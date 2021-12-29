@@ -22,15 +22,17 @@ func main() {
 
 	fmt.Println(wav)
 
-	out, err := os.OpenFile("output.wav", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		fatal("Opening output failed", err)
-	}
-	defer out.Close()
+	/*
+		out, err := os.OpenFile("output.wav", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+		if err != nil {
+			fatal("Opening output failed", err)
+		}
+		defer out.Close()
 
-	if err := wav.Write(out); err != nil {
-		fatal("Writing wav failed", err)
-	}
+		if err := wav.Write(out); err != nil {
+			fatal("Writing wav failed", err)
+		}
+	*/
 
 	fmt.Println("OK!")
 }
