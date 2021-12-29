@@ -17,6 +17,9 @@ type Wav struct {
 	RiffId        []byte
 
 	Fmt *WavFmt
+
+	DataId []byte
+	Data   *Data
 }
 
 func (w *Wav) String() string {
@@ -25,6 +28,9 @@ func (w *Wav) String() string {
 	fmt.Fprintf(s, "%s\n", w.RiffId)
 	if w.Fmt != nil {
 		fmt.Fprintf(s, "%v", w.Fmt)
+	}
+	if w.Data != nil {
+		fmt.Fprintf(s, "%v\n", w.Data)
 	}
 	return s.String()
 }
@@ -75,6 +81,25 @@ func ReadWav(in io.Reader) (*Wav, error) {
 
 	wav.Fmt = wavFmt
 
+	// Read 'data' section
+	_, err = readBytesExpect(in, []byte("data"))
+	if err != nil {
+		return nil, fmt.Errorf("Error reading 'data' section id: %w", err)
+	}
+	dataSize, err := readUint32(in)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading 'data' section seize: %w", err)
+	}
+
+	log.Printf("Data size: %v", dataSize)
+	dataChunk, err := readBytes(in, int(dataSize))
+	if err != nil {
+		return nil, fmt.Errorf("Error reading 'data' chunk: %w", err)
+	}
+	data := ParseWavData(dataChunk)
+
+	wav.Data = data
+
 	return wav, nil
 }
 
@@ -112,4 +137,18 @@ func readBytesExpect(in io.Reader, expect []byte) ([]byte, error) {
 		return nil, errors.New(fmt.Errorf("Incorrect bytes read: expected '%s', actual '%s'", expect, buffer))
 	}
 	return buffer, nil
+}
+
+func (w *Wav) Write(out io.Writer) error {
+	io.WriteString(out, "RIFF")
+	var chunkSize uint32 = uint32(len("WAVE")) + w.Fmt.FullSize() + w.Data.FullSize()
+	binary.Write(out, binary.LittleEndian, chunkSize)
+	io.WriteString(out, "WAVE")
+	if err := w.Fmt.Write(out); err != nil {
+		return fmt.Errorf("Failed to write 'fmt' chunk: %w", err)
+	}
+	if err := w.Data.Write(out); err != nil {
+		return fmt.Errorf("Failed to write 'data' chunk: %w", err)
+	}
+	return nil
 }

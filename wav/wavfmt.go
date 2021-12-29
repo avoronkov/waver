@@ -3,6 +3,7 @@ package wav
 import (
 	"encoding/binary"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/go-errors/errors"
@@ -30,6 +31,24 @@ func (f *WavFmt) String() string {
 	return s.String()
 }
 
+func ReadWavFmt(in io.Reader) (*WavFmt, error) {
+	_, err := readBytesExpect(in, []byte("fmt "))
+	if err != nil {
+		return nil, fmt.Errorf("Error reading 'fmt ' section id: %w", err)
+	}
+
+	// Read 'fmt ' section size - 4 bytes as INT
+	fmtSize, err := readUint32(in)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading 'fmt ' Chunk Data Size: %w", err)
+	}
+	fmtChunk, err := readBytes(in, int(fmtSize))
+	if err != nil {
+		return nil, fmt.Errorf("Error reading 'fmt' chunk: %w", err)
+	}
+	return ParseWavFmt(fmtChunk)
+}
+
 func ParseWavFmt(buf []byte) (*WavFmt, error) {
 	if len(buf) < 16 {
 		return nil, errors.New(fmt.Errorf("fmt section chunch should be at least 16 bytes, actual: %v", len(buf)))
@@ -47,4 +66,31 @@ func ParseWavFmt(buf []byte) (*WavFmt, error) {
 	}
 
 	return f, nil
+}
+
+func (f *WavFmt) Write(w io.Writer) error {
+	io.WriteString(w, "fmt ")
+	binary.Write(w, binary.LittleEndian, f.ChunkSize())
+	binary.Write(w, binary.LittleEndian, f.CompressionCode)
+	binary.Write(w, binary.LittleEndian, f.NumberOfChannels)
+	binary.Write(w, binary.LittleEndian, f.SampleRate)
+	binary.Write(w, binary.LittleEndian, f.AvgBps)
+	binary.Write(w, binary.LittleEndian, f.BlockAlign)
+	binary.Write(w, binary.LittleEndian, f.SignificantBitsPerSample)
+	if f.ExtraFormatBytes != 0 {
+		return errors.New("Writing Extra Format Bytes is not supported")
+	}
+	return nil
+}
+
+func (f *WavFmt) FullSize() uint32 {
+	return uint32(len("fmt ")) + /* section length */ 4 + f.ChunkSize()
+}
+
+func (f *WavFmt) ChunkSize() uint32 {
+	var size uint32 = 16
+	if f.ExtraFormatBytes != 0 {
+		size += 2 + uint32(f.ExtraFormatBytes)
+	}
+	return size
 }
