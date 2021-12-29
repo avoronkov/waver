@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	f, err := os.Open("./main.go")
+	f, err := os.Open("./cats.wav")
 	if err != nil {
 		fatal("Opening input failed", err)
 	}
