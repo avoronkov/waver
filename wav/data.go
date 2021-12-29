@@ -29,6 +29,10 @@ func (d *Data) AddSample(value int16) {
 	d.Samples = append(d.Samples, value)
 }
 
+func (d *Data) AddStereoSample(value int16) {
+	d.Samples = append(d.Samples, value, -value)
+}
+
 func (d *Data) FullSize() uint32 {
 	return uint32(len("data")) + 4 + d.ChunkSize()
 }
