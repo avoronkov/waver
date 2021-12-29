@@ -1,10 +1,11 @@
-package main
+package wav
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 
 	"github.com/go-errors/errors"
@@ -14,12 +15,17 @@ type Wav struct {
 	Riff          []byte
 	RiffChunkSize uint32
 	RiffId        []byte
+
+	Fmt *WavFmt
 }
 
 func (w *Wav) String() string {
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "%s (size: %v)\n", w.Riff, w.RiffChunkSize)
 	fmt.Fprintf(s, "%s\n", w.RiffId)
+	if w.Fmt != nil {
+		fmt.Fprintf(s, "%v", w.Fmt)
+	}
 	return s.String()
 }
 
@@ -47,6 +53,27 @@ func ReadWav(in io.Reader) (*Wav, error) {
 		return nil, fmt.Errorf("Error reading Riff ID ('WAVE'): %w", err)
 	}
 	wav.RiffId = wave
+
+	// Read 'fmt ' section
+	_, err = readBytesExpect(in, []byte("fmt "))
+	if err != nil {
+		return nil, fmt.Errorf("Error reading 'fmt ' section: %w", err)
+	}
+	// Read 'fmt ' section size - 4 bytes as INT
+	fmtSize, err := readUint32(in)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading RIFF Chunk Data Size: %w", err)
+	}
+
+	log.Printf("fmt section size: %v", fmtSize)
+	fmtChunk, err := readBytes(in, int(fmtSize))
+
+	wavFmt, err := ParseWavFmt(fmtChunk)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading 'fmt ' section data: %w", err)
+	}
+
+	wav.Fmt = wavFmt
 
 	return wav, nil
 }

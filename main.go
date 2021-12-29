@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"waver/wav"
 )
 
 func main() {
@@ -14,7 +15,7 @@ func main() {
 	}
 	defer f.Close()
 
-	wav, err := ReadWav(f)
+	wav, err := wav.ReadWav(f)
 	if err != nil {
 		fatal("Error reading WAV file", err)
 	}
