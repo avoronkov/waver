@@ -3,11 +3,13 @@ package main
 import (
 	"log"
 	"waver/lib/midisynth"
+	"waver/lib/notes"
 )
 
 func main() {
-	log.Printf("Strting midi syntesizer...")
-	m, err := midisynth.NewMidiSynth(44100, 2, 2)
+	port := 49161
+	log.Printf("Starting midi syntesizer on port %v...", port)
+	m, err := midisynth.NewMidiSynth(44100, 2, 2, notes.NewStandard(), port)
 	if err != nil {
 		log.Fatal(err)
 	}

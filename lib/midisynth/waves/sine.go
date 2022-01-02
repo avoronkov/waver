@@ -41,12 +41,13 @@ func NewSine(
 		amp:             amp,
 		duration:        duration,
 	}
+	log.Printf("New Sine: %#v", sine)
 	sine.init()
 	return sine
 }
 
 func (s *Sine) init() {
-	samples := int(float64(s.duration/time.Second) * float64(s.sampleRate))
+	samples := int(float64(s.duration) / float64(time.Second) * float64(s.sampleRate))
 	log.Printf("samples: %v", samples)
 	buf := new(bytes.Buffer)
 	for i := 0; i < samples; i++ {
@@ -75,10 +76,12 @@ func (s *Sine) String() string {
 }
 
 func (s *Sine) Read(buf []byte) (n int, err error) {
-	defer func(s *Sine) {
-		l := len(s.buf)
-		log.Printf("Read %v bytes: %v, %v; pos: %v; left: %v", l, n, err, s.pos, l-s.pos)
-	}(s)
+	/*
+		defer func(s *Sine) {
+			l := len(s.buf)
+			log.Printf("Read %v bytes: %v, %v; pos: %v; left: %v", l, n, err, s.pos, l-s.pos)
+		}(s)
+	*/
 	if s.pos == len(s.buf) {
 		return 0, io.EOF
 	}
