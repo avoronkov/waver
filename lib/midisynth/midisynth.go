@@ -25,6 +25,8 @@ type MidiSynth struct {
 	scale notes.Scale
 
 	port int
+
+	tempo int
 }
 
 func NewMidiSynth(sampleRate int, channelNum int, bitDepthInBytes int, scale notes.Scale, port int) (*MidiSynth, error) {
@@ -41,6 +43,7 @@ func NewMidiSynth(sampleRate int, channelNum int, bitDepthInBytes int, scale not
 		context:         c,
 		scale:           scale,
 		port:            port,
+		tempo:           120,
 	}, nil
 }
 
@@ -53,13 +56,13 @@ func (m *MidiSynth) Start() error {
 	log.Printf("Listening to UDP on localhost:%v", m.port)
 	for {
 		buff := make([]byte, 64)
-		_, _, err := pc.ReadFrom(buff)
+		n, _, err := pc.ReadFrom(buff)
 		if err != nil {
 			log.Printf("[ERROR] %v", err)
 			continue
 		}
 		log.Printf("UDP: '%s'", buff)
-		go m.handleMessage(buff)
+		go m.handleMessage(buff[:n])
 	}
 }
 
@@ -78,13 +81,20 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 	if len(msg) >= 4 {
 		amp = 0.1 * float64(m.parseValue(msg[3]))
 	}
+	dur := 500 * time.Millisecond
+	log.Printf("len('%s') = %v", msg, len(msg))
+	if len(msg) >= 5 {
+		// Evaluate duration in bits (1/4 tempo)
+		dur = time.Duration(15.0 * float64(time.Second) * float64(m.parseValue(msg[4])) / float64(m.tempo))
+		log.Printf("dur = %v", dur)
+	}
 
 	freq, ok := m.scale.Note(octave, note)
 	if !ok {
 		log.Printf("Unknown note: %v%v", octave, note)
 		return
 	}
-	m.playNote(freq, 500*time.Millisecond, amp)
+	m.playNote(freq, dur, amp)
 }
 
 func (m *MidiSynth) parseValue(b byte) int {
