@@ -22,6 +22,7 @@ func (s *Standard) init() {
 	s.notes[4] = s.buildOctaveScale(440.0)
 	s.notes[5] = s.buildOctaveScale(880.0)
 	s.notes[6] = s.buildOctaveScale(880.0 * 2.0)
+	s.notes[7] = s.buildOctaveScale(880.0 * 4.0)
 }
 
 func (s *Standard) buildOctaveScale(afreq float64) map[string]float64 {

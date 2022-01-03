@@ -1,10 +1,12 @@
-.PHONY: all clean midisynth
+.PHONY: all run clean midisynth
 
-all: midisynth
+all: run
+
+run: midisynth
+	./midisynth
 
 midisynth:
 	PKG_CONFIG_PATH=/usr/lib/pkgconfig go build ./cmd/midisynth
-	./midisynth
 
 clean:
 	rm -f ./midisynth
