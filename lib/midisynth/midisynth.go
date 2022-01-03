@@ -74,7 +74,10 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 	_ = octave
 	note := string(msg[2])
 	_ = note
-	amp := 0.2
+	amp := 0.5
+	if len(msg) >= 4 {
+		amp = 0.1 * float64(m.parseValue(msg[3]))
+	}
 
 	freq, ok := m.scale.Note(octave, note)
 	if !ok {
@@ -82,6 +85,19 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 		return
 	}
 	m.playNote(freq, 500*time.Millisecond, amp)
+}
+
+func (m *MidiSynth) parseValue(b byte) int {
+	if b >= '0' && b <= '9' {
+		return int(b - '0')
+	}
+	if b >= 'a' && b <= 'z' {
+		return 10 + int(b-'a')
+	}
+	if b >= 'A' && b <= 'Z' {
+		return 10 + int(b-'Z')
+	}
+	return 0
 }
 
 func (m *MidiSynth) playNote(hz float64, dur time.Duration, amp float64) {
