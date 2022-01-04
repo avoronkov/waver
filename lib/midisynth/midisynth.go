@@ -73,12 +73,9 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 	if len(msg) < 3 {
 		return
 	}
-	inst := msg[0]
-	_ = inst
+	inst := int(msg[0] - '0')
 	octave := int(msg[1] - '0')
-	_ = octave
 	note := string(msg[2])
-	_ = note
 	amp := 0.5
 	if len(msg) >= 4 {
 		amp = 0.1 * float64(m.parseValue(msg[3]))
@@ -95,7 +92,7 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 		log.Printf("Unknown note: %v%v", octave, note)
 		return
 	}
-	m.playNote(freq, dur, amp)
+	m.playNote(inst, freq, dur, amp)
 }
 
 func (m *MidiSynth) parseValue(b byte) int {
@@ -111,11 +108,23 @@ func (m *MidiSynth) parseValue(b byte) int {
 	return 0
 }
 
-func (m *MidiSynth) playNote(hz float64, dur float64, amp float64) {
+func (m *MidiSynth) playNote(inst int, hz float64, dur float64, amp float64) {
+	var wave waves.Wave
+	switch inst {
+	case 1:
+		wave = waves.NewSine(hz)
+	case 2:
+		wave = waves.NewSquare(hz)
+	case 3:
+		wave = waves.NewTriangle(hz)
+	default:
+		log.Printf("Unknown instrument: %v", inst)
+		return
+	}
 	p := m.context.NewPlayer(
 		m.play.Play(
 			filters.NewAdsr(
-				waves.NewSine(hz),
+				wave,
 				filters.AdsrAttackLevel(amp),
 				filters.AdsrDecayLevel(amp),
 				filters.AdsrReleaseLen(dur),
