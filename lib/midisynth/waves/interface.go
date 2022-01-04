@@ -4,3 +4,10 @@ type Wave interface {
 	// Return sample volume at moment t (in seconds) in range [-1.0, 1.0]
 	Value(t float64) float64
 }
+
+type WaveDuration interface {
+	Wave
+
+	// Duration in seconds
+	Duration() float64
+}

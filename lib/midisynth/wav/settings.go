@@ -6,7 +6,7 @@ type Settings struct {
 	BitDepthInBytes int
 }
 
-var Default = Settings{
+var Default = &Settings{
 	SampleRate:      44000,
 	ChannelNum:      2,
 	BitDepthInBytes: 2,

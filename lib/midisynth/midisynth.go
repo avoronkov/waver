@@ -9,14 +9,16 @@ import (
 
 	oto "github.com/hajimehoshi/oto/v2"
 
-	"waver/lib/midisynth/envelops"
+	"waver/lib/midisynth/player"
 	"waver/lib/midisynth/wav"
 	"waver/lib/midisynth/waves"
 	"waver/lib/notes"
 )
 
 type MidiSynth struct {
-	settings wav.Settings
+	settings *wav.Settings
+
+	play *player.Player
 
 	context *oto.Context
 
@@ -29,7 +31,7 @@ type MidiSynth struct {
 	tempo int
 }
 
-func NewMidiSynth(settings wav.Settings, scale notes.Scale, port int) (*MidiSynth, error) {
+func NewMidiSynth(settings *wav.Settings, scale notes.Scale, port int) (*MidiSynth, error) {
 	c, ready, err := oto.NewContext(settings.SampleRate, settings.ChannelNum, settings.BitDepthInBytes)
 	if err != nil {
 		return nil, err
@@ -38,6 +40,7 @@ func NewMidiSynth(settings wav.Settings, scale notes.Scale, port int) (*MidiSynt
 
 	return &MidiSynth{
 		settings: settings,
+		play:     player.New(settings),
 		context:  c,
 		scale:    scale,
 		port:     port,
@@ -79,11 +82,10 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 	if len(msg) >= 4 {
 		amp = 0.1 * float64(m.parseValue(msg[3]))
 	}
-	dur := 500 * time.Millisecond
-	log.Printf("len('%s') = %v", msg, len(msg))
+	dur := 0.5
 	if len(msg) >= 5 {
 		// Evaluate duration in bits (1/4 tempo)
-		dur = time.Duration(15.0 * float64(time.Second) * float64(m.parseValue(msg[4])) / float64(m.tempo))
+		dur = 15.0 * float64(m.parseValue(msg[4])) / float64(m.tempo)
 		log.Printf("dur = %v", dur)
 	}
 
@@ -108,12 +110,12 @@ func (m *MidiSynth) parseValue(b byte) int {
 	return 0
 }
 
-func (m *MidiSynth) playNote(hz float64, dur time.Duration, amp float64) {
+func (m *MidiSynth) playNote(hz float64, dur float64, amp float64) {
 	p := m.context.NewPlayer(
-		envelops.NewDuration(m.settings, dur).Wrap(waves.NewSineWave(hz, amp)),
+		m.play.PlayLimited(waves.NewSineWave(hz, amp), dur),
 	)
 	p.Play()
-	time.Sleep(dur)
+	time.Sleep(time.Duration(dur * float64(time.Second)))
 	runtime.KeepAlive(p)
 }
 
