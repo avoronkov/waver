@@ -23,7 +23,7 @@ func (p *Player) Play(wave waves.WaveDuration) io.Reader {
 	return p.PlayLimited(wave, duration)
 }
 
-const maxInt16Amp = (2 << 15) - 1
+const maxInt16Amp = (1 << 15) - 1
 
 func (p *Player) PlayLimited(wave waves.Wave, duration float64) io.Reader {
 	b := &bytes.Buffer{}

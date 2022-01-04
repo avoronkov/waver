@@ -115,7 +115,9 @@ func (m *MidiSynth) playNote(hz float64, dur float64, amp float64) {
 	p := m.context.NewPlayer(
 		m.play.Play(
 			filters.NewAdsr(
-				waves.NewSineWave(hz, amp),
+				waves.NewSine(hz),
+				filters.AdsrAttackLevel(amp),
+				filters.AdsrDecayLevel(amp),
 				filters.AdsrReleaseLen(dur),
 			),
 		),
