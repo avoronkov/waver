@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"waver/lib/midisynth"
+	"waver/lib/midisynth/wav"
 	"waver/lib/notes"
 )
 
@@ -18,7 +19,7 @@ func main() {
 		log.Printf("Using Standard 12 tone scale.")
 		scale = notes.NewStandard()
 	}
-	m, err := midisynth.NewMidiSynth(44100, 2, 2, scale, port)
+	m, err := midisynth.NewMidiSynth(wav.Default, scale, port)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -9,14 +9,14 @@ import (
 
 	oto "github.com/hajimehoshi/oto/v2"
 
+	"waver/lib/midisynth/envelops"
+	"waver/lib/midisynth/wav"
 	"waver/lib/midisynth/waves"
 	"waver/lib/notes"
 )
 
 type MidiSynth struct {
-	sampleRate      int
-	channelNum      int
-	bitDepthInBytes int
+	settings wav.Settings
 
 	context *oto.Context
 
@@ -29,21 +29,19 @@ type MidiSynth struct {
 	tempo int
 }
 
-func NewMidiSynth(sampleRate int, channelNum int, bitDepthInBytes int, scale notes.Scale, port int) (*MidiSynth, error) {
-	c, ready, err := oto.NewContext(sampleRate, channelNum, bitDepthInBytes)
+func NewMidiSynth(settings wav.Settings, scale notes.Scale, port int) (*MidiSynth, error) {
+	c, ready, err := oto.NewContext(settings.SampleRate, settings.ChannelNum, settings.BitDepthInBytes)
 	if err != nil {
 		return nil, err
 	}
 	<-ready
 
 	return &MidiSynth{
-		sampleRate:      sampleRate,
-		channelNum:      channelNum,
-		bitDepthInBytes: bitDepthInBytes,
-		context:         c,
-		scale:           scale,
-		port:            port,
-		tempo:           120,
+		settings: settings,
+		context:  c,
+		scale:    scale,
+		port:     port,
+		tempo:    120,
 	}, nil
 }
 
@@ -111,7 +109,9 @@ func (m *MidiSynth) parseValue(b byte) int {
 }
 
 func (m *MidiSynth) playNote(hz float64, dur time.Duration, amp float64) {
-	p := m.context.NewPlayer(waves.NewSine(m.sampleRate, m.channelNum, m.bitDepthInBytes, hz, amp, dur))
+	p := m.context.NewPlayer(
+		envelops.NewDuration(m.settings, dur).Wrap(waves.NewSineWave(hz, amp)),
+	)
 	p.Play()
 	time.Sleep(dur)
 	runtime.KeepAlive(p)
