@@ -9,6 +9,7 @@ import (
 
 	oto "github.com/hajimehoshi/oto/v2"
 
+	"waver/lib/midisynth/filters"
 	"waver/lib/midisynth/player"
 	"waver/lib/midisynth/wav"
 	"waver/lib/midisynth/waves"
@@ -112,7 +113,12 @@ func (m *MidiSynth) parseValue(b byte) int {
 
 func (m *MidiSynth) playNote(hz float64, dur float64, amp float64) {
 	p := m.context.NewPlayer(
-		m.play.PlayLimited(waves.NewSineWave(hz, amp), dur),
+		m.play.Play(
+			filters.NewAdsr(
+				waves.NewSineWave(hz, amp),
+				filters.AdsrReleaseLen(dur),
+			),
+		),
 	)
 	p.Play()
 	time.Sleep(time.Duration(dur * float64(time.Second)))
