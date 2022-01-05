@@ -112,11 +112,13 @@ func (m *MidiSynth) playNote(inst int, hz float64, dur float64, amp float64) {
 	var wave waves.Wave
 	switch inst {
 	case 1:
-		wave = waves.NewSine(hz)
+		wave = waves.Sine(hz)
 	case 2:
-		wave = waves.NewSquare(hz)
+		wave = waves.Square(hz)
 	case 3:
-		wave = waves.NewTriangle(hz)
+		wave = waves.Triangle(hz)
+	case 4:
+		wave = waves.Saw(hz, false)
 	default:
 		log.Printf("Unknown instrument: %v", inst)
 		return
