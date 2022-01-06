@@ -1,0 +1,31 @@
+<html>
+<head>
+	<!-- Load plotly.js into the DOM -->
+	<script src='https://cdn.plot.ly/plotly-2.8.3.min.js'></script>
+	<script language="javascript">
+		const draw = (divId) => {
+			var trace1 = {
+						x: [{{.LeftX}}],
+						y: [{{.LeftY}}],
+						mode: 'lines',
+					};
+			var trace2 = {
+						x: [{{.RightX}}],
+						y: [{{.RightY}}],
+						mode: 'lines',
+					};
+			var data = [trace1, trace2];
+
+			var layout = {
+						title:'Wave'
+					};
+
+			Plotly.newPlot(divId, data, layout);
+		};
+	</script>
+</head>
+
+<body onLoad="draw('mydiv')">
+	<div id="mydiv"><!-- Plotly chart will be drawn inside this DIV --></div>
+</body>
+</html>
