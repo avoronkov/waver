@@ -36,7 +36,7 @@ func NewAdsr(wave waves.Wave, o ...func(*AdsrOpts)) waves.WaveDuration {
 func (a *Adsr) Value(t float64) float64 {
 	amp := 0.0
 	o := a.opts
-	if t < a.opts.AttackLen {
+	if t < o.AttackLen {
 		// attack
 		amp = t * o.AttackLevel / o.AttackLen
 	} else if t < o.AttackLen+o.DecayLen {

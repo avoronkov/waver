@@ -10,9 +10,11 @@ import (
 	oto "github.com/hajimehoshi/oto/v2"
 
 	"waver/lib/midisynth/filters"
+	instr "waver/lib/midisynth/instruments"
 	"waver/lib/midisynth/player"
 	"waver/lib/midisynth/wav"
 	"waver/lib/midisynth/waves"
+	waves2 "waver/lib/midisynth/waves/v2"
 	"waver/lib/notes"
 )
 
@@ -30,6 +32,8 @@ type MidiSynth struct {
 	port int
 
 	tempo int
+
+	instruments map[int]*instr.Instrument
 }
 
 func NewMidiSynth(settings *wav.Settings, scale notes.Scale, port int) (*MidiSynth, error) {
@@ -39,14 +43,24 @@ func NewMidiSynth(settings *wav.Settings, scale notes.Scale, port int) (*MidiSyn
 	}
 	<-ready
 
-	return &MidiSynth{
+	m := &MidiSynth{
 		settings: settings,
 		play:     player.New(settings),
 		context:  c,
 		scale:    scale,
 		port:     port,
 		tempo:    120,
-	}, nil
+	}
+	m.initInstruments()
+	return m, nil
+}
+
+func (m *MidiSynth) initInstruments() {
+	m.instruments = make(map[int]*instr.Instrument)
+	m.instruments[1] = instr.NewInstrument(&waves2.Sine{}, filters.NewAdsrFilter())
+	m.instruments[2] = instr.NewInstrument(&waves2.Square{}, filters.NewAdsrFilter())
+	m.instruments[3] = instr.NewInstrument(&waves2.Triangle{}, filters.NewAdsrFilter())
+	m.instruments[4] = instr.NewInstrument(&waves2.Saw{}, filters.NewAdsrFilter())
 }
 
 func (m *MidiSynth) Start() error {
@@ -92,7 +106,7 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 		log.Printf("Unknown note: %v%v", octave, note)
 		return
 	}
-	m.playNote(inst, freq, dur, amp)
+	m.playNoteV2(inst, freq, dur, amp)
 }
 
 func (m *MidiSynth) parseValue(b byte) int {
@@ -106,6 +120,22 @@ func (m *MidiSynth) parseValue(b byte) int {
 		return 10 + int(b-'Z')
 	}
 	return 0
+}
+
+func (m *MidiSynth) playNoteV2(inst int, hz float64, dur float64, amp float64) {
+	in, ok := m.instruments[inst]
+	if !ok {
+		log.Printf("Unknown instrument: %v", inst)
+		return
+	}
+
+	data, duration := m.play.PlayContext(in.Wave(), waves2.NewNoteCtx(hz, amp, dur))
+
+	p := m.context.NewPlayer(data)
+	p.Play()
+
+	time.Sleep(time.Duration(duration * float64(time.Second)))
+	runtime.KeepAlive(p)
 }
 
 func (m *MidiSynth) playNote(inst int, hz float64, dur float64, amp float64) {
