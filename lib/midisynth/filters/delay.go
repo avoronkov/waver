@@ -1,7 +1,7 @@
 package filters
 
 import (
-	"waver/lib/midisynth/waves"
+	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 type DelayFilter struct {

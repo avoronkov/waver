@@ -9,12 +9,12 @@ import (
 
 	oto "github.com/hajimehoshi/oto/v2"
 
-	"waver/lib/midisynth/filters"
-	instr "waver/lib/midisynth/instruments"
-	"waver/lib/midisynth/player"
-	"waver/lib/midisynth/wav"
-	"waver/lib/midisynth/waves"
-	"waver/lib/notes"
+	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
+	instr "gitlab.com/avoronkov/waver/lib/midisynth/instruments"
+	"gitlab.com/avoronkov/waver/lib/midisynth/player"
+	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
+	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
 type MidiSynth struct {

@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"log"
-	"waver/lib/midisynth"
-	"waver/lib/midisynth/wav"
-	"waver/lib/notes"
+
+	"gitlab.com/avoronkov/waver/lib/midisynth"
+	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
+	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
 func main() {

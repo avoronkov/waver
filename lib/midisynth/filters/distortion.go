@@ -1,6 +1,6 @@
 package filters
 
-import "waver/lib/midisynth/waves"
+import "gitlab.com/avoronkov/waver/lib/midisynth/waves"
 
 // Amplitude distortion filter
 type DistortionFilter struct {

@@ -1,4 +1,4 @@
-module waver
+module gitlab.com/avoronkov/waver
 
 go 1.17
 

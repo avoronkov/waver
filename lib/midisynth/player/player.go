@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
-	"waver/lib/midisynth/wav"
-	"waver/lib/midisynth/waves"
+
+	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
+	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 type Player struct {
