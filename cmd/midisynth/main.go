@@ -6,7 +6,10 @@ import (
 
 	"gitlab.com/avoronkov/waver/lib/midisynth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/config"
+	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
+	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
+	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
@@ -29,6 +32,16 @@ func main() {
 	if err := cfg.InitMidiSynth(configPath, m); err != nil {
 		log.Fatal(err)
 	}
+
+	// Experimental section
+
+	m.AddInstrument(9, instruments.NewInstrument(
+		&waves.Triangle{},
+		filters.NewRing(&waves.Sine{}, 4.0),
+		filters.NewAdsrFilter(),
+	))
+
+	// .
 
 	m.Start()
 	if err := m.Close(); err != nil {
