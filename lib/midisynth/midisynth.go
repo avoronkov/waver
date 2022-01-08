@@ -62,9 +62,11 @@ func (m *MidiSynth) initInstruments() {
 	m.instruments[3] = instr.NewInstrument(&waves2.Triangle{}, filters.NewAdsrFilter())
 	m.instruments[4] = instr.NewInstrument(&waves2.Saw{}, filters.NewAdsrFilter())
 	m.instruments[5] = instr.NewInstrument(&waves2.Sine{}, filters.NewDistortionFilter(1.5), filters.NewAdsrFilter())
-	m.instruments[6] = instr.NewInstrument(&waves2.Sine{}, filters.NewDistortionFilter(2.0), filters.NewAdsrFilter())
-	m.instruments[7] = instr.NewInstrument(&waves2.Sine{}, filters.NewDistortionFilter(3.0), filters.NewAdsrFilter())
-	m.instruments[8] = instr.NewInstrument(&waves2.Sine{}, filters.NewDistortionFilter(4.0), filters.NewAdsrFilter())
+	m.instruments[6] = instr.NewInstrument(
+		&waves2.Sine{},
+		filters.NewAdsrFilter(),
+		filters.NewDelayFilter(filters.DelayInterval(0.5), filters.DelayFadeOut(0.5), filters.DelayTimes(2)),
+	)
 }
 
 func (m *MidiSynth) Start() error {

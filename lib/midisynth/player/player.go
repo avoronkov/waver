@@ -38,15 +38,10 @@ func (p *Player) PlayLimited(wave waves.Wave, duration float64) io.Reader {
 	return b
 }
 
-type WithDuration interface {
-	// Duration in seconds
-	Duration() float64
-}
-
 func (p *Player) PlayContext(wave waves2.Wave, ctx *waves2.NoteCtx) (io.Reader, float64) {
 	dur := 0.0
-	if wd, ok := wave.(WithDuration); ok {
-		dur = wd.Duration()
+	if wd, ok := wave.(waves2.WithDuration); ok {
+		dur = wd.Duration(ctx)
 	} else {
 		dur = ctx.Dur
 	}
