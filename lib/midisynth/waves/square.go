@@ -2,20 +2,10 @@ package waves
 
 import "math"
 
-type square struct {
-	hz     float64
-	period float64
-}
+type Square struct{}
 
-func Square(hz float64) Wave {
-	return &square{
-		hz:     hz,
-		period: 1.0 / hz,
-	}
-}
-
-func (s *square) Value(t float64) float64 {
-	y := t / s.period
+func (s *Square) Value(t float64, ctx *NoteCtx) float64 {
+	y := t / ctx.Period
 	if y-math.Floor(y) < 0.5 {
 		return 1.0
 	}

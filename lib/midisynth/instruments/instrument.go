@@ -2,7 +2,7 @@ package instruments
 
 import (
 	"waver/lib/midisynth/filters"
-	"waver/lib/midisynth/waves/v2"
+	"waver/lib/midisynth/waves"
 )
 
 type Instrument struct {

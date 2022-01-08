@@ -14,7 +14,6 @@ import (
 	"waver/lib/midisynth/player"
 	"waver/lib/midisynth/wav"
 	"waver/lib/midisynth/waves"
-	waves2 "waver/lib/midisynth/waves/v2"
 	"waver/lib/notes"
 )
 
@@ -57,13 +56,13 @@ func NewMidiSynth(settings *wav.Settings, scale notes.Scale, port int) (*MidiSyn
 
 func (m *MidiSynth) initInstruments() {
 	m.instruments = make(map[int]*instr.Instrument)
-	m.instruments[1] = instr.NewInstrument(&waves2.Sine{}, filters.NewAdsrFilter())
-	m.instruments[2] = instr.NewInstrument(&waves2.Square{}, filters.NewAdsrFilter())
-	m.instruments[3] = instr.NewInstrument(&waves2.Triangle{}, filters.NewAdsrFilter())
-	m.instruments[4] = instr.NewInstrument(&waves2.Saw{}, filters.NewAdsrFilter())
-	m.instruments[5] = instr.NewInstrument(&waves2.Sine{}, filters.NewDistortionFilter(1.5), filters.NewAdsrFilter())
+	m.instruments[1] = instr.NewInstrument(&waves.Sine{}, filters.NewAdsrFilter())
+	m.instruments[2] = instr.NewInstrument(&waves.Square{}, filters.NewAdsrFilter())
+	m.instruments[3] = instr.NewInstrument(&waves.Triangle{}, filters.NewAdsrFilter())
+	m.instruments[4] = instr.NewInstrument(&waves.Saw{}, filters.NewAdsrFilter())
+	m.instruments[5] = instr.NewInstrument(&waves.Sine{}, filters.NewDistortionFilter(1.5), filters.NewAdsrFilter())
 	m.instruments[6] = instr.NewInstrument(
-		&waves2.Sine{},
+		&waves.Sine{},
 		filters.NewAdsrFilter(),
 		filters.NewDelayFilter(filters.DelayInterval(0.5), filters.DelayFadeOut(0.5), filters.DelayTimes(2)),
 	)
@@ -135,42 +134,12 @@ func (m *MidiSynth) playNoteV2(inst int, hz float64, dur float64, amp float64) {
 		return
 	}
 
-	data, duration := m.play.PlayContext(in.Wave(), waves2.NewNoteCtx(hz, amp, dur))
+	data, duration := m.play.PlayContext(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
 
 	p := m.context.NewPlayer(data)
 	p.Play()
 
 	time.Sleep(time.Duration(duration * float64(time.Second)))
-	runtime.KeepAlive(p)
-}
-
-func (m *MidiSynth) playNote(inst int, hz float64, dur float64, amp float64) {
-	var wave waves.Wave
-	switch inst {
-	case 1:
-		wave = waves.Sine(hz)
-	case 2:
-		wave = waves.Square(hz)
-	case 3:
-		wave = waves.Triangle(hz)
-	case 4:
-		wave = waves.Saw(hz, false)
-	default:
-		log.Printf("Unknown instrument: %v", inst)
-		return
-	}
-	p := m.context.NewPlayer(
-		m.play.Play(
-			filters.NewAdsr(
-				wave,
-				filters.AdsrAttackLevel(amp),
-				filters.AdsrDecayLevel(amp),
-				filters.AdsrReleaseLen(dur),
-			),
-		),
-	)
-	p.Play()
-	time.Sleep(time.Duration(dur * float64(time.Second)))
 	runtime.KeepAlive(p)
 }
 

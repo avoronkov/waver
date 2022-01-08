@@ -1,15 +1,8 @@
 package filters
 
-import (
-	"waver/lib/midisynth/waves"
-)
+import "waver/lib/midisynth/waves"
 
-type Adsr struct {
-	wave waves.Wave
-	opts *AdsrOpts
-}
-
-type AdsrOpts struct {
+type AdsrFilter struct {
 	AttackLevel float64
 	DecayLevel  float64
 
@@ -19,77 +12,49 @@ type AdsrOpts struct {
 	ReleaseLen float64
 }
 
-func NewAdsr(wave waves.Wave, o ...func(*AdsrOpts)) waves.WaveDuration {
-	opts := &AdsrOpts{
+func NewAdsrFilter(opts ...func(*AdsrFilter)) Filter {
+	f := &AdsrFilter{
 		AttackLevel: 1.0,
 		DecayLevel:  1.0,
+		ReleaseLen:  1.0,
 	}
-	for _, opt := range o {
-		opt(opts)
-	}
-	return &Adsr{
-		wave: wave,
-		opts: opts,
+
+	// TODO handle opts
+
+	return f
+}
+
+func (af *AdsrFilter) Apply(w waves.Wave) waves.Wave {
+	return &adsrImpl{
+		wave: w,
+		opts: af,
 	}
 }
 
-func (a *Adsr) Value(t float64) float64 {
+type adsrImpl struct {
+	wave waves.Wave
+	opts *AdsrFilter
+}
+
+func (i *adsrImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 	amp := 0.0
-	o := a.opts
-	if t < o.AttackLen {
+	dur := ctx.Dur
+	o := i.opts
+
+	if attackLen := o.AttackLen * dur; tm < attackLen {
 		// attack
-		amp = t * o.AttackLevel / o.AttackLen
-	} else if t < o.AttackLen+o.DecayLen {
+		amp = tm * i.opts.AttackLevel / attackLen
+	} else if tm < (o.AttackLen+o.DecayLen)*dur {
 		// decay
-		amp = o.AttackLevel - (o.AttackLevel-o.DecayLevel)*(t-o.AttackLen)/o.DecayLen
-	} else if t < o.AttackLen+o.DecayLen+o.SusteinLen {
+		amp = o.AttackLevel - (o.AttackLevel-o.DecayLevel)*(tm-(o.AttackLen*dur))/(o.DecayLen*dur)
+	} else if tm < (o.AttackLen+o.DecayLen+o.SusteinLen)*dur {
 		// sustein
 		amp = o.DecayLevel
-	} else if t < a.Duration() {
-		j := t - o.AttackLen - o.DecayLen - o.SusteinLen
-		amp = o.DecayLevel - o.DecayLevel*j/o.ReleaseLen
+	} else if tm < (o.AttackLen+o.DecayLen+o.SusteinLen+o.ReleaseLen)*dur {
+		// release
+		j := tm - (o.AttackLen-o.DecayLen-o.SusteinLen)*dur
+		amp = o.DecayLevel - o.DecayLevel*j/(o.ReleaseLen*dur)
 	}
 
-	return a.wave.Value(t) * amp
-}
-
-func (a *Adsr) Duration() float64 {
-	return a.opts.AttackLen + a.opts.DecayLen + a.opts.SusteinLen + a.opts.ReleaseLen
-}
-
-// ADSR options
-type adsrOpt func(*AdsrOpts)
-
-func AdsrAttackLevel(v float64) func(*AdsrOpts) {
-	return func(o *AdsrOpts) {
-		o.AttackLevel = v
-	}
-}
-
-func AdsrDecayLevel(v float64) func(*AdsrOpts) {
-	return func(o *AdsrOpts) {
-		o.DecayLevel = v
-	}
-}
-
-func AdsrAttackLen(v float64) func(*AdsrOpts) {
-	return func(o *AdsrOpts) {
-		o.AttackLen = v
-	}
-}
-
-func AdsrDecayLen(v float64) func(*AdsrOpts) {
-	return func(o *AdsrOpts) {
-		o.DecayLen = v
-	}
-}
-func AdsrSusteinLen(v float64) func(*AdsrOpts) {
-	return func(o *AdsrOpts) {
-		o.SusteinLen = v
-	}
-}
-func AdsrReleaseLen(v float64) func(*AdsrOpts) {
-	return func(o *AdsrOpts) {
-		o.ReleaseLen = v
-	}
+	return i.wave.Value(tm, ctx) * amp * ctx.Amp
 }
