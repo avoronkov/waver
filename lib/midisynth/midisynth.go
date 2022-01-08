@@ -9,7 +9,6 @@ import (
 
 	oto "github.com/hajimehoshi/oto/v2"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	instr "gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/player"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
@@ -43,29 +42,19 @@ func NewMidiSynth(settings *wav.Settings, scale notes.Scale, port int) (*MidiSyn
 	<-ready
 
 	m := &MidiSynth{
-		settings: settings,
-		play:     player.New(settings),
-		context:  c,
-		scale:    scale,
-		port:     port,
-		tempo:    120,
+		settings:    settings,
+		play:        player.New(settings),
+		context:     c,
+		scale:       scale,
+		port:        port,
+		tempo:       120,
+		instruments: make(map[int]*instr.Instrument),
 	}
-	m.initInstruments()
 	return m, nil
 }
 
-func (m *MidiSynth) initInstruments() {
-	m.instruments = make(map[int]*instr.Instrument)
-	m.instruments[1] = instr.NewInstrument(&waves.Sine{}, filters.NewAdsrFilter())
-	m.instruments[2] = instr.NewInstrument(&waves.Square{}, filters.NewAdsrFilter())
-	m.instruments[3] = instr.NewInstrument(&waves.Triangle{}, filters.NewAdsrFilter())
-	m.instruments[4] = instr.NewInstrument(&waves.Saw{}, filters.NewAdsrFilter())
-	m.instruments[5] = instr.NewInstrument(&waves.Sine{}, filters.NewDistortionFilter(1.5), filters.NewAdsrFilter())
-	m.instruments[6] = instr.NewInstrument(
-		&waves.Sine{},
-		filters.NewAdsrFilter(),
-		filters.NewDelayFilter(filters.DelayInterval(0.5), filters.DelayFadeOut(0.5), filters.DelayTimes(2)),
-	)
+func (m *MidiSynth) AddInstrument(n int, in *instr.Instrument) {
+	m.instruments[n] = in
 }
 
 func (m *MidiSynth) Start() error {

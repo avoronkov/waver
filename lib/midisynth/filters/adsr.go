@@ -19,7 +19,9 @@ func NewAdsrFilter(opts ...func(*AdsrFilter)) Filter {
 		ReleaseLen:  1.0,
 	}
 
-	// TODO handle opts
+	for _, opt := range opts {
+		opt(f)
+	}
 
 	return f
 }
@@ -57,4 +59,41 @@ func (i *adsrImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 	}
 
 	return i.wave.Value(tm, ctx) * amp * ctx.Amp
+}
+
+// Options
+func AdsrAttackLevel(v float64) func(*AdsrFilter) {
+	return func(f *AdsrFilter) {
+		f.AttackLevel = v
+	}
+}
+
+func AdsrDecayLevel(v float64) func(*AdsrFilter) {
+	return func(f *AdsrFilter) {
+		f.DecayLevel = v
+	}
+}
+
+func AdsrAttackLen(v float64) func(*AdsrFilter) {
+	return func(f *AdsrFilter) {
+		f.AttackLen = v
+	}
+}
+
+func AdsrDecayLen(v float64) func(*AdsrFilter) {
+	return func(f *AdsrFilter) {
+		f.DecayLen = v
+	}
+}
+
+func AdsrSusteinLen(v float64) func(*AdsrFilter) {
+	return func(f *AdsrFilter) {
+		f.SusteinLen = v
+	}
+}
+
+func AdsrReleaseLen(v float64) func(*AdsrFilter) {
+	return func(f *AdsrFilter) {
+		f.ReleaseLen = v
+	}
 }

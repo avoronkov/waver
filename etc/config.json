@@ -1,0 +1,64 @@
+{
+	"instruments": {
+		"1": {
+			"wave": "sine",
+			"filters": [
+				{
+					"adsr": {}
+				}
+			]
+		},
+		"2": {
+			"wave": "square",
+			"filters": [
+				{
+					"adsr": {}
+				}
+			]
+		},
+		"3": {
+			"wave": "triangle",
+			"filters": [
+				{
+					"adsr": {}
+				}
+			]
+		},
+		"4": {
+			"wave": "saw",
+			"filters": [
+				{
+					"adsr": {}
+				}
+			]
+		},
+		"5": {
+			"wave": "sine",
+			"filters": [
+				{
+					"distortion": {
+						"value": 1.5
+					}
+				},
+				{
+					"adsr": {}
+				}
+			]
+		},
+		"6": {
+			"wave": "sine",
+			"filters": [
+				{
+					"adsr": {}
+				},
+				{
+					"delay": {
+						"interval": 0.75,
+						"fade": 0.5,
+						"times": 4
+					}
+				}
+			]
+		}
+	}
+}
