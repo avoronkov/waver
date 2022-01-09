@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"runtime"
-	"time"
 
 	oto "github.com/hajimehoshi/oto/v2"
 
@@ -100,7 +99,7 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 		log.Printf("Unknown note: %v%v", octave, note)
 		return
 	}
-	m.playNoteV2(inst, freq, dur, amp)
+	m.playNote(inst, freq, dur, amp)
 }
 
 func (m *MidiSynth) parseValue(b byte) int {
@@ -116,19 +115,19 @@ func (m *MidiSynth) parseValue(b byte) int {
 	return 0
 }
 
-func (m *MidiSynth) playNoteV2(inst int, hz float64, dur float64, amp float64) {
+func (m *MidiSynth) playNote(inst int, hz float64, dur float64, amp float64) {
 	in, ok := m.instruments[inst]
 	if !ok {
 		log.Printf("Unknown instrument: %v", inst)
 		return
 	}
 
-	data, duration := m.play.PlayContext(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
+	data, done := m.play.PlayContext2(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
 
 	p := m.context.NewPlayer(data)
 	p.Play()
 
-	time.Sleep(time.Duration(duration * float64(time.Second)))
+	<-done
 	runtime.KeepAlive(p)
 }
 
