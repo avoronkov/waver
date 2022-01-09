@@ -80,7 +80,7 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 	if len(msg) < 3 {
 		return
 	}
-	inst := int(msg[0] - '0')
+	inst := m.parseValue(msg['0'])
 	octave := int(msg[1] - '0')
 	note := string(msg[2])
 	amp := 0.5
@@ -100,6 +100,16 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 		return
 	}
 	m.playNote(inst, freq, dur, amp)
+}
+
+func (m *MidiSynth) PlayNote(instr int, octave int, note string, durationBits int, amp float64) error {
+	freq, ok := m.scale.Note(octave, note)
+	if !ok {
+		return fmt.Errorf("Unknown note: %v%v", octave, note)
+	}
+	dur := 15.0 * float64(durationBits) / float64(m.tempo)
+	m.playNote(instr, freq, dur, amp)
+	return nil
 }
 
 func (m *MidiSynth) parseValue(b byte) int {
