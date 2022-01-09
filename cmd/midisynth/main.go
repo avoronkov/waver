@@ -35,9 +35,21 @@ func main() {
 
 	// Experimental section
 
+	m.AddInstrument(8, instruments.NewInstrument(
+		&waves.Sine{},
+		filters.NewVibrato(&waves.Sine{}, 10.0, 0.05),
+		filters.NewAdsrFilter(),
+	))
+
 	m.AddInstrument(9, instruments.NewInstrument(
 		&waves.Triangle{},
 		filters.NewRing(&waves.Sine{}, 4.0),
+		filters.NewAdsrFilter(),
+	))
+
+	m.AddInstrument(7, instruments.NewInstrument(
+		&waves.Sine{},
+		filters.NewTimeShift(10.0, 0.01),
 		filters.NewAdsrFilter(),
 	))
 

@@ -3,20 +3,30 @@ package main
 import (
 	"io"
 	"log"
-	"waver/lib/midisynth/filters"
-	instr "waver/lib/midisynth/instruments"
-	"waver/lib/midisynth/player"
-	"waver/lib/midisynth/wav"
-	waves2 "waver/lib/midisynth/waves/v2"
+
+	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
+	instr "gitlab.com/avoronkov/waver/lib/midisynth/instruments"
+	"gitlab.com/avoronkov/waver/lib/midisynth/player"
+	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
+	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 func main() {
-	in := instr.NewInstrument(&waves2.Saw{}, filters.NewAdsrFilter())
+	// Instrument
+
+	in := instr.NewInstrument(
+		&waves.Saw{},
+		filters.NewVibrato(&waves.Sine{}, 10.0, 0.01),
+		filters.NewAdsrFilter(),
+	)
+
+	// .
+
 	play := player.New(wav.Default)
 	hz := 440.0
 	amp := 1.0
-	dur := 0.25
-	reader, _ := play.PlayContext(in.Wave(), waves2.NewNoteCtx(hz, amp, dur))
+	dur := 0.5
+	reader, _ := play.PlayContext(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
 
 	data, err := io.ReadAll(reader)
 	if err != nil {
