@@ -30,6 +30,9 @@ func NewProc(synth Synth) *Proc {
 func (p *Proc) handleLine(line string) error {
 	fields := strings.Fields(line)
 	log.Printf("> %#v", fields)
+	if len(fields) < 3 {
+		return nil
+	}
 	switch fmt.Sprintf("%v %v", fields[1], fields[2]) {
 	case "Note on":
 		log.Printf("Note on")
@@ -39,7 +42,10 @@ func (p *Proc) handleLine(line string) error {
 		}
 	case "Note off":
 		log.Printf("Note off")
-
+		err := p.handleNoteOff(fields)
+		if err != nil {
+			log.Printf("p.handleNoteOff failed: %v", err)
+		}
 	}
 	return nil
 }
@@ -59,7 +65,7 @@ func (p *Proc) handleNoteOn(fields []string) error {
 	if !ok {
 		panic(fmt.Errorf("Key not found in table: %v", key.note))
 	}
-	stop, err := p.synth.PlayNoteControlled(key.channel, on.Octave, on.Note, 0.2)
+	stop, err := p.synth.PlayNoteControlled(key.channel+1, on.Octave, on.Note, 0.2)
 	if err != nil {
 		return err
 	}

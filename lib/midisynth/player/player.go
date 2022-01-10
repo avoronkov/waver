@@ -85,7 +85,10 @@ func (pi *playerImpl) Read(data []byte) (n int, err error) {
 		return 0, io.EOF
 	}
 
-	l := len(data)
+	l := 640
+	if len(data) < l {
+		l = len(data)
+	}
 	buff := new(bytes.Buffer)
 	for buff.Len() < l && pi.tm < pi.dur {
 		waveValue := pi.wave.Value(pi.tm, pi.ctx)

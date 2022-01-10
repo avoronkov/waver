@@ -30,11 +30,20 @@ type manualControlImpl struct {
 	releaseStartTime *float64
 }
 
+func float64ptr(x float64) *float64 { return &x }
+
 func (i *manualControlImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
+	mult := 1.0
 	if i.releasing {
-		return math.NaN()
+		if i.releaseStartTime == nil {
+			i.releaseStartTime = float64ptr(t)
+		}
+		if t > *(i.releaseStartTime)+i.opts.Release {
+			return math.NaN()
+		}
+		mult = 1.0 - (t-*i.releaseStartTime)/i.opts.Release
 	}
-	return i.wave.Value(t, ctx)
+	return i.wave.Value(t, ctx) * ctx.Amp * mult
 }
 
 func (i *manualControlImpl) Release() {
