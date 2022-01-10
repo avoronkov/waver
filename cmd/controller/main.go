@@ -30,9 +30,7 @@ func main() {
 	cfg := &config.Config{}
 	check(cfg.InitMidiSynth(configPath, m))
 
-	proc := &Proc{
-		synth: m,
-	}
+	proc := NewProc(m)
 
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)

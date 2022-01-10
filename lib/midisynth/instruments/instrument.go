@@ -34,8 +34,9 @@ func (i *Instrument) Wave() waves.Wave {
 
 func (i *Instrument) WaveControlled() waves.WaveControlled {
 	w := i.initialWave
-	for _, f := range i.fx {
+	for _, f := range i.fx[:len(i.fx)-1] {
 		w = f.Apply(w)
 	}
-
+	manual := filters.NewManualControlFilter(0.0)
+	return manual.Apply(w).(waves.WaveControlled)
 }

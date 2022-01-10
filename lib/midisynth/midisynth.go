@@ -3,6 +3,7 @@ package midisynth
 import (
 	"fmt"
 	"log"
+	"math"
 	"net"
 	"runtime"
 
@@ -112,8 +113,15 @@ func (m *MidiSynth) PlayNote(instr int, octave int, note string, durationBits in
 	return nil
 }
 
-func (m *MidiSynth) PlayNoteManual(instr int, octave int, note string, durationBits int, amp float64) (stop func(), err error) {
+func (m *MidiSynth) PlayNoteControlled(instr int, octave int, note string, amp float64) (stop func(), err error) {
+	freq, ok := m.scale.Note(octave, note)
+	if !ok {
+		return nil, fmt.Errorf("Unknown note: %v%v", octave, note)
+	}
 
+	stop = m.playNoteControlled(instr, freq, amp)
+
+	return stop, nil
 }
 
 func (m *MidiSynth) parseValue(b byte) int {
@@ -143,6 +151,27 @@ func (m *MidiSynth) playNote(inst int, hz float64, dur float64, amp float64) {
 
 	<-done
 	runtime.KeepAlive(p)
+}
+
+func (m *MidiSynth) playNoteControlled(inst int, hz float64, amp float64) (stop func()) {
+	in, ok := m.instruments[inst]
+	if !ok {
+		log.Printf("Unknown instrument: %v", inst)
+		return
+	}
+
+	wave := in.WaveControlled()
+	data, done := m.play.PlayContext2(wave, waves.NewNoteCtx(hz, amp, math.Inf(+1)))
+
+	go func() {
+		p := m.context.NewPlayer(data)
+		p.Play()
+
+		<-done
+		runtime.KeepAlive(p)
+
+	}()
+	return wave.Release
 }
 
 func (m *MidiSynth) Close() error {

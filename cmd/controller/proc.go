@@ -9,10 +9,20 @@ import (
 
 type Synth interface {
 	PlayNote(instr int, octave int, note string, durationBits int, amp float64) error
+	PlayNoteControlled(instr int, octave int, note string, amp float64) (func(), error)
 }
 
 type Proc struct {
 	synth Synth
+
+	notesReleases map[int]func()
+}
+
+func NewProc(synth Synth) *Proc {
+	return &Proc{
+		synth:         synth,
+		notesReleases: make(map[int]func()),
+	}
 }
 
 // []string{"24:0", "Note", "off", "1,", "note", "67,", "velocity", "64"}
@@ -34,10 +44,6 @@ func (p *Proc) handleLine(line string) error {
 	return nil
 }
 
-func (p *Proc) channel(fields []string) (int, error) {
-	return strconv.Atoi(strings.TrimRight(fields[3], ","))
-}
-
 type Key struct {
 	channel  int
 	note     int
@@ -53,7 +59,24 @@ func (p *Proc) handleNoteOn(fields []string) error {
 	if !ok {
 		panic(fmt.Errorf("Key not found in table: %v", key.note))
 	}
-	return p.synth.PlayNote(key.channel, on.Octave, on.Note, 4, 0.2)
+	stop, err := p.synth.PlayNoteControlled(key.channel, on.Octave, on.Note, 0.2)
+	if err != nil {
+		return err
+	}
+	p.notesReleases[key.note] = stop
+	return nil
+}
+
+func (p *Proc) handleNoteOff(fields []string) error {
+	key, err := p.parseNote(fields)
+	if err != nil {
+		return err
+	}
+	if stop, ok := p.notesReleases[key.note]; ok && stop != nil {
+		stop()
+		p.notesReleases[key.note] = nil
+	}
+	return nil
 }
 
 func (p *Proc) parseNote(fields []string) (key *Key, err error) {
