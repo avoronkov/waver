@@ -31,3 +31,11 @@ func NewInstrument(wave waves.Wave, fx ...filters.Filter) *Instrument {
 func (i *Instrument) Wave() waves.Wave {
 	return i.resultingWave
 }
+
+func (i *Instrument) WaveControlled() waves.WaveControlled {
+	w := i.initialWave
+	for _, f := range i.fx {
+		w = f.Apply(w)
+	}
+
+}

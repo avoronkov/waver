@@ -8,3 +8,8 @@ type WithDuration interface {
 	// Duration in seconds
 	Duration(ctx *NoteCtx) float64
 }
+
+type WaveControlled interface {
+	Wave
+	Release()
+}

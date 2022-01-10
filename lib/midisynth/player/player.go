@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"math"
 
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
@@ -70,12 +71,13 @@ type playerImpl struct {
 	dur      float64
 	done     chan struct{}
 	closed   bool
+	eof      bool
 }
 
 var _ io.Reader = (*playerImpl)(nil)
 
 func (pi *playerImpl) Read(data []byte) (n int, err error) {
-	if pi.tm >= pi.dur {
+	if pi.eof || pi.tm >= pi.dur {
 		if !pi.closed {
 			close(pi.done)
 			pi.closed = true
@@ -86,13 +88,18 @@ func (pi *playerImpl) Read(data []byte) (n int, err error) {
 	l := len(data)
 	buff := new(bytes.Buffer)
 	for buff.Len() < l && pi.tm < pi.dur {
+		waveValue := pi.wave.Value(pi.tm, pi.ctx)
+		if math.IsNaN(waveValue) {
+			pi.eof = true
+			break
+		}
 		value := int16(maxInt16Amp * pi.wave.Value(pi.tm, pi.ctx))
 		for ch := 0; ch < pi.settings.ChannelNum; ch++ {
 			binary.Write(buff, binary.LittleEndian, value)
 		}
 		pi.tm += pi.dt
 	}
-	if !pi.closed && pi.tm >= pi.dur {
+	if (pi.eof || pi.tm >= pi.dur) && !pi.closed {
 		close(pi.done)
 		pi.closed = true
 	}

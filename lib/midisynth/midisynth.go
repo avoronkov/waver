@@ -112,6 +112,10 @@ func (m *MidiSynth) PlayNote(instr int, octave int, note string, durationBits in
 	return nil
 }
 
+func (m *MidiSynth) PlayNoteManual(instr int, octave int, note string, durationBits int, amp float64) (stop func(), err error) {
+
+}
+
 func (m *MidiSynth) parseValue(b byte) int {
 	if b >= '0' && b <= '9' {
 		return int(b - '0')
