@@ -10,6 +10,8 @@ type ManualControl struct {
 	Release float64
 }
 
+var _ FilterManualControl = (*ManualControl)(nil)
+
 func NewManualControlFilter(release float64) Filter {
 	return &ManualControl{
 		Release: release,
@@ -22,6 +24,8 @@ func (mc *ManualControl) Apply(w waves.Wave) waves.Wave {
 		opts: mc,
 	}
 }
+
+func (mc *ManualControl) IsManualControl() {}
 
 type manualControlImpl struct {
 	wave             waves.Wave

@@ -1,19 +1,31 @@
 package filters
 
 import (
+	"math"
+
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 type VibratoFilter struct {
-	Shifter    waves.Wave
-	ShifterCtx *waves.NoteCtx
+	shifter    waves.Wave
+	shifterCtx *waves.NoteCtx
+
+	freq float64
+	amp  float64
 }
 
-func NewVibrato(w waves.Wave, freq, amp float64) Filter {
-	return &VibratoFilter{
-		Shifter:    w,
-		ShifterCtx: waves.NewNoteCtx(freq, amp, -1.0),
+func NewVibrato(opts ...func(*VibratoFilter)) Filter {
+	f := &VibratoFilter{
+		shifter: &waves.Sine{},
 	}
+
+	for _, o := range opts {
+		o(f)
+	}
+
+	f.shifterCtx = waves.NewNoteCtx(f.freq, f.amp, math.Inf(1))
+
+	return f
 }
 
 func (v *VibratoFilter) Apply(input waves.Wave) waves.Wave {
@@ -29,9 +41,26 @@ type vibratoImpl struct {
 }
 
 func (i *vibratoImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
-	newFreq := (i.opts.Shifter.Value(t, i.opts.ShifterCtx)*i.opts.ShifterCtx.Amp + 1.0) * ctx.Freq
-	newCtx := waves.NewNoteCtx(newFreq, ctx.Amp, ctx.Dur)
-	res := i.input.Value(t, newCtx)
-	// log.Printf("newFreq(t=%v) = %v (%v) -> %v", t, newFreq, ctx.Freq, res)
-	return res
+	shift := i.opts.shifter.Value(t, i.opts.shifterCtx)
+	return i.input.Value(t+shift, ctx)
+}
+
+// Options
+
+func VibratoFrequency(v float64) func(f *VibratoFilter) {
+	return func(f *VibratoFilter) {
+		f.freq = v
+	}
+}
+
+func VibratoAmplitude(v float64) func(f *VibratoFilter) {
+	return func(f *VibratoFilter) {
+		f.amp = v
+	}
+}
+
+func VibratoCarrierWave(w waves.Wave) func(f *VibratoFilter) {
+	return func(f *VibratoFilter) {
+		f.shifter = w
+	}
 }

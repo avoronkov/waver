@@ -94,6 +94,12 @@ func (c *Config) handleFilter(f Filter) (filters.Filter, error) {
 			return c.handleDelay(opts)
 		case "distortion":
 			return c.handleDistortion(opts)
+		case "vibrato":
+			return c.handleVibrato(opts)
+		case "am":
+			return c.handleAmplitudeModulation(opts)
+		case "timeshift":
+			return c.handleTimeShift(opts)
 		}
 		return nil, fmt.Errorf("Unknown filter: %v", name)
 	}
@@ -157,4 +163,78 @@ func (c *Config) handleDistortion(opts map[string]interface{}) (filters.Filter, 
 		}
 	}
 	return filters.NewDistortionFilter(value), nil
+}
+
+func (c *Config) handleVibrato(opts map[string]interface{}) (filters.Filter, error) {
+	log.Printf("> Using Vibrato filter")
+	var o []func(*filters.VibratoFilter)
+	for param, value := range opts {
+		log.Printf(">> with %v = %v", param, value)
+		switch param {
+		case "wave":
+			w, err := c.handleWave(value.(string))
+			if err != nil {
+				return nil, err
+			}
+			o = append(o, filters.VibratoCarrierWave(w))
+		case "frequency":
+			o = append(o, filters.VibratoFrequency(value.(float64)))
+		case "amplitude":
+			o = append(o, filters.VibratoAmplitude(value.(float64)))
+		default:
+			return nil, fmt.Errorf("Unknown Vibrato parameter: %v", param)
+		}
+	}
+	return filters.NewVibrato(o...), nil
+}
+
+func (c *Config) handleAmplitudeModulation(opts map[string]interface{}) (filters.Filter, error) {
+	log.Printf("> Using AM (amplitude modulation) filter")
+	var carrier waves.Wave = &waves.Sine{}
+	var freq float64
+	amp := 1.0
+
+	for param, value := range opts {
+		log.Printf(">> with %v = %v", param, value)
+		switch param {
+		case "wave":
+			w, err := c.handleWave(value.(string))
+			if err != nil {
+				return nil, err
+			}
+			carrier = w
+		case "frequency":
+			freq = value.(float64)
+		case "amplitude":
+			amp = value.(float64)
+		default:
+			return nil, fmt.Errorf("Unknown AM parameter: %v", param)
+		}
+
+	}
+
+	return filters.NewRing(carrier, freq, amp), nil
+}
+
+func (c *Config) handleTimeShift(opts map[string]interface{}) (filters.Filter, error) {
+	log.Printf("> Using Time Shift filter")
+	var o []func(*filters.TimeShift)
+	for param, value := range opts {
+		log.Printf(">> with %v = %v", param, value)
+		switch param {
+		case "wave":
+			w, err := c.handleWave(value.(string))
+			if err != nil {
+				return nil, err
+			}
+			o = append(o, filters.TimeShiftCarrierWave(w))
+		case "frequency":
+			o = append(o, filters.TimeShiftFrequency(value.(float64)))
+		case "amplitude":
+			o = append(o, filters.TimeShiftAmplitude(value.(float64)))
+		default:
+			return nil, fmt.Errorf("Unknown Time Shift parameter: %v", param)
+		}
+	}
+	return filters.NewTimeShift(o...), nil
 }

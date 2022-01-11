@@ -12,6 +12,8 @@ type AdsrFilter struct {
 	ReleaseLen float64
 }
 
+var _ FilterAdsr = (*AdsrFilter)(nil)
+
 func NewAdsrFilter(opts ...func(*AdsrFilter)) Filter {
 	f := &AdsrFilter{
 		AttackLevel: 1.0,
@@ -32,6 +34,8 @@ func (af *AdsrFilter) Apply(w waves.Wave) waves.Wave {
 		opts: af,
 	}
 }
+
+func (af *AdsrFilter) IsAdsr() {}
 
 type adsrImpl struct {
 	wave waves.Wave

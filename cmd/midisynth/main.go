@@ -43,7 +43,7 @@ func main() {
 
 	m.AddInstrument(9, instruments.NewInstrument(
 		&waves.Triangle{},
-		filters.NewRing(&waves.Sine{}, 4.0),
+		filters.NewRing(&waves.Sine{}, 4.0, 1.0),
 		filters.NewAdsrFilter(),
 	))
 

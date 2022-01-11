@@ -59,6 +59,45 @@
 					}
 				}
 			]
+		},
+		"7": {
+			"wave": "square",
+			"filters": [
+				{
+					"am": {
+						"wave": "sine",
+						"frequency": 5,
+						"amplitude": 1.0
+					}
+				},
+				{
+					"adsr": {}
+				}
+			]
+		},
+		"8": {
+			"wave": "sine",
+			"filters": [
+				{
+					"vibrato": {
+						"wave": "sine",
+						"frequency": 5,
+						"amplitude": 1.0
+					}
+				}
+			]
+		},
+		"9": {
+			"wave": "sine",
+			"filters": [
+				{
+					"timeshift": {
+						"wave": "sine",
+						"frequency": 5.0,
+						"amplitude": 0.01
+					}
+				}
+			]
 		}
 	}
 }

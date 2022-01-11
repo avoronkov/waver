@@ -8,10 +8,10 @@ type Ring struct {
 	CarrierCtx *waves.NoteCtx
 }
 
-func NewRing(carrier waves.Wave, freq float64) Filter {
+func NewRing(carrier waves.Wave, freq, amp float64) Filter {
 	return &Ring{
 		Carrier:    carrier,
-		CarrierCtx: waves.NewNoteCtx(freq, 1.0, -1.0),
+		CarrierCtx: waves.NewNoteCtx(freq, amp, -1.0),
 	}
 }
 

@@ -13,10 +13,7 @@ import (
 
 	"gitlab.com/avoronkov/waver/lib/midisynth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/config"
-	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
-	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
@@ -36,27 +33,6 @@ func main() {
 	cfg := &config.Config{}
 	check(cfg.InitMidiSynth(configPath, m))
 
-	// Experimental section
-
-	m.AddInstrument(9, instruments.NewInstrument(
-		&waves.Sine{},
-		filters.NewVibrato(&waves.Sine{}, 10.0, 0.05),
-		filters.NewAdsrFilter(),
-	))
-
-	m.AddInstrument(8, instruments.NewInstrument(
-		&waves.Sine{},
-		filters.NewTimeShift(10.0, 0.01),
-		filters.NewAdsrFilter(),
-	))
-
-	m.AddInstrument(7, instruments.NewInstrument(
-		&waves.Triangle{},
-		filters.NewRing(&waves.Sine{}, 4.0),
-		filters.NewAdsrFilter(),
-	))
-
-	// .
 	proc := NewProc(m)
 
 	scanner := bufio.NewScanner(reader)
