@@ -81,7 +81,7 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 	if len(msg) < 3 {
 		return
 	}
-	inst := m.parseValue(msg['0'])
+	inst := m.parseValue(msg[0])
 	octave := int(msg[1] - '0')
 	note := string(msg[2])
 	amp := 0.5
