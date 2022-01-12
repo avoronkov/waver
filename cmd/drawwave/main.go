@@ -4,8 +4,6 @@ import (
 	"io"
 	"log"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
-	instr "gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/player"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
@@ -13,12 +11,6 @@ import (
 
 func main() {
 	// Instrument
-
-	in := instr.NewInstrument(
-		&waves.Saw{},
-		filters.NewVibrato(&waves.Sine{}, 10.0, 0.01),
-		filters.NewAdsrFilter(),
-	)
 
 	// .
 

@@ -6,7 +6,10 @@ import (
 
 	"gitlab.com/avoronkov/waver/lib/midisynth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/config"
+	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
+	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
+	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
@@ -30,9 +33,42 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Experimantal section
+
+	kick, err := waves.ReadSample("./samples/4-kick.wav")
+	check(err)
+
+	kickInst := instruments.NewInstrument(
+		kick,
+		filters.NewAdsrFilter(
+			filters.AdsrSusteinLen(0.9),
+			filters.AdsrReleaseLen(0.1),
+		),
+		filters.NewDelayFilter(filters.DelayInterval(0.75), filters.DelayTimes(3), filters.DelayFadeOut(0.5)),
+	)
+	m.AddInstrument(20, kickInst) // 'k'
+
+	hat, err := waves.ReadSample("./samples/4-hat.wav")
+	check(err)
+	hatInst := instruments.NewInstrument(hat)
+	m.AddInstrument(17, hatInst) // 'h'
+
+	snare, err := waves.ReadSample("./samples/4-snare.wav")
+	check(err)
+	snareInst := instruments.NewInstrument(snare)
+	m.AddInstrument(28, snareInst)
+
+	// .
+
 	m.Start()
 	if err := m.Close(); err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("OK!")
+}
+
+func check(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }

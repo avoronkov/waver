@@ -71,7 +71,6 @@ func (m *MidiSynth) Start() error {
 			log.Printf("[ERROR] %v", err)
 			continue
 		}
-		log.Printf("UDP: '%s'", buff)
 		go m.handleMessage(buff[:n])
 	}
 }

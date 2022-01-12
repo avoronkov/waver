@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"waver/wav"
+
+	"gitlab.com/avoronkov/waver/wav"
 )
 
 func main() {

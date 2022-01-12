@@ -16,6 +16,8 @@ type Instrument struct {
 	adsr          filters.Filter
 }
 
+var _ Interface = (*Instrument)(nil)
+
 var defaultAdsr = filters.NewAdsrFilter()
 var defaultManual = filters.NewManualControlFilter(0.125)
 
@@ -27,16 +29,18 @@ func NewInstrument(wave waves.Wave, fx ...filters.Filter) *Instrument {
 		adsr:          defaultAdsr,
 	}
 
+	/// TODO fix manual / auto filters problem
+
 	w := in.initialWave
 	for _, f := range fx {
+		if _, ok := f.(filters.FilterManualControl); ok {
+			in.manualControl = f
+			continue
+		}
 		w = f.Apply(w)
 
 		if _, ok := f.(filters.FilterAdsr); ok {
 			in.adsr = f
-			continue
-		}
-		if _, ok := f.(filters.FilterManualControl); ok {
-			in.manualControl = f
 			continue
 		}
 		in.fx = append(in.fx, f)
