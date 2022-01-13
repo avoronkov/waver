@@ -53,9 +53,9 @@
 				},
 				{
 					"delay": {
-						"interval": 0.25,
+						"interval": 0.5,
 						"fade": 0.5,
-						"times": 4
+						"times":4
 					}
 				}
 			]

@@ -38,19 +38,19 @@ func main() {
 	kick, err := waves.ReadSample("./samples/4-kick.wav")
 	check(err)
 
-	kickInst := instruments.NewInstrument(
-		kick,
-		filters.NewAdsrFilter(
-			filters.AdsrSusteinLen(0.9),
-			filters.AdsrReleaseLen(0.1),
-		),
-		filters.NewDelayFilter(filters.DelayInterval(0.75), filters.DelayTimes(3), filters.DelayFadeOut(0.5)),
-	)
+	kickInst := instruments.NewInstrument(kick)
 	m.AddInstrument(20, kickInst) // 'k'
 
 	hat, err := waves.ReadSample("./samples/4-hat.wav")
 	check(err)
-	hatInst := instruments.NewInstrument(hat)
+	hatInst := instruments.NewInstrument(
+		hat,
+		filters.NewDelayFilter(
+			filters.DelayTimes(3),
+			filters.DelayInterval(0.125),
+			filters.DelayFadeOut(0.5),
+		),
+	)
 	m.AddInstrument(17, hatInst) // 'h'
 
 	snare, err := waves.ReadSample("./samples/4-snare.wav")

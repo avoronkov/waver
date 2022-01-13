@@ -44,7 +44,8 @@ func ReadSample(file string) (*Sample, error) {
 		sampleRate: float64(reader.GetSampleRate()),
 	}
 
-	for {
+	sampleCount := int(reader.GetSampleCount())
+	for i := 0; i < sampleCount; i++ {
 		sample, err := reader.ReadRawSample()
 		if err == io.EOF {
 			break
@@ -56,19 +57,20 @@ func ReadSample(file string) (*Sample, error) {
 			return nil, fmt.Errorf("Sample read size is not 16bit: %v", len(sample))
 		}
 		num := binary.LittleEndian.Uint16(sample)
-		// log.Printf("Read: %v", (num))
 		s.data = append(s.data, int16(num))
 	}
 	s.datalen = len(s.data)
 	return s, nil
 }
 
-const maxInt16Value = float64(1 << 15)
+const maxInt16Value = float64((1 << 15) + 1)
 
 func (s *Sample) Value(t float64, ctx *NoteCtx) float64 {
 	n := int(t * s.sampleRate)
 	if n >= s.datalen {
 		return math.NaN()
 	}
-	return float64(s.data[n]) / maxInt16Value
+
+	res := float64(s.data[n]) / maxInt16Value
+	return res
 }

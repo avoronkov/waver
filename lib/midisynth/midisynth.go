@@ -6,6 +6,7 @@ import (
 	"math"
 	"net"
 	"runtime"
+	"time"
 
 	oto "github.com/hajimehoshi/oto/v2"
 
@@ -91,12 +92,11 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 	if len(msg) >= 5 {
 		// Evaluate duration in bits (1/4 tempo)
 		dur = 15.0 * float64(m.parseValue(msg[4])) / float64(m.tempo)
-		log.Printf("dur = %v", dur)
 	}
 
 	freq, ok := m.scale.Note(octave, note)
 	if !ok {
-		log.Printf("Unknown note: %v%v", octave, note)
+		log.Printf("Unknown note: %v %v (%s)", octave, note, msg)
 		return
 	}
 	m.playNote(inst, freq, dur, amp)
@@ -149,6 +149,7 @@ func (m *MidiSynth) playNote(inst int, hz float64, dur float64, amp float64) {
 	p.Play()
 
 	<-done
+	time.Sleep(1 * time.Second)
 	runtime.KeepAlive(p)
 }
 
@@ -167,6 +168,7 @@ func (m *MidiSynth) playNoteControlled(inst int, hz float64, amp float64) (stop 
 		p.Play()
 
 		<-done
+		time.Sleep(1 * time.Second)
 		runtime.KeepAlive(p)
 
 	}()

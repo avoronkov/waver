@@ -1,6 +1,8 @@
 package filters
 
 import (
+	"math"
+
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 )
 
@@ -39,6 +41,9 @@ var _ waves.WithDuration = (*delayImpl)(nil)
 
 func (d *delayImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 	value := d.wave.Value(tm, ctx)
+	if math.IsNaN(value) && tm < float64(d.opts.Times)*d.opts.Interval {
+		value = 0
+	}
 
 	multiplier := 1.0
 	t := tm
@@ -48,7 +53,11 @@ func (d *delayImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 		if t < 0.0 {
 			break
 		}
-		value += d.wave.Value(t, ctx) * multiplier
+		v := d.wave.Value(t, ctx)
+		if math.IsNaN(v) {
+			continue
+		}
+		value += v * multiplier
 	}
 
 	return value
