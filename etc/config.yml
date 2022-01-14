@@ -1,0 +1,56 @@
+instruments:
+  1:
+    wave: sine
+    filters:
+      - adsr:
+  2:
+    wave: square
+    filters:
+      - adsr:
+  3:
+    wave: triangle
+    filters:
+      - adsr:
+  4:
+    wave: saw
+    filters:
+      - distortion:
+          value: 1.5 
+      - adsr:
+  5:
+    wave: sine
+    filters:
+      - distortion:
+          value: 1.5
+      - adsr:
+  6:
+    wave: sine
+    filters:
+      - adsr:
+      - delay:
+          interval: 0.5
+          fade: 0.5
+          times: 4
+  7:
+    wave: square
+    filters:
+      - am:
+          wave: sine
+          frequency: 5.0
+          amplidute: 1.0
+      - adsr:
+  8:
+    wave: sine
+    filters:
+      - vibrato:
+          wave: sine
+          frequency: 5.0
+          amplitude: 1.0
+  9:
+    wave: sine
+    filters:
+    - timeshift:
+        wave: sine
+        frequency: 5.0
+        amplitude: 0.01
+

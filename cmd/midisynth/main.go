@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"gitlab.com/avoronkov/waver/lib/midisynth"
-	"gitlab.com/avoronkov/waver/lib/midisynth/config"
+	"gitlab.com/avoronkov/waver/lib/midisynth/config/v2"
 	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
