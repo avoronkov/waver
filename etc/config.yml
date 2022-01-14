@@ -37,7 +37,7 @@ instruments:
       - am:
           wave: sine
           frequency: 5.0
-          amplidute: 1.0
+          amplitude: 1.0
       - adsr:
   8:
     wave: sine
@@ -53,4 +53,17 @@ instruments:
         wave: sine
         frequency: 5.0
         amplitude: 0.01
+
+samples:
+  4k:
+    sample: "samples/4-kick.wav"
+  4s:
+    sample: "samples/4-snare.wav"
+  4h:
+    sample: "samples/4-hat.wav"
+    filters:
+      - delay:
+          interval: 0.125
+          fade: 0.5
+          times: 3
 

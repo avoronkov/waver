@@ -18,6 +18,7 @@ type Config struct {
 }
 
 func (c *Config) InitMidiSynth(filename string, m *midisynth.MidiSynth) error {
+	log.Printf("Synthesizer configuration: %v", filename)
 	f, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("Error reading config file '%v': %w", filename, err)
@@ -34,6 +35,7 @@ func (c *Config) InitMidiSynth(filename string, m *midisynth.MidiSynth) error {
 }
 
 func (c *Config) handleData(data *Data, m *midisynth.MidiSynth) error {
+	log.Printf("Data: %+v", data)
 	for inst, instData := range data.Instruments {
 		instIdx, err := strconv.Atoi(inst)
 		if err != nil {
@@ -45,6 +47,15 @@ func (c *Config) handleData(data *Data, m *midisynth.MidiSynth) error {
 			return err
 		}
 		m.AddInstrument(instIdx, instr)
+	}
+
+	for name, sampleData := range data.Samples {
+		log.Printf("Loading sampled instrument %v...", name)
+		instr, err := c.handleSampleData(&sampleData)
+		if err != nil {
+			return fmt.Errorf("Failed to handle instrument %v: %v", name, err)
+		}
+		m.AddSampledInstrument(name, instr)
 	}
 	return nil
 }
@@ -65,6 +76,22 @@ func (c *Config) handleInstrument(in *Instrument) (*instruments.Instrument, erro
 	return instruments.NewInstrument(wave, fs...), nil
 }
 
+func (c *Config) handleSampleData(s *SampleData) (*instruments.Instrument, error) {
+	sample, err := c.handleSample(s.Sample)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to handle sample %v: %v", s.Sample, err)
+	}
+	var fs []filters.Filter
+	for _, f := range s.Filters {
+		fx, err := c.handleFilter(f)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to handle filter: %w", err)
+		}
+		fs = append(fs, fx)
+	}
+	return instruments.NewInstrument(sample, fs...), nil
+}
+
 func (c *Config) handleWave(wave string) (waves.Wave, error) {
 	switch wave {
 	case "sine":
@@ -81,6 +108,11 @@ func (c *Config) handleWave(wave string) (waves.Wave, error) {
 		return &waves.Saw{}, nil
 	}
 	return nil, fmt.Errorf("Unknown wave: %v", wave)
+}
+
+func (c *Config) handleSample(sample string) (waves.Wave, error) {
+	log.Printf("> Using sample '%v'", sample)
+	return waves.ReadSample(sample)
 }
 
 func (c *Config) handleFilter(f Filter) (filters.Filter, error) {

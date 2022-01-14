@@ -33,6 +33,7 @@ type MidiSynth struct {
 	tempo int
 
 	instruments map[int]*instr.Instrument
+	samples     map[string]*instr.Instrument
 }
 
 func NewMidiSynth(settings *wav.Settings, scale notes.Scale, port int) (*MidiSynth, error) {
@@ -50,12 +51,17 @@ func NewMidiSynth(settings *wav.Settings, scale notes.Scale, port int) (*MidiSyn
 		port:        port,
 		tempo:       120,
 		instruments: make(map[int]*instr.Instrument),
+		samples:     make(map[string]*instr.Instrument),
 	}
 	return m, nil
 }
 
 func (m *MidiSynth) AddInstrument(n int, in *instr.Instrument) {
 	m.instruments[n] = in
+}
+
+func (m *MidiSynth) AddSampledInstrument(name string, in *instr.Instrument) {
+	m.samples[name] = in
 }
 
 func (m *MidiSynth) Start() error {
@@ -94,6 +100,11 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 		dur = 15.0 * float64(m.parseValue(msg[4])) / float64(m.tempo)
 	}
 
+	if inst == 35 { // 'z'
+		m.PlaySample(string(msg[1:3]), dur, amp)
+		return
+	}
+
 	freq, ok := m.scale.Note(octave, note)
 	if !ok {
 		log.Printf("Unknown note: %v %v (%s)", octave, note, msg)
@@ -123,6 +134,22 @@ func (m *MidiSynth) PlayNoteControlled(instr int, octave int, note string, amp f
 	return stop, nil
 }
 
+func (m *MidiSynth) PlaySample(name string, duration float64, amp float64) error {
+	in, ok := m.samples[name]
+	if !ok {
+		return fmt.Errorf("Unknown sample: %q", name)
+	}
+	data, done := m.play.PlayContext2(in.Wave(), waves.NewNoteCtx(0, amp, duration))
+
+	p := m.context.NewPlayer(data)
+	p.Play()
+
+	<-done
+	time.Sleep(1 * time.Second)
+	runtime.KeepAlive(p)
+	return nil
+}
+
 func (m *MidiSynth) parseValue(b byte) int {
 	if b >= '0' && b <= '9' {
 		return int(b - '0')
@@ -131,7 +158,7 @@ func (m *MidiSynth) parseValue(b byte) int {
 		return 10 + int(b-'a')
 	}
 	if b >= 'A' && b <= 'Z' {
-		return 10 + int(b-'Z')
+		return 10 + int(b-'A')
 	}
 	return 0
 }

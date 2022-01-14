@@ -6,10 +6,7 @@ import (
 
 	"gitlab.com/avoronkov/waver/lib/midisynth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/config/v2"
-	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
-	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
@@ -34,29 +31,6 @@ func main() {
 	}
 
 	// Experimantal section
-
-	kick, err := waves.ReadSample("./samples/4-kick.wav")
-	check(err)
-
-	kickInst := instruments.NewInstrument(kick)
-	m.AddInstrument(20, kickInst) // 'k'
-
-	hat, err := waves.ReadSample("./samples/4-hat.wav")
-	check(err)
-	hatInst := instruments.NewInstrument(
-		hat,
-		filters.NewDelayFilter(
-			filters.DelayTimes(3),
-			filters.DelayInterval(0.125),
-			filters.DelayFadeOut(0.5),
-		),
-	)
-	m.AddInstrument(17, hatInst) // 'h'
-
-	snare, err := waves.ReadSample("./samples/4-snare.wav")
-	check(err)
-	snareInst := instruments.NewInstrument(snare)
-	m.AddInstrument(28, snareInst)
 
 	// .
 
