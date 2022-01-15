@@ -3,15 +3,19 @@ package main
 import "flag"
 
 var (
-	port  int
-	edo19 bool
+	udpPort  int
+	midiPort int
+	edo19    bool
 
 	configPath string
 )
 
 func init() {
-	flag.IntVar(&port, "port", 49161, "UPD port")
-	flag.IntVar(&port, "p", 49161, "UPD port (shorthand)")
+	flag.IntVar(&udpPort, "udp-port", 49161, "UPD port")
+	flag.IntVar(&udpPort, "p", 49161, "UPD port (shorthand)")
+
+	flag.IntVar(&midiPort, "midi-port", 0, "MIDI port")
+	flag.IntVar(&midiPort, "m", 0, "MIDI port shorthand")
 
 	flag.BoolVar(&edo19, "edo19", false, "Use EDO19 scale")
 	flag.BoolVar(&edo19, "19", false, "Use EDO19 scale (shorthand)")

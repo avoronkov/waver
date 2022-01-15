@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,18 +10,21 @@ import (
 	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+
+	yaml "gopkg.in/yaml.v3"
 )
 
 type Config struct {
 }
 
 func (c *Config) InitMidiSynth(filename string, m *midisynth.MidiSynth) error {
+	log.Printf("Synthesizer configuration: %v", filename)
 	f, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("Error reading config file '%v': %w", filename, err)
 	}
 	var data Data
-	if err := json.Unmarshal(f, &data); err != nil {
+	if err := yaml.Unmarshal(f, &data); err != nil {
 		return fmt.Errorf("Error parsing data: %w\n%s", err, f)
 	}
 	log.Printf("Loading configuration from %v", filename)
@@ -33,6 +35,7 @@ func (c *Config) InitMidiSynth(filename string, m *midisynth.MidiSynth) error {
 }
 
 func (c *Config) handleData(data *Data, m *midisynth.MidiSynth) error {
+	log.Printf("Data: %+v", data)
 	for inst, instData := range data.Instruments {
 		instIdx, err := strconv.Atoi(inst)
 		if err != nil {
@@ -44,6 +47,15 @@ func (c *Config) handleData(data *Data, m *midisynth.MidiSynth) error {
 			return err
 		}
 		m.AddInstrument(instIdx, instr)
+	}
+
+	for name, sampleData := range data.Samples {
+		log.Printf("Loading sampled instrument %v...", name)
+		instr, err := c.handleSampleData(&sampleData)
+		if err != nil {
+			return fmt.Errorf("Failed to handle instrument %v: %v", name, err)
+		}
+		m.AddSampledInstrument(name, instr)
 	}
 	return nil
 }
@@ -64,6 +76,22 @@ func (c *Config) handleInstrument(in *Instrument) (*instruments.Instrument, erro
 	return instruments.NewInstrument(wave, fs...), nil
 }
 
+func (c *Config) handleSampleData(s *SampleData) (*instruments.Instrument, error) {
+	sample, err := c.handleSample(s.Sample)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to handle sample %v: %v", s.Sample, err)
+	}
+	var fs []filters.Filter
+	for _, f := range s.Filters {
+		fx, err := c.handleFilter(f)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to handle filter: %w", err)
+		}
+		fs = append(fs, fx)
+	}
+	return instruments.NewInstrument(sample, fs...), nil
+}
+
 func (c *Config) handleWave(wave string) (waves.Wave, error) {
 	switch wave {
 	case "sine":
@@ -80,6 +108,11 @@ func (c *Config) handleWave(wave string) (waves.Wave, error) {
 		return &waves.Saw{}, nil
 	}
 	return nil, fmt.Errorf("Unknown wave: %v", wave)
+}
+
+func (c *Config) handleSample(sample string) (waves.Wave, error) {
+	log.Printf("> Using sample '%v'", sample)
+	return waves.ReadSample(sample)
 }
 
 func (c *Config) handleFilter(f Filter) (filters.Filter, error) {
@@ -113,17 +146,17 @@ func (c *Config) handleAdsr(opts map[string]interface{}) (filters.Filter, error)
 		log.Printf(">> with %v = %v", param, value)
 		switch param {
 		case "attackLevel":
-			o = append(o, filters.AdsrAttackLevel(value.(float64)))
+			o = append(o, filters.AdsrAttackLevel(valueFloat64(value)))
 		case "decayLevel":
-			o = append(o, filters.AdsrDecayLevel(value.(float64)))
+			o = append(o, filters.AdsrDecayLevel(valueFloat64(value)))
 		case "attackLen":
-			o = append(o, filters.AdsrAttackLen(value.(float64)))
+			o = append(o, filters.AdsrAttackLen(valueFloat64(value)))
 		case "decayLen":
-			o = append(o, filters.AdsrDecayLen(value.(float64)))
+			o = append(o, filters.AdsrDecayLen(valueFloat64(value)))
 		case "susteinLen":
-			o = append(o, filters.AdsrSusteinLen(value.(float64)))
+			o = append(o, filters.AdsrSusteinLen(valueFloat64(value)))
 		case "releaseLen":
-			o = append(o, filters.AdsrReleaseLen(value.(float64)))
+			o = append(o, filters.AdsrReleaseLen(valueFloat64(value)))
 		default:
 			return nil, fmt.Errorf("Unknown ADSR parameter: %v", param)
 		}
@@ -138,11 +171,11 @@ func (c *Config) handleDelay(opts map[string]interface{}) (filters.Filter, error
 		log.Printf(">> with %v = %v", param, value)
 		switch param {
 		case "interval":
-			o = append(o, filters.DelayInterval(value.(float64)))
+			o = append(o, filters.DelayInterval(valueFloat64(value)))
 		case "times":
-			o = append(o, filters.DelayTimes(int(value.(float64))))
+			o = append(o, filters.DelayTimes(value.(int)))
 		case "fade":
-			o = append(o, filters.DelayFadeOut(value.(float64)))
+			o = append(o, filters.DelayFadeOut(valueFloat64(value)))
 		default:
 			return nil, fmt.Errorf("Unknown Delay parameter: %v", param)
 		}
@@ -157,7 +190,7 @@ func (c *Config) handleDistortion(opts map[string]interface{}) (filters.Filter, 
 		log.Printf(">> with %v = %v", param, v)
 		switch param {
 		case "value":
-			value = v.(float64)
+			value = valueFloat64(v)
 		default:
 			return nil, fmt.Errorf("Unknown Distortion parameter: %v", param)
 		}
@@ -178,9 +211,9 @@ func (c *Config) handleVibrato(opts map[string]interface{}) (filters.Filter, err
 			}
 			o = append(o, filters.VibratoCarrierWave(w))
 		case "frequency":
-			o = append(o, filters.VibratoFrequency(value.(float64)))
+			o = append(o, filters.VibratoFrequency(valueFloat64(value)))
 		case "amplitude":
-			o = append(o, filters.VibratoAmplitude(value.(float64)))
+			o = append(o, filters.VibratoAmplitude(valueFloat64(value)))
 		default:
 			return nil, fmt.Errorf("Unknown Vibrato parameter: %v", param)
 		}
@@ -204,9 +237,9 @@ func (c *Config) handleAmplitudeModulation(opts map[string]interface{}) (filters
 			}
 			carrier = w
 		case "frequency":
-			freq = value.(float64)
+			freq = valueFloat64(value)
 		case "amplitude":
-			amp = value.(float64)
+			amp = valueFloat64(value)
 		default:
 			return nil, fmt.Errorf("Unknown AM parameter: %v", param)
 		}
@@ -229,12 +262,23 @@ func (c *Config) handleTimeShift(opts map[string]interface{}) (filters.Filter, e
 			}
 			o = append(o, filters.TimeShiftCarrierWave(w))
 		case "frequency":
-			o = append(o, filters.TimeShiftFrequency(value.(float64)))
+			o = append(o, filters.TimeShiftFrequency(valueFloat64(value)))
 		case "amplitude":
-			o = append(o, filters.TimeShiftAmplitude(value.(float64)))
+			o = append(o, filters.TimeShiftAmplitude(valueFloat64(value)))
 		default:
 			return nil, fmt.Errorf("Unknown Time Shift parameter: %v", param)
 		}
 	}
 	return filters.NewTimeShift(o...), nil
+}
+
+func valueFloat64(x interface{}) float64 {
+	switch a := x.(type) {
+	case float64:
+		return a
+	case int:
+		return float64(a)
+	default:
+		panic(fmt.Errorf("Not an integer value: %v", x))
+	}
 }

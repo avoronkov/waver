@@ -1,10 +1,14 @@
-package main
+package midi
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log"
+	"os/exec"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 type Synth interface {
@@ -13,21 +17,57 @@ type Synth interface {
 }
 
 type Proc struct {
-	synth Synth
+	synth    Synth
+	ch       chan<- string
+	midiPort int
 
 	notesReleases map[int]func()
+	dumpProcess   *exec.Cmd
 }
 
-func NewProc(synth Synth) *Proc {
+func NewProc(synth Synth, midiPort int, ch chan<- string) *Proc {
 	return &Proc{
 		synth:         synth,
+		ch:            ch,
+		midiPort:      midiPort,
 		notesReleases: make(map[int]func()),
 	}
 }
 
+func (p *Proc) Start() error {
+	log.Printf("Starting aseqdump process (-p %v)", p.midiPort)
+	dumpProcess, reader, err := aseqdump(p.midiPort)
+	if err != nil {
+		return err
+	}
+	p.dumpProcess = dumpProcess
+
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanLines)
+	go func() {
+		log.Printf("Scanning aseqdump outpupt")
+		for scanner.Scan() {
+			text := scanner.Text()
+			log.Printf("[MIDI] Got event: %v", text)
+			p.ch <- text
+		}
+		if err := scanner.Err(); err != nil {
+			log.Printf("[ERROR] %v", err)
+		}
+	}()
+	return nil
+}
+
+func (p *Proc) Close() error {
+	if p.dumpProcess != nil {
+		p.dumpProcess.Process.Signal(syscall.SIGINT)
+	}
+	return nil
+}
+
 // []string{"24:0", "Note", "off", "1,", "note", "67,", "velocity", "64"}
 // []string{"24:0", "Control", "change", "1,", "controller", "2,", "value", "12"}
-func (p *Proc) handleLine(line string) error {
+func (p *Proc) HandleLine(line string) error {
 	fields := strings.Fields(line)
 	log.Printf("> %#v", fields)
 	if len(fields) < 3 {
@@ -103,4 +143,16 @@ func (p *Proc) parseNote(fields []string) (key *Key, err error) {
 	}
 
 	return
+}
+
+func aseqdump(p int) (*exec.Cmd, io.Reader, error) {
+	cmd := exec.Command("aseqdump", "-p", strconv.Itoa(p))
+	reader, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := cmd.Start(); err != nil {
+		return nil, nil, err
+	}
+	return cmd, reader, nil
 }

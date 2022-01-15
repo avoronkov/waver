@@ -1,4 +1,4 @@
-package main
+package midi
 
 type OctaveNote struct {
 	Octave int

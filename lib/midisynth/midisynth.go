@@ -1,16 +1,19 @@
 package midisynth
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math"
 	"net"
+	"os"
 	"runtime"
 	"time"
 
 	oto "github.com/hajimehoshi/oto/v2"
 
 	instr "gitlab.com/avoronkov/waver/lib/midisynth/instruments"
+	"gitlab.com/avoronkov/waver/lib/midisynth/midi"
 	"gitlab.com/avoronkov/waver/lib/midisynth/player"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
@@ -28,31 +31,59 @@ type MidiSynth struct {
 
 	scale notes.Scale
 
-	port int
+	// UDP udpPort for Orca messages
+	udpPort int
+
+	// Midi port for controller client
+	midiPort int
+	midiProc *midi.Proc
 
 	tempo int
 
 	instruments map[int]*instr.Instrument
 	samples     map[string]*instr.Instrument
+
+	midiChan chan string
+	udpChan  chan []byte
+	signals  chan os.Signal
+
+	udpListener net.PacketConn
 }
 
-func NewMidiSynth(settings *wav.Settings, scale notes.Scale, port int) (*MidiSynth, error) {
-	c, ready, err := oto.NewContext(settings.SampleRate, settings.ChannelNum, settings.BitDepthInBytes)
+func NewMidiSynth(opts ...func(*MidiSynth)) (*MidiSynth, error) {
+	m := &MidiSynth{
+		settings: wav.Default,
+		// play:        player.New(settings),
+		// context:     c,
+		// scale:       scale,
+		// udpPort:     port,
+		tempo:       120,
+		instruments: make(map[int]*instr.Instrument),
+		samples:     make(map[string]*instr.Instrument),
+		midiChan:    make(chan string),
+		udpChan:     make(chan []byte),
+		signals:     make(chan os.Signal),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+
+	// Init scale
+	if m.scale == nil {
+		m.scale = notes.NewStandard()
+	}
+
+	// Init oto.Context
+	c, ready, err := oto.NewContext(m.settings.SampleRate, m.settings.ChannelNum, m.settings.BitDepthInBytes)
 	if err != nil {
 		return nil, err
 	}
 	<-ready
 
-	m := &MidiSynth{
-		settings:    settings,
-		play:        player.New(settings),
-		context:     c,
-		scale:       scale,
-		port:        port,
-		tempo:       120,
-		instruments: make(map[int]*instr.Instrument),
-		samples:     make(map[string]*instr.Instrument),
-	}
+	// Init Player
+	m.play = player.New(m.settings)
+
+	m.context = c
 	return m, nil
 }
 
@@ -65,21 +96,63 @@ func (m *MidiSynth) AddSampledInstrument(name string, in *instr.Instrument) {
 }
 
 func (m *MidiSynth) Start() error {
-	pc, err := net.ListenPacket("udp", fmt.Sprintf(":%v", m.port))
+	started := false
+	if m.udpPort > 0 {
+		started = true
+		if err := m.startUdpListener(m.udpPort, m.udpChan); err != nil {
+			return err
+		}
+	}
+	if m.midiPort > 0 {
+		log.Printf("Starting MIDI listener on port %v", m.midiPort)
+		started = true
+		m.midiProc = midi.NewProc(m, m.midiPort, m.midiChan)
+		if err := m.midiProc.Start(); err != nil {
+			return err
+		}
+	}
+
+	if !started {
+		return fmt.Errorf("Either UDP or MIDI port should be specifiend")
+	}
+L:
+	for {
+		select {
+		case msg := <-m.udpChan:
+			go m.handleMessage(msg)
+		case data := <-m.midiChan:
+			go m.midiProc.HandleLine(data)
+		case <-m.signals:
+			log.Printf("Interupting...")
+			break L
+		}
+	}
+	return nil
+}
+
+func (m *MidiSynth) startUdpListener(port int, ch chan []byte) (err error) {
+	m.udpListener, err = net.ListenPacket("udp", fmt.Sprintf(":%v", port))
 	if err != nil {
 		return fmt.Errorf("Starting UDP server failed: %w", err)
 	}
-	defer pc.Close()
-	log.Printf("Listening to UDP on localhost:%v", m.port)
-	for {
-		buff := make([]byte, 64)
-		n, _, err := pc.ReadFrom(buff)
-		if err != nil {
-			log.Printf("[ERROR] %v", err)
-			continue
+	log.Printf("Listening to UDP on localhost:%v", port)
+	go func(pc net.PacketConn) {
+	L:
+		for {
+			buff := make([]byte, 64)
+			n, _, err := pc.ReadFrom(buff)
+			if errors.Is(err, net.ErrClosed) {
+				log.Printf("[ERROR] ErrClosed")
+				break L
+			}
+			if err != nil {
+				log.Printf("[ERROR] %v (%T, %v)", err, err, err.(*net.OpError).Unwrap())
+				continue
+			}
+			ch <- buff[:n]
 		}
-		go m.handleMessage(buff[:n])
-	}
+	}(m.udpListener)
+	return nil
 }
 
 // Intended to run in separate goroutine
@@ -87,6 +160,7 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 	if len(msg) < 3 {
 		return
 	}
+	log.Printf("Handle UDP message: %s", msg)
 	inst := m.parseValue(msg[0])
 	octave := int(msg[1] - '0')
 	note := string(msg[2])
@@ -203,5 +277,7 @@ func (m *MidiSynth) playNoteControlled(inst int, hz float64, amp float64) (stop 
 }
 
 func (m *MidiSynth) Close() error {
+	_ = m.udpListener.Close()
+	_ = m.midiProc.Close()
 	return nil
 }

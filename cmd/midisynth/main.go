@@ -5,23 +5,25 @@ import (
 	"log"
 
 	"gitlab.com/avoronkov/waver/lib/midisynth"
-	"gitlab.com/avoronkov/waver/lib/midisynth/config/v2"
-	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
+	"gitlab.com/avoronkov/waver/lib/midisynth/config"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
 func main() {
 	flag.Parse()
-	log.Printf("Starting midi syntesizer on port %v...", port)
-	var scale notes.Scale
+	log.Printf("Starting UDP listener on port %v...", udpPort)
+	opts := []func(*midisynth.MidiSynth){
+		midisynth.WithUdpPort(udpPort),
+		midisynth.WithMidiPort(midiPort),
+	}
 	if edo19 {
 		log.Printf("Using EDO-19 scale.")
-		scale = notes.NewEdo19()
+		opts = append(opts, midisynth.WithScale(notes.NewEdo19()))
 	} else {
 		log.Printf("Using Standard 12 tone scale.")
-		scale = notes.NewStandard()
+		opts = append(opts, midisynth.WithScale(notes.NewStandard()))
 	}
-	m, err := midisynth.NewMidiSynth(wav.Default, scale, port)
+	m, err := midisynth.NewMidiSynth(opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,9 +36,11 @@ func main() {
 
 	// .
 
-	m.Start()
+	if err := m.Start(); err != nil {
+		log.Fatal("Start failed: ", err)
+	}
 	if err := m.Close(); err != nil {
-		log.Fatal(err)
+		log.Fatal("Stop failed: ", err)
 	}
 	log.Printf("OK!")
 }
