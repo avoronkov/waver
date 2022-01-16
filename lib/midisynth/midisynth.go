@@ -48,6 +48,8 @@ type MidiSynth struct {
 	signals  chan os.Signal
 
 	udpListener net.PacketConn
+
+	edo int
 }
 
 func NewMidiSynth(opts ...func(*MidiSynth)) (*MidiSynth, error) {
@@ -63,6 +65,7 @@ func NewMidiSynth(opts ...func(*MidiSynth)) (*MidiSynth, error) {
 		midiChan:    make(chan string),
 		udpChan:     make(chan []byte),
 		signals:     make(chan os.Signal),
+		edo:         12,
 	}
 	for _, opt := range opts {
 		opt(m)
@@ -106,7 +109,18 @@ func (m *MidiSynth) Start() error {
 	if m.midiPort > 0 {
 		log.Printf("Starting MIDI listener on port %v", m.midiPort)
 		started = true
-		m.midiProc = midi.NewProc(m, m.midiPort, m.midiChan)
+		var opts []func(*midi.Proc)
+		switch m.edo {
+		case 12:
+		case 19:
+			opts = append(opts, midi.Edo19())
+		default:
+			panic(fmt.Errorf("Unsupported EDO scale: %v", m.edo))
+		}
+		if m.edo == 19 {
+
+		}
+		m.midiProc = midi.NewProc(m, m.midiPort, m.midiChan, opts...)
 		if err := m.midiProc.Start(); err != nil {
 			return err
 		}

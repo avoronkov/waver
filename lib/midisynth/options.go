@@ -26,5 +26,10 @@ func WithWavSettings(settings *wav.Settings) func(m *MidiSynth) {
 func WithScale(scale notes.Scale) func(m *MidiSynth) {
 	return func(m *MidiSynth) {
 		m.scale = scale
+		if edoScale, ok := scale.(notes.EdoScale); ok {
+			m.edo = edoScale.Edo()
+		} else {
+			m.edo = -1
+		}
 	}
 }

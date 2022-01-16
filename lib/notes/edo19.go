@@ -7,6 +7,8 @@ type Edo19 struct {
 	notes map[int]map[string]float64
 }
 
+var _ (EdoScale) = (*Edo19)(nil)
+
 func NewEdo19() *Edo19 {
 	e := &Edo19{}
 	e.init()
@@ -74,4 +76,8 @@ func (*Edo19) buildOctaveScale(afreq float64) map[string]float64 {
 func (e *Edo19) Note(octave int, note string) (hz float64, ok bool) {
 	hz, ok = e.notes[octave][note]
 	return
+}
+
+func (e *Edo19) Edo() int {
+	return 19
 }

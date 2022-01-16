@@ -23,15 +23,24 @@ type Proc struct {
 
 	notesReleases map[int]func()
 	dumpProcess   *exec.Cmd
+
+	keyMap map[int]OctaveNote
 }
 
-func NewProc(synth Synth, midiPort int, ch chan<- string) *Proc {
-	return &Proc{
+func NewProc(synth Synth, midiPort int, ch chan<- string, opts ...func(*Proc)) *Proc {
+	p := &Proc{
 		synth:         synth,
 		ch:            ch,
 		midiPort:      midiPort,
 		notesReleases: make(map[int]func()),
+		keyMap:        KeyMap,
 	}
+
+	for _, opt := range opts {
+		opt(p)
+	}
+
+	return p
 }
 
 func (p *Proc) Start() error {
@@ -101,7 +110,7 @@ func (p *Proc) handleNoteOn(fields []string) error {
 	if err != nil {
 		return err
 	}
-	on, ok := KeyMap[key.note]
+	on, ok := p.keyMap[key.note]
 	if !ok {
 		panic(fmt.Errorf("Key not found in table: %v", key.note))
 	}

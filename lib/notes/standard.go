@@ -8,6 +8,8 @@ type Standard struct {
 	notes map[int]map[string]float64
 }
 
+var _ EdoScale = (*Standard)(nil)
+
 func NewStandard() *Standard {
 	s := &Standard{}
 	s.init()
@@ -61,4 +63,8 @@ func (s *Standard) buildOctaveScale(afreq float64) map[string]float64 {
 func (s *Standard) Note(octave int, note string) (hz float64, ok bool) {
 	hz, ok = s.notes[octave][note]
 	return
+}
+
+func (s *Standard) Edo() int {
+	return 12
 }
