@@ -1,6 +1,7 @@
 package midisynth
 
 import (
+	"gitlab.com/avoronkov/waver/lib/midisynth/midi"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
@@ -11,9 +12,18 @@ func WithUdpPort(port int) func(m *MidiSynth) {
 	}
 }
 
+/*
 func WithMidiPort(port int) func(m *MidiSynth) {
 	return func(m *MidiSynth) {
 		m.midiPort = port
+	}
+}
+*/
+
+func WithMidiProc(p *midi.Proc) func(m *MidiSynth) {
+	return func(m *MidiSynth) {
+		midi.WithChannel(m.midiChan)(p)
+		m.midiProc = p
 	}
 }
 

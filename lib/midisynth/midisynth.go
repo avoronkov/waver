@@ -35,7 +35,6 @@ type MidiSynth struct {
 	udpPort int
 
 	// Midi port for controller client
-	midiPort int
 	midiProc *midi.Proc
 
 	tempo int
@@ -106,21 +105,8 @@ func (m *MidiSynth) Start() error {
 			return err
 		}
 	}
-	if m.midiPort > 0 {
-		log.Printf("Starting MIDI listener on port %v", m.midiPort)
+	if m.midiProc != nil {
 		started = true
-		var opts []func(*midi.Proc)
-		switch m.edo {
-		case 12:
-		case 19:
-			opts = append(opts, midi.Edo19())
-		default:
-			panic(fmt.Errorf("Unsupported EDO scale: %v", m.edo))
-		}
-		if m.edo == 19 {
-
-		}
-		m.midiProc = midi.NewProc(m, m.midiPort, m.midiChan, opts...)
 		if err := m.midiProc.Start(); err != nil {
 			return err
 		}

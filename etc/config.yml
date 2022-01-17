@@ -14,8 +14,6 @@ instruments:
   4:
     wave: saw
     filters:
-      - distortion:
-          value: 1.5 
       - adsr:
   5:
     wave: sine
@@ -28,7 +26,10 @@ instruments:
     filters:
       - adsr:
       - delay:
-          interval: 0.5
+          interval:
+            knob: 2
+            default: 1.0
+            delta: 0.125
           fade: 0.5
           times: 4
   7:

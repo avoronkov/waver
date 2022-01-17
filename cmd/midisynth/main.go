@@ -8,6 +8,7 @@ import (
 	"gitlab.com/avoronkov/waver/lib/midisynth/config"
 	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
+	"gitlab.com/avoronkov/waver/lib/midisynth/midi"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
@@ -17,7 +18,6 @@ func main() {
 	log.Printf("Starting UDP listener on port %v...", udpPort)
 	opts := []func(*midisynth.MidiSynth){
 		midisynth.WithUdpPort(udpPort),
-		midisynth.WithMidiPort(midiPort),
 	}
 	if edo19 {
 		log.Printf("Using EDO-19 scale.")
@@ -26,10 +26,12 @@ func main() {
 		log.Printf("Using Standard 12 tone scale.")
 		opts = append(opts, midisynth.WithScale(notes.NewStandard()))
 	}
+
 	m, err := midisynth.NewMidiSynth(opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	cfg := config.New(configPath, m)
 	if err := cfg.InitMidiSynth(); err != nil {
 		log.Fatal(err)
@@ -37,6 +39,18 @@ func main() {
 
 	if err := cfg.StartUpdateLoop(); err != nil {
 		log.Fatal(err)
+	}
+
+	if midiPort > 0 {
+		opts := []func(*midi.Proc){
+			midi.WithDispatcher(cfg),
+		}
+		if edo19 {
+			opts = append(opts, midi.Edo19())
+		}
+
+		midiProc := midi.NewProc(m, midiPort, opts...)
+		midisynth.WithMidiProc(midiProc)(m)
 	}
 
 	// Experimantal section

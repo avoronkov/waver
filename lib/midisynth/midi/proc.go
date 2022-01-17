@@ -25,12 +25,13 @@ type Proc struct {
 	dumpProcess   *exec.Cmd
 
 	keyMap map[int]OctaveNote
+
+	dispatcher Dispatcher
 }
 
-func NewProc(synth Synth, midiPort int, ch chan<- string, opts ...func(*Proc)) *Proc {
+func NewProc(synth Synth, midiPort int, opts ...func(*Proc)) *Proc {
 	p := &Proc{
 		synth:         synth,
-		ch:            ch,
 		midiPort:      midiPort,
 		notesReleases: make(map[int]func()),
 		keyMap:        KeyMap,
@@ -95,6 +96,12 @@ func (p *Proc) HandleLine(line string) error {
 		if err != nil {
 			log.Printf("p.handleNoteOff failed: %v", err)
 		}
+	case "Control change":
+		log.Printf("Control change")
+		err := p.handleControlChange(fields)
+		if err != nil {
+			log.Printf("p.handleControlChange failed: %v", err)
+		}
 	}
 	return nil
 }
@@ -105,6 +112,7 @@ type Key struct {
 	velocity int
 }
 
+// 24:0   Note on                 0, note 60, velocity 100
 func (p *Proc) handleNoteOn(fields []string) error {
 	key, err := p.parseNote(fields)
 	if err != nil {
@@ -122,6 +130,7 @@ func (p *Proc) handleNoteOn(fields []string) error {
 	return nil
 }
 
+// 24:0   Note off                0, note 62, velocity 64
 func (p *Proc) handleNoteOff(fields []string) error {
 	key, err := p.parseNote(fields)
 	if err != nil {
@@ -130,6 +139,45 @@ func (p *Proc) handleNoteOff(fields []string) error {
 	if stop, ok := p.notesReleases[key.note]; ok && stop != nil {
 		stop()
 		p.notesReleases[key.note] = nil
+	}
+	return nil
+}
+
+// 24:0   Control change          0, controller 51, value 0
+func (p *Proc) handleControlChange(fields []string) error {
+	if p.dispatcher == nil {
+		return nil
+	}
+
+	channel, err := strconv.Atoi(strings.TrimRight(fields[3], ","))
+	if err != nil {
+		return err
+	}
+	var controller, value int
+	if fields[4] == "controller" {
+		controller, err = strconv.Atoi(strings.TrimRight(fields[5], ","))
+		if err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("Cannot find controller section")
+	}
+
+	if fields[6] == "value" {
+		value, err = strconv.Atoi(strings.TrimRight(fields[7], ","))
+		if err != nil {
+			return err
+		}
+		if value != 1 && value != 127 {
+			return fmt.Errorf("Knob %v is not in relative mode: %v", controller, value)
+		}
+	} else {
+		return fmt.Errorf("Cannot find 'value' section")
+	}
+	if value == 1 {
+		p.dispatcher.Up(channel+1, controller)
+	} else if value == 127 {
+		p.dispatcher.Down(channel+1, controller)
 	}
 	return nil
 }
