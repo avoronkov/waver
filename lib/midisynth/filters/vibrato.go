@@ -41,7 +41,7 @@ type vibratoImpl struct {
 }
 
 func (i *vibratoImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
-	shift := i.opts.shifter.Value(t, i.opts.shifterCtx)
+	shift := i.opts.shifter.Value(t, i.opts.shifterCtx) * i.opts.shifterCtx.Amp
 	return i.input.Value(t+shift, ctx)
 }
 

@@ -289,18 +289,22 @@ func (c *Config) handleVibrato(inst int, opts map[string]interface{}) (filters.F
 	log.Printf("> Using Vibrato filter")
 	var o []func(*filters.VibratoFilter)
 	for param, value := range opts {
-		log.Printf(">> with %v = %v", param, value)
 		switch param {
 		case "wave":
 			w, err := c.handleWave(value.(string))
 			if err != nil {
 				return nil, err
 			}
+			log.Printf(">> with %v = %v", param, value)
 			o = append(o, filters.VibratoCarrierWave(w))
 		case "frequency":
-			o = append(o, filters.VibratoFrequency(c.valueFloat64(inst, value)))
+			v := c.valueFloat64(inst, value)
+			log.Printf(">> with %v = %v -> %v", param, value, v)
+			o = append(o, filters.VibratoFrequency(v))
 		case "amplitude":
-			o = append(o, filters.VibratoAmplitude(c.valueFloat64(inst, value)))
+			v := c.valueFloat64(inst, value)
+			log.Printf(">> with %v = %v -> %v", param, value, v)
+			o = append(o, filters.VibratoAmplitude(v))
 		default:
 			return nil, fmt.Errorf("Unknown Vibrato parameter: %v", param)
 		}
@@ -315,7 +319,6 @@ func (c *Config) handleAmplitudeModulation(inst int, opts map[string]interface{}
 	amp := 1.0
 
 	for param, value := range opts {
-		log.Printf(">> with %v = %v", param, value)
 		switch param {
 		case "wave":
 			w, err := c.handleWave(value.(string))
@@ -323,10 +326,13 @@ func (c *Config) handleAmplitudeModulation(inst int, opts map[string]interface{}
 				return nil, err
 			}
 			carrier = w
+			log.Printf(">> with %v = %v", param, value)
 		case "frequency":
 			freq = c.valueFloat64(inst, value)
+			log.Printf(">> with %v = %v -> %v", param, value, freq)
 		case "amplitude":
 			amp = c.valueFloat64(inst, value)
+			log.Printf(">> with %v = %v -> %v", param, value, amp)
 		default:
 			return nil, fmt.Errorf("Unknown AM parameter: %v", param)
 		}

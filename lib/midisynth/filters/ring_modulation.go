@@ -28,5 +28,6 @@ type ringImpl struct {
 }
 
 func (i *ringImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
-	return i.input.Value(t, ctx) * i.opts.Carrier.Value(t, i.opts.CarrierCtx)
+	mp := (2.0 - i.opts.CarrierCtx.Amp + i.opts.CarrierCtx.Amp*i.opts.Carrier.Value(t, i.opts.CarrierCtx)) / 2.0
+	return i.input.Value(t, ctx) * mp
 }
