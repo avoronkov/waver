@@ -30,8 +30,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cfg := &config.Config{}
-	if err := cfg.InitMidiSynth(configPath, m); err != nil {
+	cfg := config.New(configPath, m)
+	if err := cfg.InitMidiSynth(); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := cfg.StartUpdateLoop(); err != nil {
 		log.Fatal(err)
 	}
 

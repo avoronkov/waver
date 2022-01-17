@@ -2,10 +2,14 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
+	"sort"
 	"strconv"
+	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"gitlab.com/avoronkov/waver/lib/midisynth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
@@ -15,28 +19,103 @@ import (
 )
 
 type Config struct {
+	m         *midisynth.MidiSynth
+	filename  string
+	updatedAt time.Time
 }
 
-func (c *Config) InitMidiSynth(filename string, m *midisynth.MidiSynth) error {
-	log.Printf("Synthesizer configuration: %v", filename)
-	f, err := ioutil.ReadFile(filename)
+func New(filename string, m *midisynth.MidiSynth) *Config {
+	return &Config{
+		m:        m,
+		filename: filename,
+	}
+}
+
+func (c *Config) InitMidiSynth() error {
+	log.Printf("Synthesizer configuration: %v", c.filename)
+	f, err := os.Open(c.filename)
+	// f, err := ioutil.ReadFile(c.filename)
 	if err != nil {
-		return fmt.Errorf("Error reading config file '%v': %w", filename, err)
+		return fmt.Errorf("Error reading config file '%v': %w", c.filename, err)
 	}
+	defer f.Close()
+	fi, err := f.Stat()
+	if err != nil {
+		return fmt.Errorf("Cannot detect file modification time: %v", err)
+	}
+	modTime := fi.ModTime()
+	if !modTime.After(c.updatedAt) {
+		log.Printf("No need to update (%v <= %v)", modTime, c.updatedAt)
+		return nil
+	}
+	c.updatedAt = modTime
 	var data Data
-	if err := yaml.Unmarshal(f, &data); err != nil {
-		return fmt.Errorf("Error parsing data: %w\n%s", err, f)
+	if err := yaml.NewDecoder(f).Decode(&data); err != nil {
+		return fmt.Errorf("Error parsing data: %w", err)
 	}
-	log.Printf("Loading configuration from %v", filename)
-	if err := c.handleData(&data, m); err != nil {
+	log.Printf("Loading configuration from %v", c.filename)
+	if err := c.handleData(&data, c.m); err != nil {
 		return err
 	}
 	return nil
 }
 
+func (c *Config) StartUpdateLoop() error {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return err
+	}
+	absPath, err := filepath.Abs(c.filename)
+	if err != nil {
+		return fmt.Errorf("Cannot detect abs path of %v: %v", c.filename, err)
+	}
+	dir := filepath.Dir(absPath)
+	log.Printf("Starting watching file changes: %v (%v)", absPath, dir)
+	if err := watcher.Add(dir); err != nil {
+		return err
+	}
+	go func() {
+	L:
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				log.Printf("File event: %v (%v)", event, event.Name)
+				if !ok {
+					break L
+				}
+				if event.Name != absPath {
+					break
+				}
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					log.Printf("Updating Midisynth...")
+					if err := c.InitMidiSynth(); err != nil {
+						log.Printf("Failed to update MidiSynth: %v", err)
+					}
+					log.Printf("Updating Midisynth... DONE.")
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					break L
+				}
+				log.Printf("Watcher error: %v", err)
+
+			}
+		}
+		log.Printf("Config watcher is stopped.")
+	}()
+
+	return nil
+}
+
 func (c *Config) handleData(data *Data, m *midisynth.MidiSynth) error {
-	log.Printf("Data: %+v", data)
-	for inst, instData := range data.Instruments {
+	var indexes []string
+	for i := range data.Instruments {
+		indexes = append(indexes, i)
+	}
+	sort.Strings(indexes)
+	// for inst, instData := range data.Instruments {
+	for _, inst := range indexes {
+		instData := data.Instruments[inst]
 		instIdx, err := strconv.Atoi(inst)
 		if err != nil {
 			return fmt.Errorf("Instrument index is not an integer: %v", inst)
