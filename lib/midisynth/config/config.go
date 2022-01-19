@@ -26,6 +26,8 @@ type Config struct {
 	data *Data
 	// channel -> knob -> value
 	knobs map[int]map[int]int
+
+	showInst int
 }
 
 func New(filename string, m *midisynth.MidiSynth) *Config {
@@ -34,6 +36,7 @@ func New(filename string, m *midisynth.MidiSynth) *Config {
 		filename: filename,
 		data:     new(Data),
 		knobs:    make(map[int]map[int]int),
+		showInst: -1, // all
 	}
 }
 
@@ -123,7 +126,7 @@ func (c *Config) handleData(data *Data, m *midisynth.MidiSynth) error {
 		if err != nil {
 			return fmt.Errorf("Instrument index is not an integer: %v", inst)
 		}
-		log.Printf("Loading instrument %v...", instIdx)
+		c.log(instIdx, "Loading instrument %v...", instIdx)
 		instr, err := c.handleInstrument(instIdx, &instData)
 		if err != nil {
 			return err
@@ -132,7 +135,7 @@ func (c *Config) handleData(data *Data, m *midisynth.MidiSynth) error {
 	}
 
 	for name, sampleData := range data.Samples {
-		log.Printf("Loading sampled instrument %v...", name)
+		c.log(-1, "Loading sampled instrument %v...", name)
 		instr, err := c.handleSampleData(&sampleData)
 		if err != nil {
 			return fmt.Errorf("Failed to handle instrument %v: %v", name, err)
@@ -143,7 +146,7 @@ func (c *Config) handleData(data *Data, m *midisynth.MidiSynth) error {
 }
 
 func (c *Config) handleInstrument(inst int, in *Instrument) (*instruments.Instrument, error) {
-	wave, err := c.handleWave(in.Wave)
+	wave, err := c.handleWave(inst, in.Wave)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to handle wave: %w", err)
 	}
@@ -174,26 +177,26 @@ func (c *Config) handleSampleData(s *SampleData) (*instruments.Instrument, error
 	return instruments.NewInstrument(sample, fs...), nil
 }
 
-func (c *Config) handleWave(wave string) (waves.Wave, error) {
+func (c *Config) handleWave(inst int, wave string) (waves.Wave, error) {
 	switch wave {
 	case "sine":
-		log.Printf("> Using Sine wave.")
+		c.log(inst, "> Using Sine wave.")
 		return &waves.Sine{}, nil
 	case "square":
-		log.Printf("> Using Square wave.")
+		c.log(inst, "> Using Square wave.")
 		return &waves.Square{}, nil
 	case "triangle":
-		log.Printf("> Using Triangle wave.")
+		c.log(inst, "> Using Triangle wave.")
 		return &waves.Triangle{}, nil
 	case "saw":
-		log.Printf("> Using Sawtooth wave.")
+		c.log(inst, "> Using Sawtooth wave.")
 		return &waves.Saw{}, nil
 	}
 	return nil, fmt.Errorf("Unknown wave: %v", wave)
 }
 
 func (c *Config) handleSample(sample string) (waves.Wave, error) {
-	log.Printf("> Using sample '%v'", sample)
+	c.log(-1, "> Using sample '%v'", sample)
 	return waves.ReadSample(sample)
 }
 
@@ -215,6 +218,8 @@ func (c *Config) handleFilter(instr int, f Filter) (filters.Filter, error) {
 			return c.handleAmplitudeModulation(instr, opts)
 		case "timeshift":
 			return c.handleTimeShift(instr, opts)
+		case "harmonizer":
+			return c.handleHarmonizer(instr, opts)
 		}
 		return nil, fmt.Errorf("Unknown filter: %v", name)
 	}
@@ -222,10 +227,10 @@ func (c *Config) handleFilter(instr int, f Filter) (filters.Filter, error) {
 }
 
 func (c *Config) handleAdsr(instr int, opts map[string]interface{}) (filters.Filter, error) {
-	log.Printf("> Using ADSR filter...")
+	c.log(instr, "> Using ADSR filter...")
 	var o []func(*filters.AdsrFilter)
 	for param, value := range opts {
-		log.Printf(">> with %v = %v", param, value)
+		c.log(instr, ">> with %v = %v", param, value)
 		switch param {
 		case "attackLevel":
 			o = append(o, filters.AdsrAttackLevel(c.valueFloat64(instr, value)))
@@ -247,21 +252,21 @@ func (c *Config) handleAdsr(instr int, opts map[string]interface{}) (filters.Fil
 }
 
 func (c *Config) handleDelay(inst int, opts map[string]interface{}) (filters.Filter, error) {
-	log.Printf("> Using Delay filter")
+	c.log(inst, "> Using Delay filter")
 	var o []func(*filters.DelayFilter)
 	for param, value := range opts {
 		switch param {
 		case "interval":
 			v := c.valueFloat64(inst, value)
-			log.Printf(">> with %v = %v -> %v", param, value, v)
+			c.log(inst, ">> with %v = %v -> %v", param, value, v)
 			o = append(o, filters.DelayInterval(v))
 		case "times":
 			v := value.(int)
-			log.Printf(">> with %v = %v", param, v)
+			c.log(inst, ">> with %v = %v", param, v)
 			o = append(o, filters.DelayTimes(v))
 		case "fade":
 			v := c.valueFloat64(inst, value)
-			log.Printf(">> with %v = %v -> %v", param, value, v)
+			c.log(inst, ">> with %v = %v -> %v", param, value, v)
 			o = append(o, filters.DelayFadeOut(v))
 		default:
 			return nil, fmt.Errorf("Unknown Delay parameter: %v", param)
@@ -271,13 +276,13 @@ func (c *Config) handleDelay(inst int, opts map[string]interface{}) (filters.Fil
 }
 
 func (c *Config) handleDistortion(inst int, opts map[string]interface{}) (filters.Filter, error) {
-	log.Printf("> Using Distortion filter")
+	c.log(inst, "> Using Distortion filter")
 	value := 1.0
 	for param, v := range opts {
 		switch param {
 		case "value":
 			value = c.valueFloat64(inst, v)
-			log.Printf(">> with %v = %v -> %v", param, v, value)
+			c.log(inst, ">> with %v = %v -> %v", param, v, value)
 		default:
 			return nil, fmt.Errorf("Unknown Distortion parameter: %v", param)
 		}
@@ -286,24 +291,24 @@ func (c *Config) handleDistortion(inst int, opts map[string]interface{}) (filter
 }
 
 func (c *Config) handleVibrato(inst int, opts map[string]interface{}) (filters.Filter, error) {
-	log.Printf("> Using Vibrato filter")
+	c.log(inst, "> Using Vibrato filter")
 	var o []func(*filters.VibratoFilter)
 	for param, value := range opts {
 		switch param {
 		case "wave":
-			w, err := c.handleWave(value.(string))
+			w, err := c.handleWave(inst, value.(string))
 			if err != nil {
 				return nil, err
 			}
-			log.Printf(">> with %v = %v", param, value)
+			c.log(inst, ">> with %v = %v", param, value)
 			o = append(o, filters.VibratoCarrierWave(w))
 		case "frequency":
 			v := c.valueFloat64(inst, value)
-			log.Printf(">> with %v = %v -> %v", param, value, v)
+			c.log(inst, ">> with %v = %v -> %v", param, value, v)
 			o = append(o, filters.VibratoFrequency(v))
 		case "amplitude":
 			v := c.valueFloat64(inst, value)
-			log.Printf(">> with %v = %v -> %v", param, value, v)
+			c.log(inst, ">> with %v = %v -> %v", param, value, v)
 			o = append(o, filters.VibratoAmplitude(v))
 		default:
 			return nil, fmt.Errorf("Unknown Vibrato parameter: %v", param)
@@ -313,7 +318,7 @@ func (c *Config) handleVibrato(inst int, opts map[string]interface{}) (filters.F
 }
 
 func (c *Config) handleAmplitudeModulation(inst int, opts map[string]interface{}) (filters.Filter, error) {
-	log.Printf("> Using AM (amplitude modulation) filter")
+	c.log(inst, "> Using AM (amplitude modulation) filter")
 	var carrier waves.Wave = &waves.Sine{}
 	var freq float64
 	amp := 1.0
@@ -321,18 +326,18 @@ func (c *Config) handleAmplitudeModulation(inst int, opts map[string]interface{}
 	for param, value := range opts {
 		switch param {
 		case "wave":
-			w, err := c.handleWave(value.(string))
+			w, err := c.handleWave(inst, value.(string))
 			if err != nil {
 				return nil, err
 			}
 			carrier = w
-			log.Printf(">> with %v = %v", param, value)
+			c.log(inst, ">> with %v = %v", param, value)
 		case "frequency":
 			freq = c.valueFloat64(inst, value)
-			log.Printf(">> with %v = %v -> %v", param, value, freq)
+			c.log(inst, ">> with %v = %v -> %v", param, value, freq)
 		case "amplitude":
 			amp = c.valueFloat64(inst, value)
-			log.Printf(">> with %v = %v -> %v", param, value, amp)
+			c.log(inst, ">> with %v = %v -> %v", param, value, amp)
 		default:
 			return nil, fmt.Errorf("Unknown AM parameter: %v", param)
 		}
@@ -343,13 +348,13 @@ func (c *Config) handleAmplitudeModulation(inst int, opts map[string]interface{}
 }
 
 func (c *Config) handleTimeShift(inst int, opts map[string]interface{}) (filters.Filter, error) {
-	log.Printf("> Using Time Shift filter")
+	c.log(inst, "> Using Time Shift filter")
 	var o []func(*filters.TimeShift)
 	for param, value := range opts {
-		log.Printf(">> with %v = %v", param, value)
+		c.log(inst, ">> with %v = %v", param, value)
 		switch param {
 		case "wave":
-			w, err := c.handleWave(value.(string))
+			w, err := c.handleWave(inst, value.(string))
 			if err != nil {
 				return nil, err
 			}
@@ -363,6 +368,33 @@ func (c *Config) handleTimeShift(inst int, opts map[string]interface{}) (filters
 		}
 	}
 	return filters.NewTimeShift(o...), nil
+}
+
+func (c *Config) handleHarmonizer(inst int, opts map[string]interface{}) (filters.Filter, error) {
+	c.log(inst, "> Using Harmonizer filter")
+	keys := make([]string, 0, len(opts))
+	for param := range opts {
+		keys = append(keys, param)
+	}
+	sort.Strings(keys)
+	var o []func(*filters.Harmonizer)
+	for _, param := range keys {
+		n, err := strconv.Atoi(param)
+		if err != nil {
+			return nil, fmt.Errorf("Incorrect Harmonizer param: %v", param)
+		}
+		value := opts[param]
+		v := c.valueFloat64(inst, value)
+		c.log(inst, "  >> with %v = %v (%v)", n, v, value)
+		o = append(o, filters.Harmonic(n, v))
+	}
+	return filters.NewHarmonizer(o...), nil
+}
+
+func (c *Config) log(inst int, format string, args ...interface{}) {
+	if c.showInst < 0 || c.showInst == inst {
+		log.Printf(format, args...)
+	}
 }
 
 func (c *Config) valueFloat64(instr int, x interface{}) float64 {
@@ -417,9 +449,11 @@ func (c *Config) Up(inst, knob int) {
 	ik[knob] += 1
 	c.knobs[inst] = ik
 	log.Printf("Up: knobs = %+v", c.knobs)
+	c.showInst = inst
 	if err := c.handleData(c.data, c.m); err != nil {
 		log.Printf("Cannot update configuration: %v", err)
 	}
+	c.showInst = -1
 }
 
 func (c *Config) Down(inst, knob int) {
@@ -433,7 +467,9 @@ func (c *Config) Down(inst, knob int) {
 	ik[knob] -= 1
 	c.knobs[inst] = ik
 	log.Printf("Down: knobs = %+v", c.knobs)
+	c.showInst = inst
 	if err := c.handleData(c.data, c.m); err != nil {
 		log.Printf("Cannot update configuration: %v", err)
 	}
+	c.showInst = -1
 }

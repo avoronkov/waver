@@ -15,12 +15,13 @@ func main() {
 	// Instrument
 	in := instruments.NewInstrument(
 		&waves.SineSine{},
+		filters.NewHarmonizer(),
 		filters.NewAdsrFilter(),
 	)
 	// .
 
 	play := player.New(wav.Default)
-	hz := 440.0
+	hz := 55.0
 	amp := 1.0
 	dur := 0.1
 	reader, _ := play.PlayContext2(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
