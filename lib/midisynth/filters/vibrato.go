@@ -16,7 +16,7 @@ type VibratoFilter struct {
 
 func NewVibrato(opts ...func(*VibratoFilter)) Filter {
 	f := &VibratoFilter{
-		shifter: &waves.Sine{},
+		shifter: waves.Sine,
 	}
 
 	for _, o := range opts {

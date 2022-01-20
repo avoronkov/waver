@@ -13,3 +13,9 @@ type WaveControlled interface {
 	Wave
 	Release()
 }
+
+type WaveFn func(t float64, ctx *NoteCtx) float64
+
+func (f WaveFn) Value(t float64, ctx *NoteCtx) float64 {
+	return f(t, ctx)
+}

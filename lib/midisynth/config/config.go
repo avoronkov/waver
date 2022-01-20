@@ -181,16 +181,19 @@ func (c *Config) handleWave(inst int, wave string) (waves.Wave, error) {
 	switch wave {
 	case "sine":
 		c.log(inst, "> Using Sine wave.")
-		return &waves.Sine{}, nil
+		return waves.Sine, nil
 	case "square":
 		c.log(inst, "> Using Square wave.")
-		return &waves.Square{}, nil
+		return waves.Square, nil
 	case "triangle":
 		c.log(inst, "> Using Triangle wave.")
-		return &waves.Triangle{}, nil
+		return waves.Triangle, nil
 	case "saw":
 		c.log(inst, "> Using Sawtooth wave.")
-		return &waves.Saw{}, nil
+		return waves.Saw, nil
+	case "semisine":
+		c.log(inst, "> Using Semisine wave.")
+		return waves.SemiSine, nil
 	}
 	return nil, fmt.Errorf("Unknown wave: %v", wave)
 }
@@ -220,6 +223,8 @@ func (c *Config) handleFilter(instr int, f Filter) (filters.Filter, error) {
 			return c.handleTimeShift(instr, opts)
 		case "harmonizer":
 			return c.handleHarmonizer(instr, opts)
+		case "flanger":
+			return c.handleFlanger(instr, opts)
 		}
 		return nil, fmt.Errorf("Unknown filter: %v", name)
 	}
@@ -319,7 +324,7 @@ func (c *Config) handleVibrato(inst int, opts map[string]interface{}) (filters.F
 
 func (c *Config) handleAmplitudeModulation(inst int, opts map[string]interface{}) (filters.Filter, error) {
 	c.log(inst, "> Using AM (amplitude modulation) filter")
-	var carrier waves.Wave = &waves.Sine{}
+	var carrier waves.Wave = waves.Sine
 	var freq float64
 	amp := 1.0
 
@@ -389,6 +394,23 @@ func (c *Config) handleHarmonizer(inst int, opts map[string]interface{}) (filter
 		o = append(o, filters.Harmonic(n, v))
 	}
 	return filters.NewHarmonizer(o...), nil
+}
+
+func (c *Config) handleFlanger(inst int, opts map[string]interface{}) (filters.Filter, error) {
+	c.log(inst, "> Using Flanger filter")
+	var o []func(*filters.Flanger)
+	for param, value := range opts {
+		switch param {
+		case "frequency":
+			v := c.valueFloat64(inst, value)
+			c.log(inst, "  >> with %v = %v", param, v)
+			o = append(o, filters.FlangerFreq(v))
+		default:
+			return nil, fmt.Errorf("Unknown Flanger parameter: %v", param)
+		}
+	}
+
+	return filters.NewFlanger(o...), nil
 }
 
 func (c *Config) log(inst int, format string, args ...interface{}) {

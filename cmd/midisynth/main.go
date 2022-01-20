@@ -55,7 +55,7 @@ func main() {
 
 	// Experimantal section
 	in := instruments.NewInstrument(
-		&waves.SineSine{},
+		waves.SineSine,
 		filters.NewAdsrFilter(),
 	)
 

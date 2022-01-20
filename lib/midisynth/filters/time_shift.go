@@ -16,7 +16,7 @@ type TimeShift struct {
 
 func NewTimeShift(opts ...func(*TimeShift)) Filter {
 	f := &TimeShift{
-		shifter: &waves.Sine{},
+		shifter: waves.Sine,
 	}
 
 	for _, o := range opts {
