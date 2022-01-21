@@ -14,7 +14,7 @@ import (
 func main() {
 	// Instrument
 	in := instruments.NewInstrument(
-		&waves.SineSine{},
+		waves.SineSine,
 		filters.NewHarmonizer(),
 		filters.NewAdsrFilter(),
 	)

@@ -44,9 +44,9 @@ type flangerImpl struct {
 func (i *flangerImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
 	v := i.wave.Value(t, ctx)
 	shift := i.opts.shifter.Value(t, i.opts.shifterCtx) * i.opts.maxShift
-	t1 := t + 0.5*shift - 0.5*i.opts.maxShift
+	t1 := t - 0.5*shift + 0.5*i.opts.maxShift
 	v1 := i.wave.Value(t1, ctx)
-	return 0.75*v + 0.25*v1
+	return 0.5*v + 0.5*v1
 }
 
 // Options

@@ -1,14 +1,17 @@
 package filters
 
-import "gitlab.com/avoronkov/waver/lib/midisynth/waves"
+import (
+	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+)
 
 type Harmonizer struct {
-	harmonics map[int]float64
+	harmonics []float64
 }
 
 func NewHarmonizer(opts ...func(*Harmonizer)) Filter {
 	h := &Harmonizer{
-		harmonics: map[int]float64{
+		harmonics: []float64{
+			0: 0.0,
 			1: 1.0,
 			2: 0.5,
 			3: 0.25,
@@ -36,12 +39,10 @@ type harmonizerImpl struct {
 
 func (i *harmonizerImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
 	total := 0.0
-	for _, s := range i.opts.harmonics {
-		total += s
-	}
 	v := 0.0
-	for n, s := range i.opts.harmonics {
-		v += s * i.wave.Value(t, waves.NewNoteCtx(ctx.Freq*float64(n), ctx.Amp, ctx.Dur))
+	for n, s := range i.opts.harmonics[1:] {
+		v += s * i.wave.Value(float64(n)*t, ctx)
+		total += s
 	}
 	return v / total
 }
