@@ -37,19 +37,26 @@ type delayImpl struct {
 }
 
 var _ waves.Wave = (*delayImpl)(nil)
-var _ waves.WithDuration = (*delayImpl)(nil)
 
-func (d *delayImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
+// var _ waves.WithDuration = (*delayImpl)(nil)
+
+func (d *delayImpl) Value(tm float64, ctx *waves.NoteCtx) (res float64) {
 	value := d.wave.Value(tm, ctx)
-	if math.IsNaN(value) && tm < float64(d.opts.Times)*d.opts.Interval {
+	has := false
+	if math.IsNaN(value) {
 		value = 0
+		if tm < float64(d.opts.Times+1)*d.opts.Interval {
+			has = true
+		}
+	} else {
+		has = true
 	}
 
 	multiplier := 1.0
 	t := tm
-	for i := 0; i < d.opts.Times; i++ {
-		multiplier *= d.opts.FadeOut
+	for i := 1; i <= d.opts.Times; i++ {
 		t -= d.opts.Interval
+		multiplier *= d.opts.FadeOut
 		if t < 0.0 {
 			break
 		}
@@ -58,11 +65,17 @@ func (d *delayImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 			continue
 		}
 		value += v * multiplier
+		has = true
+	}
+
+	if !has {
+		return math.NaN()
 	}
 
 	return value
 }
 
+/*
 func (d *delayImpl) Duration(ctx *waves.NoteCtx) float64 {
 	// TODO better error handling
 	origDuration := 0.0
@@ -73,6 +86,7 @@ func (d *delayImpl) Duration(ctx *waves.NoteCtx) float64 {
 	}
 	return float64(d.opts.Times)*d.opts.Interval + origDuration
 }
+*/
 
 // Options
 

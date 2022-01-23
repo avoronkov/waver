@@ -12,18 +12,27 @@ import (
 )
 
 func main() {
+	snare, err := waves.ReadSample("../../samples/4-snare.wav")
+	if err != nil {
+		panic(err)
+	}
+
 	// Instrument
 	in := instruments.NewInstrument(
-		waves.SineSine,
-		filters.NewHarmonizer(),
-		filters.NewAdsrFilter(),
+		snare,
+		// filters.NewAdsrFilter(),
+		filters.NewDelayFilter(
+			filters.DelayInterval(0.125),
+			filters.DelayFadeOut(0.5),
+			filters.DelayTimes(2),
+		),
 	)
 	// .
 
 	play := player.New(wav.Default)
 	hz := 55.0
 	amp := 1.0
-	dur := 0.1
+	dur := 1.0
 	reader, _ := play.PlayContext2(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
 
 	data, err := io.ReadAll(reader)

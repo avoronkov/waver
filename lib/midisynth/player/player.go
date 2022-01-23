@@ -44,12 +44,14 @@ func (p *Player) PlayContext(wave waves.Wave, ctx *waves.NoteCtx) (io.Reader, fl
 }
 
 func (p *Player) PlayContext2(wave waves.Wave, ctx *waves.NoteCtx) (io.Reader, <-chan struct{}) {
-	dur := 0.0
-	if wd, ok := wave.(waves.WithDuration); ok {
-		dur = wd.Duration(ctx)
-	} else {
-		dur = ctx.Dur
-	}
+	/*
+		dur := 0.0
+		if wd, ok := wave.(waves.WithDuration); ok {
+			dur = wd.Duration(ctx)
+		} else {
+			dur = ctx.Dur
+		}
+	*/
 	done := make(chan struct{})
 	return &playerImpl{
 		settings: p.settings,
@@ -57,7 +59,7 @@ func (p *Player) PlayContext2(wave waves.Wave, ctx *waves.NoteCtx) (io.Reader, <
 		ctx:      ctx,
 		tm:       0.0,
 		dt:       p.dt,
-		dur:      dur,
+		dur:      math.Inf(1),
 		done:     done,
 	}, done
 }

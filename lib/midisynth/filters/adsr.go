@@ -1,6 +1,10 @@
 package filters
 
-import "gitlab.com/avoronkov/waver/lib/midisynth/waves"
+import (
+	"math"
+
+	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+)
 
 type AdsrFilter struct {
 	AttackLevel float64
@@ -47,7 +51,7 @@ func (i *adsrImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 	dur := ctx.Dur
 	o := i.opts
 
-	if attackLen := o.AttackLen * dur; tm < attackLen {
+	if attackLen := o.AttackLen * dur; tm >= 0 && tm < attackLen {
 		// attack
 		amp = tm * i.opts.AttackLevel / attackLen
 	} else if tm < (o.AttackLen+o.DecayLen)*dur {
@@ -60,6 +64,8 @@ func (i *adsrImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 		// release
 		j := tm - (o.AttackLen-o.DecayLen-o.SusteinLen)*dur
 		amp = o.DecayLevel - o.DecayLevel*j/(o.ReleaseLen*dur)
+	} else {
+		return math.NaN()
 	}
 
 	return i.wave.Value(tm, ctx) * amp * ctx.Amp

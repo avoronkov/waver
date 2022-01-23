@@ -22,6 +22,10 @@ var _ Interface = (*Instrument)(nil)
 var defaultAdsr = filters.NewAdsrFilter()
 var defaultManual = filters.NewManualControlFilter(0.125)
 
+type TimeLimitedWave interface {
+	TimeLimited()
+}
+
 func NewInstrument(wave waves.Wave, fx ...filters.Filter) *Instrument {
 	in := &Instrument{
 		initialWave:   wave,
@@ -30,9 +34,10 @@ func NewInstrument(wave waves.Wave, fx ...filters.Filter) *Instrument {
 	}
 
 	/// TODO fix manual / auto filters problem
+	_, timeLimited := wave.(TimeLimitedWave)
 
-	adsrApplied := false
-	manualApplied := false
+	adsrApplied := timeLimited
+	manualApplied := timeLimited
 	waitManual := false
 	waitAdsr := false
 

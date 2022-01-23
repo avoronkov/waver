@@ -74,3 +74,5 @@ func (s *Sample) Value(t float64, ctx *NoteCtx) float64 {
 	res := float64(s.data[n]) / maxInt16Value
 	return res
 }
+
+func (s *Sample) TimeLimited() {}
