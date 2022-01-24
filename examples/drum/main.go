@@ -27,7 +27,7 @@ func main() {
 
 	ctx := waves.NewNoteCtx(0.0, 0.0, math.Inf(1))
 
-	reader, done := p.PlayContext2(sample, ctx)
+	reader, done := p.PlayContext(sample, ctx)
 	check(err)
 
 	c, ready, err := oto.NewContext(wav.Default.SampleRate, wav.Default.ChannelNum, wav.Default.BitDepthInBytes)

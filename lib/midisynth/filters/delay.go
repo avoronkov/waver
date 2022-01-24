@@ -75,19 +75,6 @@ func (d *delayImpl) Value(tm float64, ctx *waves.NoteCtx) (res float64) {
 	return value
 }
 
-/*
-func (d *delayImpl) Duration(ctx *waves.NoteCtx) float64 {
-	// TODO better error handling
-	origDuration := 0.0
-	if withDur, ok := d.wave.(waves.WithDuration); ok {
-		origDuration = withDur.Duration(ctx)
-	} else {
-		origDuration = ctx.Dur
-	}
-	return float64(d.opts.Times)*d.opts.Interval + origDuration
-}
-*/
-
 // Options
 
 func DelayInterval(d float64) func(*DelayFilter) {

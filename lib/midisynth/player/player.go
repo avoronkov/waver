@@ -25,33 +25,7 @@ func New(settings *wav.Settings) *Player {
 
 const maxInt16Amp = (1 << 15) - 1
 
-func (p *Player) PlayContext(wave waves.Wave, ctx *waves.NoteCtx) (io.Reader, float64) {
-	dur := 0.0
-	if wd, ok := wave.(waves.WithDuration); ok {
-		dur = wd.Duration(ctx)
-	} else {
-		dur = ctx.Dur
-	}
-	b := &bytes.Buffer{}
-	dt := 1.0 / float64(p.settings.SampleRate)
-	for t := 0.0; t < dur; t += dt {
-		value := int16(maxInt16Amp * wave.Value(t, ctx))
-		for ch := 0; ch < p.settings.ChannelNum; ch++ {
-			binary.Write(b, binary.LittleEndian, value)
-		}
-	}
-	return b, dur
-}
-
-func (p *Player) PlayContext2(wave waves.Wave, ctx *waves.NoteCtx) (io.Reader, <-chan struct{}) {
-	/*
-		dur := 0.0
-		if wd, ok := wave.(waves.WithDuration); ok {
-			dur = wd.Duration(ctx)
-		} else {
-			dur = ctx.Dur
-		}
-	*/
+func (p *Player) PlayContext(wave waves.Wave, ctx *waves.NoteCtx) (io.Reader, <-chan struct{}) {
 	done := make(chan struct{})
 	return &playerImpl{
 		settings: p.settings,
@@ -59,7 +33,6 @@ func (p *Player) PlayContext2(wave waves.Wave, ctx *waves.NoteCtx) (io.Reader, <
 		ctx:      ctx,
 		tm:       0.0,
 		dt:       p.dt,
-		dur:      math.Inf(1),
 		done:     done,
 	}, done
 }
@@ -70,7 +43,6 @@ type playerImpl struct {
 	ctx      *waves.NoteCtx
 	tm       float64
 	dt       float64
-	dur      float64
 	done     chan struct{}
 	closed   bool
 	eof      bool
@@ -79,7 +51,7 @@ type playerImpl struct {
 var _ io.Reader = (*playerImpl)(nil)
 
 func (pi *playerImpl) Read(data []byte) (n int, err error) {
-	if pi.eof || pi.tm >= pi.dur {
+	if pi.eof {
 		if !pi.closed {
 			close(pi.done)
 			pi.closed = true
@@ -92,7 +64,7 @@ func (pi *playerImpl) Read(data []byte) (n int, err error) {
 		l = len(data)
 	}
 	buff := new(bytes.Buffer)
-	for buff.Len() < l && pi.tm < pi.dur {
+	for buff.Len() < l {
 		waveValue := pi.wave.Value(pi.tm, pi.ctx)
 		if math.IsNaN(waveValue) {
 			pi.eof = true
@@ -104,7 +76,7 @@ func (pi *playerImpl) Read(data []byte) (n int, err error) {
 		}
 		pi.tm += pi.dt
 	}
-	if (pi.eof || pi.tm >= pi.dur) && !pi.closed {
+	if (pi.eof) && !pi.closed {
 		close(pi.done)
 		pi.closed = true
 	}

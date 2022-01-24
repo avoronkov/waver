@@ -24,7 +24,7 @@ func BenchmarkHarmonizerFlanger(b *testing.B) {
 	amp := 1.0
 	dur := 0.1
 	for i := 0; i < b.N; i++ {
-		reader, _ := play.PlayContext2(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
+		reader, _ := play.PlayContext(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
 
 		_, err := io.ReadAll(reader)
 		if err != nil {
@@ -45,7 +45,7 @@ func BenchmarkFlanger(b *testing.B) {
 	amp := 1.0
 	dur := 0.1
 	for i := 0; i < b.N; i++ {
-		reader, _ := play.PlayContext2(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
+		reader, _ := play.PlayContext(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
 
 		_, err := io.ReadAll(reader)
 		if err != nil {

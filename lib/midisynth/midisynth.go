@@ -212,7 +212,7 @@ func (m *MidiSynth) PlaySample(name string, duration float64, amp float64) error
 	if !ok {
 		return fmt.Errorf("Unknown sample: %q", name)
 	}
-	data, done := m.play.PlayContext2(in.Wave(), waves.NewNoteCtx(0, amp, duration))
+	data, done := m.play.PlayContext(in.Wave(), waves.NewNoteCtx(0, amp, duration))
 
 	p := m.context.NewPlayer(data)
 	p.Play()
@@ -243,7 +243,7 @@ func (m *MidiSynth) playNote(inst int, hz float64, dur float64, amp float64) {
 		return
 	}
 
-	data, done := m.play.PlayContext2(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
+	data, done := m.play.PlayContext(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
 
 	p := m.context.NewPlayer(data)
 	p.Play()
@@ -261,7 +261,7 @@ func (m *MidiSynth) playNoteControlled(inst int, hz float64, amp float64) (stop 
 	}
 
 	wave := in.WaveControlled()
-	data, done := m.play.PlayContext2(wave, waves.NewNoteCtx(hz, amp, math.Inf(+1)))
+	data, done := m.play.PlayContext(wave, waves.NewNoteCtx(hz, amp, math.Inf(+1)))
 
 	go func() {
 		p := m.context.NewPlayer(data)

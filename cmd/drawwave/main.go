@@ -33,7 +33,7 @@ func main() {
 	hz := 55.0
 	amp := 1.0
 	dur := 1.0
-	reader, _ := play.PlayContext2(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
+	reader, _ := play.PlayContext(in.Wave(), waves.NewNoteCtx(hz, amp, dur))
 
 	data, err := io.ReadAll(reader)
 	if err != nil {
