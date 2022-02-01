@@ -1,6 +1,6 @@
 .PHONY: all run clean midisynth
 
-all: run
+all: midisynth
 
 run: midisynth
 	./midisynth

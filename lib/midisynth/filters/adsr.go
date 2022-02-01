@@ -51,19 +51,20 @@ func (i *adsrImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 	dur := ctx.Dur
 	o := i.opts
 
-	if attackLen := o.AttackLen * dur; tm >= 0 && tm < attackLen {
+	adsrLen := o.AttackLen + o.DecayLen + o.SusteinLen + o.ReleaseLen
+
+	if attackLen := o.AttackLen * dur / adsrLen; tm >= 0 && tm < attackLen {
 		// attack
 		amp = tm * i.opts.AttackLevel / attackLen
-	} else if tm < (o.AttackLen+o.DecayLen)*dur {
+	} else if tm < (o.AttackLen+o.DecayLen)*dur/adsrLen {
 		// decay
-		amp = o.AttackLevel - (o.AttackLevel-o.DecayLevel)*(tm-(o.AttackLen*dur))/(o.DecayLen*dur)
-	} else if tm < (o.AttackLen+o.DecayLen+o.SusteinLen)*dur {
+		amp = o.AttackLevel - (o.AttackLevel-o.DecayLevel)*(tm-(o.AttackLen*dur)/adsrLen)/(o.DecayLen*dur/adsrLen)
+	} else if tm < (o.AttackLen+o.DecayLen+o.SusteinLen)*dur/adsrLen {
 		// sustein
 		amp = o.DecayLevel
-	} else if tm < (o.AttackLen+o.DecayLen+o.SusteinLen+o.ReleaseLen)*dur {
+	} else if tm < dur {
 		// release
-		j := tm - (o.AttackLen-o.DecayLen-o.SusteinLen)*dur
-		amp = o.DecayLevel - o.DecayLevel*j/(o.ReleaseLen*dur)
+		amp = (dur - tm) * o.DecayLevel * adsrLen / (dur * o.ReleaseLen)
 	} else {
 		return math.NaN()
 	}

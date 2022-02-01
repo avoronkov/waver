@@ -1,0 +1,42 @@
+instruments:
+  1:
+    wave: sine
+    filters:
+      - adsr:
+          attackLevel: 1.0
+          decayLevel: 1.0
+          susteinLen: 1.0
+          releaseLen: 0.5
+  2:
+    wave: triangle
+    filters:
+      - adsr:
+          attackLevel: 1.0
+          decayLevel: 1.0
+          susteinLen: 1.0
+          releaseLen: 0.5
+  3:
+    wave: square
+    filters:
+      - adsr:
+          attackLevel: 0.15
+          decayLevel: 0.15
+          susteinLen: 1.0
+          releaseLen: 0.5
+  4:
+    wave: saw
+    filters:
+      - adsr:
+          attackLevel: 0.20
+          decayLevel: 0.20
+          susteinLen: 1.0
+          releaseLen: 0.5
+  5:
+    wave: semisine
+    filters:
+      - adsr:
+          attackLevel: 0.4
+          decayLevel: 0.4
+          susteinLen: 1.0
+          releaseLen: 0.5
+

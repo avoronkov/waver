@@ -5,7 +5,8 @@ import (
 	"log"
 	"math"
 	"os"
-	"waver/wav"
+
+	"gitlab.com/avoronkov/waver/wav"
 )
 
 func Sample() {
@@ -13,13 +14,13 @@ func Sample() {
 	_ = w
 
 	samplesPerSecond := 44100
-	samples := samplesPerSecond * 4
+	samples := 2 * samplesPerSecond
 
 	hz := 440.0
 
 	var waveDuration float64 = float64(samplesPerSecond) / hz
 
-	amp := 32000.0
+	amp := float64(1<<15 - 1)
 	for i := 0; i < samples; i++ {
 		x := 2.0 * math.Pi * float64(i) / waveDuration
 		l := amp * math.Sin(x)
@@ -30,10 +31,19 @@ func Sample() {
 	}
 	for i := 0; i < samples; i++ {
 		x := 2.0 * math.Pi * float64(i) / waveDuration
-		l := amp * math.Cos(x)
+		l := amp * math.Sin(x)
 		w.Data.AddSample(int16(l)) // left
-		// r := amp * math.Sin(x)
+		// r := amp * math.Cos(x)
 		r := -l
+		w.Data.AddSample(int16(r)) // right }
+	}
+
+	for i := 0; i < samples; i++ {
+		x := 2.0 * math.Pi * float64(i) / waveDuration
+		l := amp * math.Sin(x)
+		w.Data.AddSample(int16(l)) // left
+		r := amp * math.Cos(x)
+		// r := -l
 		w.Data.AddSample(int16(r)) // right }
 	}
 
