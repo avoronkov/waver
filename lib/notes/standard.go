@@ -27,35 +27,23 @@ func (s *Standard) init() {
 	s.notes[7] = s.buildOctaveScale(880.0 * 4.0)
 }
 
+// const HalfStep = 1.0594630943593
 func (s *Standard) buildOctaveScale(afreq float64) map[string]float64 {
-	m := map[string]float64{
-		"A": afreq,
-	}
+	m := map[string]float64{"A": afreq}
 
-	as := afreq * HalfStep
-	m["a"] = as
-	b := as * HalfStep
-	m["B"] = b
+	m["a"] = m["A"] * HalfStep
+	m["B"] = m["a"] * HalfStep
 
-	gs := afreq / HalfStep
-	m["g"] = gs
-	g := gs / HalfStep
-	m["G"] = g
-	fs := g / HalfStep
-	m["f"] = fs
-	f := fs / HalfStep
-	m["F"] = f
-	e := f / HalfStep
-	m["E"] = e
+	m["g"] = m["A"] / HalfStep
+	m["G"] = m["g"] / HalfStep
+	m["f"] = m["G"] / HalfStep
+	m["F"] = m["f"] / HalfStep
+	m["E"] = m["F"] / HalfStep
 
-	ds := e / HalfStep
-	m["d"] = ds
-	d := ds / HalfStep
-	m["D"] = d
-	cs := d / HalfStep
-	m["c"] = cs
-	c := cs / HalfStep
-	m["C"] = c
+	m["d"] = m["E"] / HalfStep
+	m["D"] = m["d"] / HalfStep
+	m["c"] = m["D"] / HalfStep
+	m["C"] = m["c"] / HalfStep
 
 	return m
 }
