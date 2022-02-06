@@ -170,7 +170,7 @@ func (m *MidiSynth) handleMessage(msg []byte) {
 	dur := 0.5
 	if len(msg) >= 5 {
 		// Evaluate duration in bits (1/4 tempo)
-		dur = 15.0 * float64(m.parseValue(msg[4])) / float64(m.tempo)
+		dur = 15.0 * float64(m.parseDuration(msg[4:])) / float64(m.tempo)
 	}
 
 	if inst == 35 { // 'z'
@@ -234,6 +234,17 @@ func (m *MidiSynth) parseValue(b byte) int {
 		return 10 + int(b-'A')
 	}
 	return 0
+}
+
+func (m *MidiSynth) parseDuration(b []byte) int {
+	if len(b) < 1 {
+		panic("Empty duration")
+	}
+	v := m.parseValue(b[0])
+	if len(b) >= 2 {
+		v *= m.parseValue(b[1])
+	}
+	return v
 }
 
 func (m *MidiSynth) playNote(inst int, hz float64, dur float64, amp float64) {

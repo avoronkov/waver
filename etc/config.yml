@@ -52,8 +52,8 @@ instruments:
     filters:
     - timeshift:
         wave: sine
-        frequency: 5.0
-        amplitude: 0.01
+        frequency: 4.0
+        amplitude: 0.05
 
 samples:
   4k:
