@@ -2,23 +2,10 @@ package midisynth
 
 import (
 	"gitlab.com/avoronkov/waver/lib/midisynth/midi"
+	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
-
-func WithUdpPort(port int) func(m *MidiSynth) {
-	return func(m *MidiSynth) {
-		m.udpPort = port
-	}
-}
-
-/*
-func WithMidiPort(port int) func(m *MidiSynth) {
-	return func(m *MidiSynth) {
-		m.midiPort = port
-	}
-}
-*/
 
 func WithMidiProc(p *midi.Proc) func(m *MidiSynth) {
 	return func(m *MidiSynth) {
@@ -41,5 +28,11 @@ func WithScale(scale notes.Scale) func(m *MidiSynth) {
 		} else {
 			m.edo = -1
 		}
+	}
+}
+
+func WithSignalInput(input signals.Input) func(m *MidiSynth) {
+	return func(m *MidiSynth) {
+		m.inputs = append(m.inputs, input)
 	}
 }

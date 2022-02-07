@@ -9,15 +9,18 @@ import (
 	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/midi"
+	"gitlab.com/avoronkov/waver/lib/midisynth/udp"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
 func main() {
 	flag.Parse()
-	log.Printf("Starting UDP listener on port %v...", udpPort)
+
+	udpInput := udp.New(udpPort)
+
 	opts := []func(*midisynth.MidiSynth){
-		midisynth.WithUdpPort(udpPort),
+		midisynth.WithSignalInput(udpInput),
 	}
 	if edo19 {
 		log.Printf("Using EDO-19 scale.")
