@@ -29,6 +29,10 @@ func main() {
 		log.Printf("Using Standard 12 tone scale.")
 		opts = append(opts, midisynth.WithScale(notes.NewStandard()))
 	}
+	if midiPort > 0 {
+		midiInput := midi.NewInput(midiPort)
+		opts = append(opts, midisynth.WithSignalInput(midiInput))
+	}
 
 	m, err := midisynth.NewMidiSynth(opts...)
 	if err != nil {
@@ -42,18 +46,6 @@ func main() {
 
 	if err := cfg.StartUpdateLoop(); err != nil {
 		log.Fatal(err)
-	}
-
-	if midiPort > 0 {
-		opts := []func(*midi.Proc){
-			midi.WithDispatcher(cfg),
-		}
-		if edo19 {
-			opts = append(opts, midi.Edo19())
-		}
-
-		midiProc := midi.NewProc(m, midiPort, opts...)
-		midisynth.WithMidiProc(midiProc)(m)
 	}
 
 	// Experimantal section

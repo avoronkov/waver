@@ -7,5 +7,7 @@ type Signal struct {
 	Sample       string
 	DurationBits int
 	Amp          float64
-	Stop         bool
+	// Manual control section
+	Manual bool
+	Stop   bool
 }

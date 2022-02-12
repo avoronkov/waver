@@ -1,18 +1,10 @@
 package midisynth
 
 import (
-	"gitlab.com/avoronkov/waver/lib/midisynth/midi"
 	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
-
-func WithMidiProc(p *midi.Proc) func(m *MidiSynth) {
-	return func(m *MidiSynth) {
-		midi.WithChannel(m.midiChan)(p)
-		m.midiProc = p
-	}
-}
 
 func WithWavSettings(settings *wav.Settings) func(m *MidiSynth) {
 	return func(m *MidiSynth) {

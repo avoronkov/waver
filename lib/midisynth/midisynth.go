@@ -11,7 +11,6 @@ import (
 	oto "github.com/hajimehoshi/oto/v2"
 
 	instr "gitlab.com/avoronkov/waver/lib/midisynth/instruments"
-	"gitlab.com/avoronkov/waver/lib/midisynth/midi"
 	"gitlab.com/avoronkov/waver/lib/midisynth/player"
 	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
@@ -30,35 +29,31 @@ type MidiSynth struct {
 
 	scale notes.Scale
 
-	// Midi port for controller client
-	midiProc *midi.Proc
-
 	tempo int
 
 	instruments map[int]*instr.Instrument
 	samples     map[string]*instr.Instrument
 
-	midiChan  chan string
 	osSignals chan os.Signal
 	ch        chan *signals.Signal
 	inputs    []signals.Input
+
+	// Octave -> Note -> Release fn()
+	notesReleases map[int]map[string]func()
 
 	edo int
 }
 
 func NewMidiSynth(opts ...func(*MidiSynth)) (*MidiSynth, error) {
 	m := &MidiSynth{
-		settings: wav.Default,
-		// play:        player.New(settings),
-		// context:     c,
-		// scale:       scale,
-		tempo:       120,
-		instruments: make(map[int]*instr.Instrument),
-		samples:     make(map[string]*instr.Instrument),
-		midiChan:    make(chan string),
-		osSignals:   make(chan os.Signal),
-		ch:          make(chan *signals.Signal),
-		edo:         12,
+		settings:      wav.Default,
+		tempo:         120,
+		instruments:   make(map[int]*instr.Instrument),
+		samples:       make(map[string]*instr.Instrument),
+		osSignals:     make(chan os.Signal),
+		ch:            make(chan *signals.Signal),
+		notesReleases: make(map[int]map[string]func()),
+		edo:           12,
 	}
 	for _, opt := range opts {
 		opt(m)
@@ -99,24 +94,15 @@ func (m *MidiSynth) Start() error {
 			return err
 		}
 	}
-	if m.midiProc != nil {
-		started = true
-		if err := m.midiProc.Start(); err != nil {
-			return err
-		}
-	}
 
 	if !started {
-		return fmt.Errorf("Either UDP or MIDI port should be specifiend")
+		return fmt.Errorf("Not inputs specified")
 	}
 L:
 	for {
 		select {
 		case sig := <-m.ch:
-			// TODO make stops
 			go m.PlayNoteSignal(sig)
-		case data := <-m.midiChan:
-			go m.midiProc.HandleLine(data)
 		case <-m.osSignals:
 			log.Printf("Interupting...")
 			break L
@@ -131,12 +117,47 @@ func (m *MidiSynth) PlayNoteSignal(s *signals.Signal) {
 		// Play sample
 		dur := 15.0 * float64(s.DurationBits) / float64(m.tempo)
 		err = m.PlaySample(s.Sample, dur, s.Amp)
-	} else {
+	} else if !s.Manual {
 		// Play note
 		err = m.PlayNote(s.Instrument, s.Octave, s.Note, s.DurationBits, s.Amp)
+	} else if s.Stop {
+		// Stop manual note
+		m.releaseNote(s.Octave, s.Note)
+	} else {
+		// Play manual note
+		stop, err := m.PlayNoteControlled(
+			s.Instrument,
+			s.Octave,
+			s.Note,
+			s.Amp,
+		)
+		if err != nil {
+			log.Printf("[Manual] error: %v", err)
+			return
+		}
+		m.storeNoteReleaseFn(s.Octave, s.Note, stop)
 	}
 	if err != nil {
 		log.Printf("Error: %v", err)
+	}
+}
+
+func (m *MidiSynth) storeNoteReleaseFn(octave int, note string, release func()) {
+	if _, ok := m.notesReleases[octave]; ok {
+		m.notesReleases[octave][note] = release
+	} else {
+		m.notesReleases[octave] = map[string]func(){
+			note: release,
+		}
+	}
+}
+
+func (m *MidiSynth) releaseNote(octave int, note string) {
+	if notes, ok := m.notesReleases[octave]; ok {
+		if release, ok := notes[note]; ok {
+			release()
+			delete(notes, note)
+		}
 	}
 }
 
@@ -217,7 +238,6 @@ func (m *MidiSynth) playNoteControlled(inst int, hz float64, amp float64) (stop 
 }
 
 func (m *MidiSynth) Close() error {
-	_ = m.midiProc.Close()
 	for _, input := range m.inputs {
 		if err := input.Close(); err != nil {
 			log.Printf("Input Close() failed: %v", err)
