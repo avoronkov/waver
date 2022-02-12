@@ -6,11 +6,10 @@ import (
 
 	"gitlab.com/avoronkov/waver/lib/midisynth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/config"
-	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/midi"
+	"gitlab.com/avoronkov/waver/lib/midisynth/synth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/udp"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
@@ -29,33 +28,54 @@ func main() {
 		log.Printf("Using Standard 12 tone scale.")
 		opts = append(opts, midisynth.WithScale(notes.NewStandard()))
 	}
+
 	if midiPort > 0 {
 		midiInput := midi.NewInput(midiPort)
 		opts = append(opts, midisynth.WithSignalInput(midiInput))
 	}
+
+	// Instruments
+	instSet := instruments.NewSet()
+	cfg := config.New(configPath, instSet)
+	if err := cfg.InitMidiSynth(); err != nil {
+		log.Fatal(err)
+	}
+	if err := cfg.StartUpdateLoop(); err != nil {
+		log.Fatal(err)
+	}
+	// .
+
+	// Audio output
+	audioOpts := []func(*synth.Output){
+		synth.WithInstruments(instSet),
+	}
+	if edo19 {
+		audioOpts = append(audioOpts, synth.WithScale(notes.NewEdo19()))
+	} else {
+		audioOpts = append(audioOpts, synth.WithScale(notes.NewStandard()))
+	}
+	audioOutput, err := synth.New(audioOpts...)
+	if err != nil {
+		log.Fatal(err)
+	}
+	opts = append(opts, midisynth.WithSignalOutput(audioOutput))
+	// .
 
 	m, err := midisynth.NewMidiSynth(opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cfg := config.New(configPath, m)
-	if err := cfg.InitMidiSynth(); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := cfg.StartUpdateLoop(); err != nil {
-		log.Fatal(err)
-	}
-
 	// Experimantal section
-	in := instruments.NewInstrument(
-		waves.SineSine,
-		filters.NewAdsrFilter(),
-	)
+	/*
+		in := instruments.NewInstrument(
+			waves.SineSine,
+			filters.NewAdsrFilter(),
+		)
 
-	m.AddInstrument(10, in)
+		m.AddInstrument(10, in)
 
+	*/
 	// .
 
 	if err := m.Start(); err != nil {

@@ -37,6 +37,7 @@ type MidiSynth struct {
 	osSignals chan os.Signal
 	ch        chan *signals.Signal
 	inputs    []signals.Input
+	outputs   []signals.Output
 
 	// Octave -> Note -> Release fn()
 	notesReleases map[int]map[string]func()
@@ -87,22 +88,27 @@ func (m *MidiSynth) AddSampledInstrument(name string, in *instr.Instrument) {
 }
 
 func (m *MidiSynth) Start() error {
-	started := false
+	if len(m.inputs) == 0 {
+		return fmt.Errorf("No inputs specified")
+	}
+	if len(m.outputs) == 0 {
+		return fmt.Errorf("No outputs specified")
+	}
+
 	for _, input := range m.inputs {
-		started = true
 		if err := input.Start(m.ch); err != nil {
 			return err
 		}
 	}
 
-	if !started {
-		return fmt.Errorf("Not inputs specified")
-	}
 L:
 	for {
 		select {
 		case sig := <-m.ch:
-			go m.PlayNoteSignal(sig)
+			for _, output := range m.outputs {
+				go output.ProcessAsync(sig)
+			}
+			// go m.PlayNoteSignal(sig)
 		case <-m.osSignals:
 			log.Printf("Interupting...")
 			break L

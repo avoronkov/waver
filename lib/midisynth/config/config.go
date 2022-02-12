@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"gitlab.com/avoronkov/waver/lib/midisynth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
@@ -18,8 +17,13 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
+type InstrumentSet interface {
+	AddInstrument(n int, in *instruments.Instrument)
+	AddSampledInstrument(name string, in *instruments.Instrument)
+}
+
 type Config struct {
-	m         *midisynth.MidiSynth
+	m         InstrumentSet
 	filename  string
 	updatedAt time.Time
 
@@ -30,7 +34,7 @@ type Config struct {
 	showInst int
 }
 
-func New(filename string, m *midisynth.MidiSynth) *Config {
+func New(filename string, m InstrumentSet) *Config {
 	return &Config{
 		m:        m,
 		filename: filename,
@@ -114,7 +118,7 @@ func (c *Config) StartUpdateLoop() error {
 	return nil
 }
 
-func (c *Config) handleData(data *Data, m *midisynth.MidiSynth) error {
+func (c *Config) handleData(data *Data, m InstrumentSet) error {
 	var indexes []string
 	for i := range data.Instruments {
 		indexes = append(indexes, i)
