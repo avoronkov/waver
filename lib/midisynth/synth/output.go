@@ -74,7 +74,7 @@ func New(opts ...func(*Output)) (*Output, error) {
 	return output, nil
 }
 
-func (o *Output) ProcessAsync(s *signals.Signal) {
+func (o *Output) ProcessAsync(tm float64, s *signals.Signal) {
 	var err error
 	if s.Sample != "" {
 		// Play sample

@@ -48,7 +48,9 @@ func (u *UdpInput) Start(ch chan<- *signals.Signal) (err error) {
 				log.Printf("[ERROR] %v", err)
 				continue
 			}
-			ch <- sig
+			if sig != nil {
+				ch <- sig
+			}
 		}
 	}(u.listener)
 	return nil

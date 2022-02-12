@@ -6,6 +6,7 @@ import (
 
 	"gitlab.com/avoronkov/waver/lib/midisynth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/config"
+	"gitlab.com/avoronkov/waver/lib/midisynth/dumper"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/midi"
 	"gitlab.com/avoronkov/waver/lib/midisynth/synth"
@@ -25,6 +26,14 @@ func main() {
 	if midiPort > 0 {
 		midiInput := midi.NewInput(midiPort)
 		opts = append(opts, midisynth.WithSignalInput(midiInput))
+	}
+
+	if dump != "" {
+		dumpOutput, err := dumper.NewJson(dump)
+		if err != nil {
+			log.Fatal(err)
+		}
+		opts = append(opts, midisynth.WithSignalOutput(dumpOutput))
 	}
 
 	// Instruments

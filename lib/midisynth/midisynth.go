@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
 )
@@ -40,12 +41,19 @@ func (m *MidiSynth) Start() error {
 		}
 	}
 
+	start := time.Now()
+	sec := float64(time.Second)
+
 L:
 	for {
 		select {
 		case sig := <-m.ch:
+			if sig == nil {
+				continue L
+			}
+			tm := float64(time.Now().Sub(start)) / sec
 			for _, output := range m.outputs {
-				go output.ProcessAsync(sig)
+				go output.ProcessAsync(tm, sig)
 			}
 		case <-m.osSignals:
 			log.Printf("Interupting...")

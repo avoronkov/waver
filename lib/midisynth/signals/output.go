@@ -1,6 +1,6 @@
 package signals
 
 type Output interface {
-	ProcessAsync(*Signal)
+	ProcessAsync(time float64, sig *Signal)
 	Close() error
 }
