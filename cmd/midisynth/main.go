@@ -21,13 +21,6 @@ func main() {
 	opts := []func(*midisynth.MidiSynth){
 		midisynth.WithSignalInput(udpInput),
 	}
-	if edo19 {
-		log.Printf("Using EDO-19 scale.")
-		opts = append(opts, midisynth.WithScale(notes.NewEdo19()))
-	} else {
-		log.Printf("Using Standard 12 tone scale.")
-		opts = append(opts, midisynth.WithScale(notes.NewStandard()))
-	}
 
 	if midiPort > 0 {
 		midiInput := midi.NewInput(midiPort)
@@ -50,8 +43,10 @@ func main() {
 		synth.WithInstruments(instSet),
 	}
 	if edo19 {
+		log.Printf("Using EDO-19 scale.")
 		audioOpts = append(audioOpts, synth.WithScale(notes.NewEdo19()))
 	} else {
+		log.Printf("Using Standard 12 tone scale.")
 		audioOpts = append(audioOpts, synth.WithScale(notes.NewStandard()))
 	}
 	audioOutput, err := synth.New(audioOpts...)

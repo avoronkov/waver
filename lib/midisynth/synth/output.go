@@ -1,7 +1,6 @@
 package synth
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -108,7 +107,8 @@ func (o *Output) ProcessAsync(s *signals.Signal) {
 }
 
 func (o *Output) Close() error {
-	return errors.New("NIY")
+	// oto.Context does not support method Close()
+	return nil
 }
 
 func (o *Output) PlaySample(name string, duration float64, amp float64) error {
@@ -165,7 +165,6 @@ func (o *Output) storeNoteReleaseFn(octave int, note string, release func()) {
 }
 
 func (o *Output) releaseNote(octave int, note string) {
-	log.Printf("releaseNote(%v, %v) : %+v", octave, note, o.notesReleases)
 	if notes, ok := o.notesReleases[octave]; ok {
 		if release, ok := notes[note]; ok {
 			release()
@@ -188,7 +187,6 @@ func (o *Output) playNoteControlled(inst int, hz float64, amp float64) (stop fun
 	if !ok {
 		return nil, fmt.Errorf("Unknown instrument: %v", inst)
 	}
-	log.Printf("playNoteControlled: wave, ok = %v, %v", wave, ok)
 
 	data, done := o.play.PlayContext(wave, waves.NewNoteCtx(hz, amp, math.Inf(+1)))
 
