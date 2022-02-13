@@ -27,7 +27,7 @@ func NewJson(filename string) (*Json, error) {
 }
 
 func (j *Json) ProcessAsync(tm float64, sig *signals.Signal) {
-	sjson := &signalJson{
+	sjson := &SignalJson{
 		T:      tm,
 		Signal: *sig,
 	}
@@ -43,7 +43,7 @@ func (j *Json) Close() error {
 	return nil
 }
 
-type signalJson struct {
+type SignalJson struct {
 	T float64 `json:"T"`
 	signals.Signal
 }

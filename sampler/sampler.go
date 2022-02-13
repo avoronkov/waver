@@ -11,7 +11,6 @@ import (
 
 func Sample() {
 	w := wav.CreateDefaultWav()
-	_ = w
 
 	samplesPerSecond := 44100
 	samples := 2 * samplesPerSecond
