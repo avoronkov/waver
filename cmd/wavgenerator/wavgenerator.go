@@ -72,10 +72,10 @@ func (g *WavGenerator) Run() error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Cannot decode sample: %w", err)
+			return fmt.Errorf("Cannot decode signal: %w", err)
 		}
 		if err := g.processSignal(&sig); err != nil {
-			return fmt.Errorf("Cannot process sample: %w", err)
+			return fmt.Errorf("Cannot process signal '%v': %w", sig, err)
 		}
 	}
 	// Normalize samples
@@ -112,7 +112,8 @@ func (g *WavGenerator) processSignal(s *dumper.SignalJson) error {
 		return err
 	}
 	// 3. TODO Calculate the frequency
-	freq := 440.0
+	freq, _ := g.scale.Note(s.Octave, s.Note)
+
 	// 4. Calculate the duration
 	if s.DurationBits == 0 {
 		panic("s.DurationBits == 0")
