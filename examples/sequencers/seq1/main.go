@@ -4,48 +4,51 @@ import (
 	"gitlab.com/avoronkov/waver/lib/seq"
 )
 
-type Modifier = func(seq.SignalFn) seq.SignalFn
+type Modifier = func(seq.Signaler) seq.Signaler
 
-func Every(n int64) func(seq.SignalFn) seq.SignalFn {
-	return func(fn seq.SignalFn) seq.SignalFn {
-		return func(bit int64) []string {
+func Every(n int64) Modifier {
+	return func(fn seq.Signaler) seq.Signaler {
+		f := func(bit int64, ctx seq.Context) []string {
 			if bit%n == 0 {
-				return fn(bit)
+				return fn.Eval(bit, ctx)
 			}
 			return nil
 		}
+		return seq.SignalFn(f)
 	}
 }
 
-func Shift(n int64) func(seq.SignalFn) seq.SignalFn {
-	return func(fn seq.SignalFn) seq.SignalFn {
-		return func(bit int64) []string {
-			return fn(bit - n)
+func Shift(n int64) Modifier {
+	return func(fn seq.Signaler) seq.Signaler {
+		f := func(bit int64, ctx seq.Context) []string {
+			return fn.Eval(bit-n, ctx)
 		}
+		return seq.SignalFn(f)
 	}
 }
 
 func Sig(signal string) seq.SignalFn {
-	return func(bit int64) []string {
+	return func(bit int64, ctx seq.Context) []string {
 		return []string{signal}
 	}
 }
 
 func OnBits(loop int64, bits ...int64) Modifier {
-	return func(fn seq.SignalFn) seq.SignalFn {
-		return func(bit int64) []string {
+	return func(fn seq.Signaler) seq.Signaler {
+		f := func(bit int64, ctx seq.Context) []string {
 			mod := bit % loop
 			for _, b := range bits {
 				if mod == b {
-					return fn(bit)
+					return fn.Eval(bit, ctx)
 				}
 			}
 			return nil
 		}
+		return seq.SignalFn(f)
 	}
 }
 
-func Chain(fn seq.SignalFn, modifiers ...func(seq.SignalFn) seq.SignalFn) seq.SignalFn {
+func Chain(fn seq.Signaler, modifiers ...Modifier) seq.Signaler {
 	res := fn
 	for _, md := range modifiers {
 		res = md(res)
@@ -58,9 +61,23 @@ func main() {
 	hat := Chain(Sig("z4h2"), Every(8), Shift(4))
 	snare := Chain(Sig("z4s2"), OnBits(16, 3, 6, 9, 12), Shift(-1))
 
+	_ = Chain(
+		Note(NoteInstr(1), NoteOctave(3), NoteAmp(1)),
+		Chord('A', 'C', 'E', 'G'),
+		Every(7),
+	)
+
+	melody := Chain(
+		Note(NoteInstr(2), NoteOctave(4), NoteAmp(1)),
+		RandomNote('C', 'A', 'F', 'E', 'D'),
+		Every(3),
+	)
+
 	seq.Run(
 		kick,
 		hat,
 		snare,
+		// harmony,
+		melody,
 	)
 }

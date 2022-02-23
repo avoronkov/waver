@@ -29,7 +29,7 @@ func NewSequencer() *Sequencer {
 	return s
 }
 
-func (s *Sequencer) Run(funcs ...SignalFn) error {
+func (s *Sequencer) Run(funcs ...Signaler) error {
 	if err := s.init(); err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (s *Sequencer) init() error {
 	return nil
 }
 
-func (s *Sequencer) run(funcs ...SignalFn) error {
+func (s *Sequencer) run(funcs ...Signaler) error {
 	delay := time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
 	currentDelay := 0 * time.Millisecond
 	var bit int64
@@ -73,9 +73,9 @@ func (s *Sequencer) run(funcs ...SignalFn) error {
 	}
 }
 
-func (s *Sequencer) processFuncs(bit int64, funcs []SignalFn) {
+func (s *Sequencer) processFuncs(bit int64, funcs []Signaler) {
 	for _, fn := range funcs {
-		signals := fn(bit)
+		signals := fn.Eval(bit, Context{})
 		for _, sig := range signals {
 			fmt.Fprintf(s.conn, sig)
 		}
@@ -88,6 +88,6 @@ func (s *Sequencer) close() error {
 
 var DefaultSequencer = NewSequencer()
 
-func Run(funcs ...SignalFn) error {
+func Run(funcs ...Signaler) error {
 	return DefaultSequencer.Run(funcs...)
 }
