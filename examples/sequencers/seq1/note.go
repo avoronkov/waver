@@ -15,17 +15,18 @@ func newRune(r rune) *rune {
 }
 
 type note struct {
-	instr  *int
-	octave *int
-	note   *rune
-	amp    *int
-	dur    *int
+	instr ValueFn
+	note  ValueFn
+	amp   ValueFn
+	dur   ValueFn
 }
 
-func Note(opts ...func(*note)) seq.Signaler {
+func Note(instr, nt ValueFn, opts ...func(*note)) seq.Signaler {
 	n := &note{
-		amp: newInt(5),
-		dur: newInt(4),
+		instr: instr,
+		note:  nt,
+		amp:   Const(5),
+		dur:   Const(4),
 	}
 
 	for _, opt := range opts {
@@ -37,50 +38,44 @@ func Note(opts ...func(*note)) seq.Signaler {
 
 var _ seq.Signaler = (*note)(nil)
 
-func (n *note) Eval(bit int64, ctx seq.Context) []string {
-	instr := n.instr
-	if instr == nil {
-		in, ok := ctx["instr"].(int)
-		if !ok {
-			return nil
-		}
-		instr = &in
+func (n *note) Eval(bit int64, ctx seq.Context) (res []string) {
+	instr := n.instr.Val(bit, ctx)
+	for _, i := range instr.ToInt64List() {
+		res = append(res, n.evalInstr(bit, ctx, i)...)
 	}
-	// octave
-	octave := n.octave
-	if octave == nil {
-		oc, ok := ctx["octave"].(int)
-		if !ok {
-			return nil
-		}
-		octave = &oc
-	}
-	// note
-	nt := n.note
-	if nt == nil {
-		n, ok := ctx["note"].(rune)
-		if !ok {
-			return nil
-		}
-		nt = &n
-	}
-	amp := n.amp
-	if amp == nil {
-		if n, ok := ctx["amp"].(int); ok {
-			amp = &n
-		}
-	}
-
-	result := fmt.Sprintf("%c%c%c", toRune(*instr), toRune(*octave), *nt)
-	if amp != nil {
-		result += string(toRune(*amp))
-	}
-
-	// TODO amp dur
-	return []string{result}
+	return
 }
 
-func toRune(n int) rune {
+func (n *note) evalInstr(bit int64, ctx seq.Context, in int64) (res []string) {
+	nt := n.note.Val(bit, ctx)
+	for _, i := range nt.ToInt64List() {
+		res = append(res, n.evalInstrNote(bit, ctx, in, i)...)
+	}
+	return
+}
+
+func (n *note) evalInstrNote(bit int64, ctx seq.Context, in, nt int64) (res []string) {
+	amp := n.amp.Val(bit, ctx)
+	for _, i := range amp.ToInt64List() {
+		res = append(res, n.evalIntrNoteAmp(bit, ctx, in, nt, i)...)
+	}
+	return
+}
+
+func (n *note) evalIntrNoteAmp(bit int64, ctx seq.Context, inst, note, amp int64) (res []string) {
+	dur := n.dur.Val(bit, ctx)
+	durList := dur.ToInt64List()
+	for _, d := range durList {
+		res = append(res, n.format(inst, note, amp, d))
+	}
+	return
+}
+
+func (n *note) format(inst, note, amp, dur int64) string {
+	return fmt.Sprintf("%c%s%c%c", toRune(inst), KeyNote(note).String(), toRune(amp), toRune(dur))
+}
+
+func toRune(n int64) rune {
 	if n >= 0 && n < 10 {
 		return '0' + rune(n)
 	}
@@ -91,32 +86,26 @@ func toRune(n int) rune {
 }
 
 // Options
-func NoteInstr(in int) func(*note) {
+func NoteInstr(in ValueFn) func(*note) {
 	return func(n *note) {
-		n.instr = newInt(in)
+		n.instr = in
 	}
 }
 
-func NoteOctave(o int) func(*note) {
+func NoteNote(o ValueFn) func(*note) {
 	return func(n *note) {
-		n.octave = newInt(o)
+		n.note = o
 	}
 }
 
-func NoteNote(o rune) func(*note) {
+func NoteAmp(o ValueFn) func(*note) {
 	return func(n *note) {
-		n.note = newRune(o)
+		n.amp = o
 	}
 }
 
-func NoteAmp(o int) func(*note) {
+func NoteDur(o ValueFn) func(*note) {
 	return func(n *note) {
-		n.amp = newInt(o)
-	}
-}
-
-func NoteDur(o int) func(*note) {
-	return func(n *note) {
-		n.dur = newInt(o)
+		n.dur = o
 	}
 }

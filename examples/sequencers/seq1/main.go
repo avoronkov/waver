@@ -4,80 +4,33 @@ import (
 	"gitlab.com/avoronkov/waver/lib/seq"
 )
 
-type Modifier = func(seq.Signaler) seq.Signaler
-
-func Every(n int64) Modifier {
-	return func(fn seq.Signaler) seq.Signaler {
-		f := func(bit int64, ctx seq.Context) []string {
-			if bit%n == 0 {
-				return fn.Eval(bit, ctx)
-			}
-			return nil
-		}
-		return seq.SignalFn(f)
-	}
-}
-
-func Shift(n int64) Modifier {
-	return func(fn seq.Signaler) seq.Signaler {
-		f := func(bit int64, ctx seq.Context) []string {
-			return fn.Eval(bit-n, ctx)
-		}
-		return seq.SignalFn(f)
-	}
-}
-
-func Sig(signal string) seq.SignalFn {
-	return func(bit int64, ctx seq.Context) []string {
-		return []string{signal}
-	}
-}
-
-func OnBits(loop int64, bits ...int64) Modifier {
-	return func(fn seq.Signaler) seq.Signaler {
-		f := func(bit int64, ctx seq.Context) []string {
-			mod := bit % loop
-			for _, b := range bits {
-				if mod == b {
-					return fn.Eval(bit, ctx)
-				}
-			}
-			return nil
-		}
-		return seq.SignalFn(f)
-	}
-}
-
-func Chain(fn seq.Signaler, modifiers ...Modifier) seq.Signaler {
-	res := fn
-	for _, md := range modifiers {
-		res = md(res)
-	}
-	return res
-}
-
 func main() {
 	kick := Chain(Sig("z4k2"), Every(8))
 	hat := Chain(Sig("z4h2"), Every(8), Shift(4))
+	_ = hat
 	snare := Chain(Sig("z4s2"), OnBits(16, 3, 6, 9, 12), Shift(-1))
+	_ = snare
 
-	_ = Chain(
-		Note(NoteInstr(1), NoteOctave(3), NoteAmp(1)),
-		Chord('A', 'C', 'E', 'G'),
+	harmony := Chain(
+		Note(Const(1), Lst(int64(A4), int64(C4), int64(E4), int64(G4)), NoteAmp(Const(1))),
 		Every(7),
 	)
 
 	melody := Chain(
-		Note(NoteInstr(2), NoteOctave(4), NoteAmp(1)),
-		RandomNote('C', 'A', 'F', 'E', 'D'),
+		Note(
+			Const(2),
+			Random(Const(int64(C2)), Const(int64(A2)), Const(int64(F2)), Const(int64(E2))),
+			NoteAmp(Const(1)),
+		),
 		Every(3),
 	)
+	_ = melody
 
 	seq.Run(
 		kick,
 		hat,
 		snare,
-		// harmony,
+		harmony,
 		melody,
 	)
 }
