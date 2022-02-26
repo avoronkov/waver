@@ -1,18 +1,17 @@
 package types
 
-// Signal
-type Signal = string
+import "gitlab.com/avoronkov/waver/lib/midisynth/signals"
 
 type Context = map[string]interface{}
 
 // Signaler
 type Signaler interface {
-	Eval(bit int64, ctx Context) []Signal
+	Eval(bit int64, ctx Context) []signals.Signal
 }
 
-type SignalFn func(bit int64, ctx Context) []Signal
+type SignalFn func(bit int64, ctx Context) []signals.Signal
 
-func (f SignalFn) Eval(bit int64, ctx Context) []Signal {
+func (f SignalFn) Eval(bit int64, ctx Context) []signals.Signal {
 	return f(bit, ctx)
 }
 

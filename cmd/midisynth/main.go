@@ -12,6 +12,8 @@ import (
 	"gitlab.com/avoronkov/waver/lib/midisynth/synth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/udp"
 	"gitlab.com/avoronkov/waver/lib/notes"
+	"gitlab.com/avoronkov/waver/lib/seq"
+	"gitlab.com/avoronkov/waver/lib/seq/parser"
 )
 
 func main() {
@@ -26,6 +28,15 @@ func main() {
 	if midiPort > 0 {
 		midiInput := midi.NewInput(midiPort)
 		opts = append(opts, midisynth.WithSignalInput(midiInput))
+	}
+
+	if fileInput != "" {
+		sequencer := seq.NewSequencer()
+		ps := parser.New(fileInput, sequencer)
+		if err := ps.Start(); err != nil {
+			log.Fatal(err)
+		}
+		opts = append(opts, midisynth.WithSignalInput(sequencer))
 	}
 
 	if dump != "" {

@@ -34,7 +34,11 @@ func parseRawSignal(fields []string) (types.Signaler, int, error) {
 	raw := fields[0]
 	rawLen := len(raw)
 	if rawLen > 2 && raw[0] == '\'' && raw[rawLen-1] == '\'' {
-		return common.Sig(raw[1 : rawLen-1]), 1, nil
+		sig, err := common.Sig(raw[1 : rawLen-1])
+		if err != nil {
+			return nil, 0, err
+		}
+		return sig, 1, nil
 	}
 	return nil, 0, fmt.Errorf("Incorrect raw signal: %q", raw)
 }

@@ -43,7 +43,7 @@ func (u *UdpInput) Start(ch chan<- *signals.Signal) (err error) {
 				log.Printf("[ERROR] %v (%T, %v)", err, err, err.(*net.OpError).Unwrap())
 				continue
 			}
-			sig, err := parseMessage(buff[:n])
+			sig, err := ParseMessage(buff[:n])
 			if err != nil {
 				log.Printf("[ERROR] %v", err)
 				continue
@@ -60,7 +60,7 @@ func (u *UdpInput) Close() error {
 	return u.listener.Close()
 }
 
-func parseMessage(msg []byte) (*signals.Signal, error) {
+func ParseMessage(msg []byte) (*signals.Signal, error) {
 	if len(msg) < 3 {
 		return nil, nil
 	}

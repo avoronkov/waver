@@ -10,6 +10,8 @@ var (
 	configPath string
 
 	dump string
+
+	fileInput string
 )
 
 func init() {
@@ -28,4 +30,7 @@ func init() {
 
 	flag.StringVar(&dump, "dump", "", "dump signals into file")
 	flag.StringVar(&dump, "d", "", "dump signals into file (shorthand)")
+
+	flag.StringVar(&fileInput, "input-file", "", "input sequencer file")
+	flag.StringVar(&fileInput, "i", "", "input sequencer file (shorthand)")
 }

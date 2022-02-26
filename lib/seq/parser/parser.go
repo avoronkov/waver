@@ -2,12 +2,10 @@ package parser
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"gitlab.com/avoronkov/waver/lib/seq/common"
 	"gitlab.com/avoronkov/waver/lib/seq/types"
@@ -41,8 +39,7 @@ func (p *Parser) Start() error {
 	if err := p.parse(); err != nil {
 		return err
 	}
-	time.Sleep(144000 * time.Second)
-	return errors.New("time up")
+	return nil
 }
 
 func (p *Parser) parse() error {
