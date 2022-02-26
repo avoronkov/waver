@@ -23,6 +23,8 @@ type Parser struct {
 func New(file string, seq Seq) *Parser {
 	modParsers := map[string]ModParser{
 		":": parseEvery,
+		"+": parseShift,
+		"-": parseShift,
 	}
 	sigParsers := map[string]SigParser{
 		"": parseRawSignal,
@@ -61,6 +63,9 @@ func (p *Parser) parse() error {
 	sc.Split(bufio.ScanLines)
 	for sc.Scan() {
 		text := sc.Text()
+		if text == "" {
+			continue
+		}
 		if err := p.parseLine(text); err != nil {
 			return err
 		}

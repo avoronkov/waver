@@ -23,3 +23,17 @@ func parseEvery(fields []string) (types.Modifier, int, error) {
 
 	return common.Every(int64(n)), 2, nil
 }
+
+// "+ 2", "- 2"
+func parseShift(fields []string) (types.Modifier, int, error) {
+	if len(fields) < 2 {
+		return nil, 0, fmt.Errorf("Not enough arguments for Shift ('+' / '-')")
+	}
+
+	n, err := strconv.Atoi(fields[1])
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return common.Shift(int64(n)), 2, nil
+}
