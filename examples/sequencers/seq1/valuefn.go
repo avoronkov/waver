@@ -46,3 +46,20 @@ func Random(vfns ...ValueFn) ValueFn {
 		return vfns[i].Val(bit, ctx)
 	})
 }
+
+type sequence struct {
+	fns []ValueFn
+	idx int
+}
+
+func (s *sequence) Val(bit int64, ctx seq.Context) (res Value) {
+	res = s.fns[s.idx].Val(bit, ctx)
+	s.idx = (s.idx + 1) % len(s.fns)
+	return
+}
+
+func Sequence(vfns ...ValueFn) ValueFn {
+	return &sequence{
+		fns: vfns,
+	}
+}
