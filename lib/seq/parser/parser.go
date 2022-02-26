@@ -9,6 +9,7 @@ import (
 
 	"gitlab.com/avoronkov/waver/lib/seq/common"
 	"gitlab.com/avoronkov/waver/lib/seq/types"
+	"gitlab.com/avoronkov/waver/lib/watch"
 )
 
 type Parser struct {
@@ -34,10 +35,17 @@ func New(file string, seq Seq) *Parser {
 	}
 }
 
-func (p *Parser) Start() error {
+func (p *Parser) Start(wtch bool) error {
 	// TODO live reload
 	if err := p.parse(); err != nil {
 		return err
+	}
+	if wtch {
+		watch.OnFileUpdate(p.file, func() {
+			if err := p.parse(); err != nil {
+				log.Printf("Parsing %v failed: %v", p.file, err)
+			}
+		})
 	}
 	return nil
 }

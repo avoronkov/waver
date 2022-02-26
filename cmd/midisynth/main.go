@@ -33,7 +33,7 @@ func main() {
 	if fileInput != "" {
 		sequencer := seq.NewSequencer()
 		ps := parser.New(fileInput, sequencer)
-		if err := ps.Start(); err != nil {
+		if err := ps.Start(true); err != nil {
 			log.Fatal(err)
 		}
 		opts = append(opts, midisynth.WithSignalInput(sequencer))

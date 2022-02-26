@@ -67,9 +67,7 @@ func (s *Sequencer) processFuncs(bit int64, funcs []types.Signaler) {
 	for _, fn := range funcs {
 		signals := fn.Eval(bit, types.Context{})
 		for _, sig := range signals {
-			log.Printf("[Sequencer] sending signal %v ...", sig)
 			s.ch <- &sig
-			log.Printf("[Sequencer] sending signal %v DONE", sig)
 		}
 	}
 }

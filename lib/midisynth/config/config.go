@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+	"gitlab.com/avoronkov/waver/lib/watch"
 
 	yaml "gopkg.in/yaml.v3"
 )
@@ -72,50 +71,14 @@ func (c *Config) InitMidiSynth() error {
 }
 
 func (c *Config) StartUpdateLoop() error {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		return err
-	}
-	absPath, err := filepath.Abs(c.filename)
-	if err != nil {
-		return fmt.Errorf("Cannot detect abs path of %v: %v", c.filename, err)
-	}
-	dir := filepath.Dir(absPath)
-	log.Printf("Starting watching file changes: %v (%v)", absPath, dir)
-	if err := watcher.Add(dir); err != nil {
-		return err
-	}
-	go func() {
-	L:
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				log.Printf("File event: %v (%v)", event, event.Name)
-				if !ok {
-					break L
-				}
-				if event.Name != absPath {
-					break
-				}
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Printf("Updating Midisynth...")
-					if err := c.InitMidiSynth(); err != nil {
-						log.Printf("Failed to update MidiSynth: %v", err)
-					}
-					log.Printf("Updating Midisynth... DONE.")
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					break L
-				}
-				log.Printf("Watcher error: %v", err)
-
-			}
+	callback := func() {
+		log.Printf("Updating Midisynth...")
+		if err := c.InitMidiSynth(); err != nil {
+			log.Printf("Failed to update MidiSynth: %v", err)
 		}
-		log.Printf("Config watcher is stopped.")
-	}()
-
-	return nil
+		log.Printf("Updating Midisynth... DONE.")
+	}
+	return watch.OnFileUpdate(c.filename, callback)
 }
 
 func (c *Config) handleData(data *Data, m InstrumentSet) error {
