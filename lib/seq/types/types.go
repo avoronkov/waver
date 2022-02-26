@@ -17,3 +17,19 @@ func (f SignalFn) Eval(bit int64, ctx Context) []signals.Signal {
 
 // Modifier
 type Modifier = func(Signaler) Signaler
+
+// Value function
+
+type Value interface {
+	ToInt64List() []int64
+}
+
+type ValueFn interface {
+	Val(bit int64, ctx Context) Value
+}
+
+type ValueFunc func(bit int64, ctx Context) Value
+
+func (f ValueFunc) Val(bit int64, ctx Context) Value {
+	return f(bit, ctx)
+}

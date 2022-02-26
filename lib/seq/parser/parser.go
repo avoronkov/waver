@@ -12,6 +12,15 @@ import (
 	"gitlab.com/avoronkov/waver/lib/watch"
 )
 
+var modParsers = map[string]ModParser{
+	":": parseEvery,
+	"+": parseShift,
+	"-": parseShift,
+}
+var sigParsers = map[string]SigParser{
+	"": parseRawSignal,
+}
+
 type Parser struct {
 	file string
 	seq  Seq
@@ -21,14 +30,6 @@ type Parser struct {
 }
 
 func New(file string, seq Seq) *Parser {
-	modParsers := map[string]ModParser{
-		":": parseEvery,
-		"+": parseShift,
-		"-": parseShift,
-	}
-	sigParsers := map[string]SigParser{
-		"": parseRawSignal,
-	}
 	return &Parser{
 		file:       file,
 		seq:        seq,
@@ -80,6 +81,7 @@ func (p *Parser) parse() error {
 func (p *Parser) parseLine(line string) error {
 	fields := strings.Fields(line)
 	if idx := stringsFind(fields, "->"); idx >= 0 {
+		// modifiers -> signals
 		mods, err := p.parseModifiers(fields[:idx])
 		if err != nil {
 			return err
@@ -92,6 +94,14 @@ func (p *Parser) parseLine(line string) error {
 			x := common.Chain(sig, mods...)
 			p.seq.Add(x)
 		}
+	} else if len(fields) >= 2 && fields[1] == "=" {
+		// var = atom
+		// TODO check shift
+		vfn, _, err := parseAtom(fields[2:])
+		if err != nil {
+			return err
+		}
+		p.seq.Assign(fields[0], vfn)
 	} else {
 		log.Printf("[WARNING] Skipping line: %q", line)
 	}

@@ -24,10 +24,12 @@ func Sig(signal string) (types.SignalFn, error) {
 	}, nil
 }
 
-func Every(n int64) types.Modifier {
+func Every(n types.ValueFn) types.Modifier {
 	return func(fn types.Signaler) types.Signaler {
 		f := func(bit int64, ctx types.Context) []signals.Signal {
-			if bit%n == 0 {
+			// TODO some error handling?
+			nVal := n.Val(bit, ctx).ToInt64List()[0]
+			if bit%nVal == 0 {
 				return fn.Eval(bit, ctx)
 			}
 			return nil
@@ -36,11 +38,18 @@ func Every(n int64) types.Modifier {
 	}
 }
 
-func Shift(n int64) types.Modifier {
+func Shift(n types.ValueFn) types.Modifier {
 	return func(fn types.Signaler) types.Signaler {
 		f := func(bit int64, ctx types.Context) []signals.Signal {
-			return fn.Eval(bit-n, ctx)
+			nVal := n.Val(bit, ctx).ToInt64List()[0]
+			return fn.Eval(bit-nVal, ctx)
 		}
 		return types.SignalFn(f)
 	}
+}
+
+func Var(name string) types.ValueFn {
+	return types.ValueFunc(func(n int64, ctx types.Context) types.Value {
+		return ctx[name].(types.Value)
+	})
 }

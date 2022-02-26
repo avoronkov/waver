@@ -1,6 +1,7 @@
 package seq
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -13,6 +14,8 @@ type Sequencer struct {
 
 	current []types.Signaler
 	next    []types.Signaler
+
+	vars assignments
 
 	ch chan<- *signals.Signal
 }
@@ -47,6 +50,10 @@ func (s *Sequencer) Commit() error {
 	return nil
 }
 
+func (s *Sequencer) Assign(name string, value types.ValueFn) {
+	s.vars = append(s.vars, assignment{name, value})
+}
+
 func (s *Sequencer) run() error {
 	delay := time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
 	currentDelay := 0 * time.Millisecond
@@ -55,7 +62,9 @@ func (s *Sequencer) run() error {
 		select {
 		case <-time.After(currentDelay):
 			start := time.Now()
-			s.processFuncs(bit, s.current)
+			if err := s.processFuncs(bit); err != nil {
+				log.Printf("File processing failed: %v", err)
+			}
 			dt := time.Since(start)
 			currentDelay = delay - dt
 		}
@@ -63,13 +72,25 @@ func (s *Sequencer) run() error {
 	}
 }
 
-func (s *Sequencer) processFuncs(bit int64, funcs []types.Signaler) {
-	for _, fn := range funcs {
-		signals := fn.Eval(bit, types.Context{})
+func (s *Sequencer) processFuncs(bit int64) error {
+	// eval variables first
+	ctx := types.Context{}
+	for _, as := range s.vars {
+		if _, exists := ctx[as.name]; exists {
+			return fmt.Errorf("Cannot re-assign variable: %v", as.name)
+		}
+		value := as.valueFn.Val(bit, ctx)
+		ctx[as.name] = value
+	}
+
+	for _, fn := range s.current {
+
+		signals := fn.Eval(bit, ctx)
 		for _, sig := range signals {
 			s.ch <- &sig
 		}
 	}
+	return nil
 }
 
 func (s *Sequencer) Close() error {
