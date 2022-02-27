@@ -39,7 +39,6 @@ func New(file string, seq Seq) *Parser {
 }
 
 func (p *Parser) Start(wtch bool) error {
-	// TODO live reload
 	if err := p.parse(); err != nil {
 		return err
 	}

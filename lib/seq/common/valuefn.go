@@ -8,12 +8,12 @@ func Const(n int64) types.ValueFn {
 	})
 }
 
-func Lst(values ...int64) types.ValueFn {
-	var res List
-	for _, v := range values {
-		res = append(res, Num(v))
-	}
-	return types.ValueFunc(func(int64, types.Context) types.Value {
+func Lst(values ...types.ValueFn) types.ValueFn {
+	return types.ValueFunc(func(bit int64, ctx types.Context) types.Value {
+		var res List
+		for _, x := range values {
+			res = append(res, x.Val(bit, ctx))
+		}
 		return res
 	})
 }

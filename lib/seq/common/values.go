@@ -6,17 +6,10 @@ type Num int64
 
 var _ types.Value = Num(0)
 
-func (n Num) ToInt64List() []int64 {
-	return []int64{int64(n)}
-}
+func (n Num) IsValue() {}
 
-type List []Num
+type List []types.Value
 
 var _ types.Value = List(nil)
 
-func (l List) ToInt64List() (res []int64) {
-	for _, n := range l {
-		res = append(res, int64(n))
-	}
-	return
-}
+func (l List) IsValue() {}

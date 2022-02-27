@@ -51,5 +51,32 @@ func parseAtom(fields []string) (types.ValueFn, int, error) {
 	if strings.HasPrefix(token, "$") {
 		return common.Var(token[1:]), 1, nil
 	}
+	if token == "[" {
+		fn, shift, err := parseList(fields[1:])
+		if err != nil {
+			return nil, 0, err
+		}
+		// Include '[' and ']'
+		return fn, shift + 2, nil
+	}
 	return nil, 0, fmt.Errorf("Don't know how to parse: %v", fields)
+}
+
+func parseList(fields []string) (types.ValueFn, int, error) {
+	atoms := []types.ValueFn{}
+	l := len(fields)
+	i := 0
+	for i < l {
+		token := fields[i]
+		if token == "]" {
+			return common.Lst(atoms...), i, nil
+		}
+		fn, shift, err := parseAtom(fields[i:])
+		if err != nil {
+			return nil, 0, err
+		}
+		atoms = append(atoms, fn)
+		i += shift
+	}
+	return nil, 0, fmt.Errorf("Closing ']' not found.")
 }

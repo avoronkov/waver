@@ -15,7 +15,8 @@ type Sequencer struct {
 	current []types.Signaler
 	next    []types.Signaler
 
-	vars assignments
+	currentVars assignments
+	nextVars    assignments
 
 	ch chan<- *signals.Signal
 }
@@ -47,11 +48,13 @@ func (s *Sequencer) Add(sig types.Signaler) {
 func (s *Sequencer) Commit() error {
 	s.current = s.next
 	s.next = nil
+	s.currentVars = s.nextVars
+	s.nextVars = nil
 	return nil
 }
 
 func (s *Sequencer) Assign(name string, value types.ValueFn) {
-	s.vars = append(s.vars, assignment{name, value})
+	s.nextVars = append(s.nextVars, assignment{name, value})
 }
 
 func (s *Sequencer) run() error {
@@ -75,7 +78,7 @@ func (s *Sequencer) run() error {
 func (s *Sequencer) processFuncs(bit int64) error {
 	// eval variables first
 	ctx := types.Context{}
-	for _, as := range s.vars {
+	for _, as := range s.currentVars {
 		if _, exists := ctx[as.name]; exists {
 			return fmt.Errorf("Cannot re-assign variable: %v", as.name)
 		}

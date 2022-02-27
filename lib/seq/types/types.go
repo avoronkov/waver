@@ -21,7 +21,7 @@ type Modifier = func(Signaler) Signaler
 // Value function
 
 type Value interface {
-	ToInt64List() []int64
+	IsValue()
 }
 
 type ValueFn interface {
