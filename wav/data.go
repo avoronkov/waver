@@ -42,10 +42,10 @@ func (d *Data) ChunkSize() uint32 {
 }
 
 func (d *Data) Write(w io.Writer) error {
-	io.WriteString(w, "data")
-	binary.Write(w, binary.LittleEndian, d.ChunkSize())
+	_, _ = io.WriteString(w, "data")
+	_ = binary.Write(w, binary.LittleEndian, d.ChunkSize())
 	for _, sample := range d.Samples {
-		binary.Write(w, binary.LittleEndian, sample)
+		_ = binary.Write(w, binary.LittleEndian, sample)
 	}
 	return nil
 }

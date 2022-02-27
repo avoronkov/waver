@@ -59,18 +59,16 @@ func (s *Sequencer) Assign(name string, value types.ValueFn) {
 
 func (s *Sequencer) run() error {
 	delay := time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
-	currentDelay := 0 * time.Millisecond
 	var bit int64
 	for {
-		select {
-		case <-time.After(currentDelay):
-			start := time.Now()
-			if err := s.processFuncs(bit); err != nil {
-				log.Printf("File processing failed: %v", err)
-			}
-			dt := time.Since(start)
-			currentDelay = delay - dt
+		start := time.Now()
+		if err := s.processFuncs(bit); err != nil {
+			log.Printf("File processing failed: %v", err)
 		}
+		dt := time.Since(start)
+		currentDelay := delay - dt
+		time.Sleep(currentDelay)
+
 		bit++
 	}
 }

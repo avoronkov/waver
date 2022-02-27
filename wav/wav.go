@@ -73,10 +73,13 @@ func ReadWav(in io.Reader) (*Wav, error) {
 
 	log.Printf("fmt section size: %v", fmtSize)
 	fmtChunk, err := readBytes(in, int(fmtSize))
+	if err != nil {
+		return nil, fmt.Errorf("Error reading 'fmt ' section data: %w", err)
+	}
 
 	wavFmt, err := ParseWavFmt(fmtChunk)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading 'fmt ' section data: %w", err)
+		return nil, fmt.Errorf("Error pasing 'fmt ' section data: %w", err)
 	}
 
 	wav.Fmt = wavFmt
@@ -133,17 +136,17 @@ func readBytesExpect(in io.Reader, expect []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if bytes.Compare(buffer, expect) != 0 {
+	if !bytes.Equal(buffer, expect) {
 		return nil, errors.New(fmt.Errorf("Incorrect bytes read: expected '%s', actual '%s'", expect, buffer))
 	}
 	return buffer, nil
 }
 
 func (w *Wav) Write(out io.Writer) error {
-	io.WriteString(out, "RIFF")
+	_, _ = io.WriteString(out, "RIFF")
 	var chunkSize uint32 = uint32(len("WAVE")) + w.Fmt.FullSize() + w.Data.FullSize()
-	binary.Write(out, binary.LittleEndian, chunkSize)
-	io.WriteString(out, "WAVE")
+	_ = binary.Write(out, binary.LittleEndian, chunkSize)
+	_, _ = io.WriteString(out, "WAVE")
 	if err := w.Fmt.Write(out); err != nil {
 		return fmt.Errorf("Failed to write 'fmt' chunk: %w", err)
 	}

@@ -51,7 +51,7 @@ L:
 			if sig == nil {
 				continue L
 			}
-			tm := float64(time.Now().Sub(start)) / sec
+			tm := float64(time.Since(start)) / sec
 			for _, output := range m.outputs {
 				go output.ProcessAsync(tm, sig)
 			}

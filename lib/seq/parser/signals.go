@@ -16,15 +16,45 @@ func parseSignal(fields []string) (types.Signaler, int, error) {
 		return nil, 0, fmt.Errorf("Not enough arguments for signal: %v", fields)
 	}
 
+	// skip '{'
+	shift := 1
 	// parse instrument
+	in, sh, err := parseAtom(fields[shift:])
+	if err != nil {
+		return nil, 0, err
+	}
+	shift += sh
 
 	// parse note
+	nt, sh, err := parseAtom(fields[shift:])
+	if err != nil {
+		return nil, 0, err
+	}
+	shift += sh
+
+	if fields[shift] == "}" {
+		return common.Note(in, nt), shift + 1, nil
+	}
 
 	// parse amplitude
+	amp, sh, err := parseAtom(fields[shift:])
+	if err != nil {
+		return nil, 0, err
+	}
+	shift += sh
+
+	if fields[shift] == "}" {
+		return common.Note(in, nt, common.NoteAmp(amp)), shift + 1, nil
+	}
 
 	// parse duration
+	dur, sh, err := parseAtom(fields[shift:])
+	if err != nil {
+		return nil, 0, err
+	}
+	shift += sh
 
-	panic("NIY")
+	return common.Note(in, nt, common.NoteAmp(amp), common.NoteDur(dur)), shift + 1, nil
 }
 
 func parseRawSignal(fields []string) (types.Signaler, int, error) {

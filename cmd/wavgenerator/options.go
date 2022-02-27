@@ -30,6 +30,8 @@ func WithWavSettings(settings *wav.Settings) func(*WavGenerator) {
 	}
 }
 
+var _ = WithWavSettings
+
 func WithScale(scale notes.Scale) func(*WavGenerator) {
 	return func(g *WavGenerator) {
 		g.scale = scale

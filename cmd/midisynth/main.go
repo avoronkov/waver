@@ -33,29 +33,21 @@ func main() {
 	if fileInput != "" {
 		sequencer := seq.NewSequencer()
 		ps := parser.New(fileInput, sequencer)
-		if err := ps.Start(true); err != nil {
-			log.Fatal(err)
-		}
+		check("Parser start", ps.Start(true))
 		opts = append(opts, midisynth.WithSignalInput(sequencer))
 	}
 
 	if dump != "" {
 		dumpOutput, err := dumper.NewJson(dump)
-		if err != nil {
-			log.Fatal(err)
-		}
+		check("Json dumper creation", err)
 		opts = append(opts, midisynth.WithSignalOutput(dumpOutput))
 	}
 
 	// Instruments
 	instSet := instruments.NewSet()
 	cfg := config.New(configPath, instSet)
-	if err := cfg.InitMidiSynth(); err != nil {
-		log.Fatal(err)
-	}
-	if err := cfg.StartUpdateLoop(); err != nil {
-		log.Fatal(err)
-	}
+	check("MidiSynth initialization", cfg.InitMidiSynth())
+	check("Config StartUpdateLoop", cfg.StartUpdateLoop())
 	// .
 
 	// Audio output
@@ -70,16 +62,12 @@ func main() {
 		audioOpts = append(audioOpts, synth.WithScale(notes.NewStandard()))
 	}
 	audioOutput, err := synth.New(audioOpts...)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check("Syntheziser output", err)
 	opts = append(opts, midisynth.WithSignalOutput(audioOutput))
 	// .
 
 	m, err := midisynth.NewMidiSynth(opts...)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check("Midisynth creation", err)
 
 	// Experimantal section
 	/*
@@ -93,17 +81,13 @@ func main() {
 	*/
 	// .
 
-	if err := m.Start(); err != nil {
-		log.Fatal("Start failed: ", err)
-	}
-	if err := m.Close(); err != nil {
-		log.Fatal("Stop failed: ", err)
-	}
+	check("Start", m.Start())
+	check("Stop", m.Close())
 	log.Printf("OK!")
 }
 
-func check(err error) {
+func check(msg string, err error) {
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(msg, err)
 	}
 }

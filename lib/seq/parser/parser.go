@@ -18,7 +18,8 @@ var modParsers = map[string]ModParser{
 	"-": parseShift,
 }
 var sigParsers = map[string]SigParser{
-	"": parseRawSignal,
+	"":  parseRawSignal,
+	"{": parseSignal,
 }
 
 type Parser struct {
@@ -43,11 +44,14 @@ func (p *Parser) Start(wtch bool) error {
 		return err
 	}
 	if wtch {
-		watch.OnFileUpdate(p.file, func() {
+		err := watch.OnFileUpdate(p.file, func() {
 			if err := p.parse(); err != nil {
 				log.Printf("Parsing %v failed: %v", p.file, err)
 			}
 		})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -63,7 +67,7 @@ func (p *Parser) parse() error {
 	sc.Split(bufio.ScanLines)
 	for sc.Scan() {
 		text := sc.Text()
-		if text == "" {
+		if text == "" || text[0] == '#' {
 			continue
 		}
 		if err := p.parseLine(text); err != nil {

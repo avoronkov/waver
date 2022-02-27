@@ -48,6 +48,9 @@ func parseAtom(fields []string) (types.ValueFn, int, error) {
 	if n, err := strconv.Atoi(token); err == nil {
 		return common.Const(int64(n)), 1, nil
 	}
+	if n, err := common.ParseStandardNote(token); err == nil {
+		return common.Const(n.Number), 1, nil
+	}
 	if strings.HasPrefix(token, "$") {
 		return common.Var(token[1:]), 1, nil
 	}

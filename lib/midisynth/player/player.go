@@ -72,7 +72,7 @@ func (pi *playerImpl) Read(data []byte) (n int, err error) {
 		}
 		value := int16(maxInt16Amp * pi.wave.Value(pi.tm, pi.ctx))
 		for ch := 0; ch < pi.settings.ChannelNum; ch++ {
-			binary.Write(buff, binary.LittleEndian, value)
+			_ = binary.Write(buff, binary.LittleEndian, value)
 		}
 		pi.tm += pi.dt
 	}

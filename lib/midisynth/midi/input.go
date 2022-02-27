@@ -63,7 +63,7 @@ func (i *Input) Start(ch chan<- *signals.Signal) (err error) {
 
 func (i *Input) Close() error {
 	if i.dumpProcess != nil {
-		i.dumpProcess.Process.Signal(syscall.SIGINT)
+		_ = i.dumpProcess.Process.Signal(syscall.SIGINT)
 	}
 	return nil
 }

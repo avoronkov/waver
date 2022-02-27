@@ -69,14 +69,14 @@ func ParseWavFmt(buf []byte) (*WavFmt, error) {
 }
 
 func (f *WavFmt) Write(w io.Writer) error {
-	io.WriteString(w, "fmt ")
-	binary.Write(w, binary.LittleEndian, f.ChunkSize())
-	binary.Write(w, binary.LittleEndian, f.CompressionCode)
-	binary.Write(w, binary.LittleEndian, f.NumberOfChannels)
-	binary.Write(w, binary.LittleEndian, f.SampleRate)
-	binary.Write(w, binary.LittleEndian, f.AvgBps)
-	binary.Write(w, binary.LittleEndian, f.BlockAlign)
-	binary.Write(w, binary.LittleEndian, f.SignificantBitsPerSample)
+	_, _ = io.WriteString(w, "fmt ")
+	_ = binary.Write(w, binary.LittleEndian, f.ChunkSize())
+	_ = binary.Write(w, binary.LittleEndian, f.CompressionCode)
+	_ = binary.Write(w, binary.LittleEndian, f.NumberOfChannels)
+	_ = binary.Write(w, binary.LittleEndian, f.SampleRate)
+	_ = binary.Write(w, binary.LittleEndian, f.AvgBps)
+	_ = binary.Write(w, binary.LittleEndian, f.BlockAlign)
+	_ = binary.Write(w, binary.LittleEndian, f.SignificantBitsPerSample)
 	if f.ExtraFormatBytes != 0 {
 		return errors.New("Writing Extra Format Bytes is not supported")
 	}
