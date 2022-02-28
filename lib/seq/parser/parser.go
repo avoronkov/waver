@@ -17,9 +17,16 @@ var modParsers = map[string]ModParser{
 	"+": parseShift,
 	"-": parseShift,
 }
+
 var sigParsers = map[string]SigParser{
 	"":  parseRawSignal,
 	"{": parseSignal,
+}
+
+var valueFnParser = map[string]ValueFnParser{}
+
+func init() {
+	valueFnParser["seq"] = parseSequence
 }
 
 type Parser struct {
