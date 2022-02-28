@@ -1,7 +1,6 @@
 package seq
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -75,13 +74,11 @@ func (s *Sequencer) run() error {
 
 func (s *Sequencer) processFuncs(bit int64) error {
 	// eval variables first
-	ctx := types.Context{}
+	ctx := types.NewContext()
 	for _, as := range s.currentVars {
-		if _, exists := ctx[as.name]; exists {
-			return fmt.Errorf("Cannot re-assign variable: %v", as.name)
+		if err := ctx.Put(as.name, as.valueFn); err != nil {
+			return err
 		}
-		value := as.valueFn.Val(bit, ctx)
-		ctx[as.name] = value
 	}
 
 	for _, fn := range s.current {
