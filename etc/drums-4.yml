@@ -1,0 +1,49 @@
+samples:
+  41:
+    sample: "samples/4-1.wav"
+  42:
+    sample: "samples/4-2.wav"
+  43:
+    sample: "samples/4-3.wav"
+  44:
+    sample: "samples/4-4.wav"
+  45:
+    sample: "samples/4-5.wav"
+  46:
+    sample: "samples/4-6.wav"
+  47:
+    sample: "samples/4-7.wav"
+  48:
+    sample: "samples/4-8.wav"
+  49:
+    sample: "samples/4-9.wav"
+  4a:
+    sample: "samples/4-10.wav"
+  4b:
+    sample: "samples/4-11.wav"
+  4c:
+    sample: "samples/4-12.wav"
+  4d:
+    sample: "samples/4-13.wav"
+  4e:
+    sample: "samples/4-14.wav"
+  4f:
+    sample: "samples/4-15.wav"
+  4g:
+    sample: "samples/4-16.wav"
+  4h:
+    sample: "samples/4-17.wav"
+  4i:
+    sample: "samples/4-18.wav"
+  4j:
+    sample: "samples/4-19.wav"
+  4k:
+    sample: "samples/4-20.wav"
+  4l:
+    sample: "samples/4-21.wav"
+  4m:
+    sample: "samples/4-22.wav"
+  4n:
+    sample: "samples/4-23.wav"
+  4o:
+    sample: "samples/4-24.wav"
