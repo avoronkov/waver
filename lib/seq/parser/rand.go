@@ -13,9 +13,9 @@ func parseRandom(fields []string) (types.ValueFn, int, error) {
 		return nil, 0, fmt.Errorf("Not enough arguments for 'seq': %v", fields)
 	}
 
-	values, shift, err := parseList(fields[1:])
+	values, shift, err := parseAtom(fields[1:])
 	if err != nil {
 		return nil, 0, err
 	}
-	return common.Random(values...), shift + 1, nil
+	return common.Random(values), shift + 1, nil
 }
