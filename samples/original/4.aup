@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="4_data" version="1.3.0" audacityversion="2.4.1" sel0="2.2040511545" sel1="2.4700573283" vpos="0" h="2.0688724446" zoom="3447.2884100254" rate="44100.0" snapto="off" selectionformat="seconds" frequencyformat="Hz" bandwidthformat="octaves">
+	<tags>
+		<tag name="Software" value="{&quot;drum_version&quot;:2,&quot;dyna_env&quot;:[3072,8192,2048,8448,0,0,0,0],&quot;end&quot;:[61076066,102528952,136518602,164214324,192733816,211644008,261009350,303857572,333326632,341004332,381356898,394318090,442186036,508525912,569058818,598872806,625111712,642905960,702846400,831013678,870217834,927800586,985776964,1105722772],&quot;fx_active&quot;:false,&quot;fx_params&quot;:[16448,11552,16384,11264,8000,8000,8000,8000],&quot;fx_type&quot;:&quot;spring&quot;,&quot;lfo_active&quot;:false,&quot;lfo_params&quot;:[10856,15359,4952,15800,0,0,0,0],&quot;lfo_type&quot;:&quot;random&quot;,&quot;name&quot;:&quot;gallium&quot;,&quot;octave&quot;:0,&quot;pitch&quot;:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],&quot;playmode&quot;:[5120,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192],&quot;reverse&quot;:[12800,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192],&quot;start&quot;:[0,61145660,102533010,136522660,164218382,192737874,211648066,261013408,303861630,333330690,341008390,381360956,394322148,442190094,508529970,569062876,598876864,625115770,642910016,702858650,831017736,870221892,927804644,985781022],&quot;type&quot;:&quot;drum&quot;,&quot;volume&quot;:[8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,8192,7116,8192,8192,8192,8192]}"/>
+	</tags>
+	<wavetrack name="4" isSelected="1" height="150" minimized="0" channel="2" linked="0" mute="0" solo="0" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="272482">
+				<waveblock start="0">
+					<simpleblockfile filename="eff1f66f.au" len="262144" min="-0.845978" max="0.999969" rms="0.113893"/>
+				</waveblock>
+				<waveblock start="262144">
+					<simpleblockfile filename="eff1fc06.au" len="10338" min="-0.004913" max="0.00647" rms="0.0011"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>
