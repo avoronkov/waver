@@ -69,7 +69,7 @@ func (i *adsrImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 		return math.NaN()
 	}
 
-	return i.wave.Value(tm, ctx) * amp * ctx.Amp
+	return i.wave.Value(tm, ctx) * amp
 }
 
 // Options

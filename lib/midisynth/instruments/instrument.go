@@ -33,7 +33,7 @@ func NewInstrument(wave waves.Wave, fx ...filters.Filter) *Instrument {
 		adsr:          defaultAdsr,
 	}
 
-	/// TODO fix manual / auto filters problem
+	// TODO fix manual / auto filters problem
 	_, timeLimited := wave.(TimeLimitedWave)
 
 	adsrApplied := timeLimited
@@ -91,6 +91,9 @@ func NewInstrument(wave waves.Wave, fx ...filters.Filter) *Instrument {
 	if !manualApplied {
 		in.manualFx = append(in.manualFx, defaultManual)
 	}
+
+	in.fx = append(in.fx, &filters.Volume{})
+	in.manualFx = append(in.manualFx, &filters.Volume{})
 
 	// evaluate resulting wave
 	w := in.initialWave
