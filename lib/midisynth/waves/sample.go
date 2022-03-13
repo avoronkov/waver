@@ -1,6 +1,7 @@
 package waves
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -15,6 +16,49 @@ type Sample struct {
 
 	data    []int16
 	datalen int
+}
+
+func ParseSample(data []byte) (*Sample, error) {
+	f := bytes.NewReader(data)
+	return parseSample(f, int64(len(data)))
+}
+
+func parseSample(f io.ReadSeeker, size int64) (*Sample, error) {
+	reader, err := wav.NewReader(f, size)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create wav.Reader: %w", err)
+	}
+
+	if nc := reader.GetNumChannels(); nc != 1 {
+		return nil, fmt.Errorf("Only mono wav files supported (number of channels: %v)", nc)
+	}
+
+	if bits := reader.GetBitsPerSample(); bits != 16 {
+		return nil, fmt.Errorf("Only 16bit samples are supported: %v", bits)
+	}
+
+	s := &Sample{
+		sampleRate: float64(reader.GetSampleRate()),
+	}
+
+	sampleCount := int(reader.GetSampleCount())
+	for i := 0; i < sampleCount; i++ {
+		sample, err := reader.ReadRawSample()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("ReadRawSample failed: %w", err)
+		}
+		if len(sample) != 2 {
+			return nil, fmt.Errorf("Sample read size is not 16bit: %v", len(sample))
+		}
+		num := binary.LittleEndian.Uint16(sample)
+		s.data = append(s.data, int16(num))
+	}
+	s.datalen = len(s.data)
+	return s, nil
+
 }
 
 func ReadSample(file string) (*Sample, error) {

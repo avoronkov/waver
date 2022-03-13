@@ -12,6 +12,7 @@ import (
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
 	"gitlab.com/avoronkov/waver/lib/watch"
+	"gitlab.com/avoronkov/waver/static"
 
 	yaml "gopkg.in/yaml.v3"
 )
@@ -167,7 +168,11 @@ func (c *Config) handleWave(inst int, wave string) (waves.Wave, error) {
 
 func (c *Config) handleSample(sample string) (waves.Wave, error) {
 	c.log(-1, "> Using sample '%v'", sample)
-	return waves.ReadSample(sample)
+	data, err := static.Files.ReadFile(sample)
+	if err != nil {
+		return nil, err
+	}
+	return waves.ParseSample(data)
 }
 
 func (c *Config) handleFilter(instr int, f Filter) (filters.Filter, error) {

@@ -1,6 +1,8 @@
 package main
 
-import "flag"
+import (
+	"flag"
+)
 
 var (
 	udpPort  int
@@ -12,6 +14,8 @@ var (
 	dump string
 
 	fileInput string
+
+	newProject string
 )
 
 func init() {
@@ -33,4 +37,6 @@ func init() {
 
 	flag.StringVar(&fileInput, "input-file", "", "input sequencer file")
 	flag.StringVar(&fileInput, "i", "", "input sequencer file (shorthand)")
+
+	flag.StringVar(&newProject, "new", "", "initialize new project")
 }

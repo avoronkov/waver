@@ -43,8 +43,7 @@ type timeShiftImpl struct {
 func (i *timeShiftImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
 	newFreq := (i.opts.shifter.Value(t, i.opts.shifterCtx)*i.opts.shifterCtx.Amp + 1.0) * ctx.Freq
 	newCtx := waves.NewNoteCtx(newFreq, ctx.Amp, ctx.Dur)
-	res := i.input.Value(t, newCtx)
-	return res
+	return i.input.Value(t, newCtx)
 }
 
 // Options

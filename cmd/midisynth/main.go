@@ -2,8 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 
+	"gitlab.com/avoronkov/waver/etc"
 	"gitlab.com/avoronkov/waver/lib/midisynth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/config"
 	"gitlab.com/avoronkov/waver/lib/midisynth/dumper"
@@ -12,12 +17,20 @@ import (
 	"gitlab.com/avoronkov/waver/lib/midisynth/synth"
 	"gitlab.com/avoronkov/waver/lib/midisynth/udp"
 	"gitlab.com/avoronkov/waver/lib/notes"
+	"gitlab.com/avoronkov/waver/lib/project"
 	"gitlab.com/avoronkov/waver/lib/seq"
 	"gitlab.com/avoronkov/waver/lib/seq/parser"
 )
 
 func main() {
 	flag.Parse()
+
+	if newProject != "" {
+		if err := project.New(newProject, etc.DefaultConfig); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 
 	udpInput := udp.New(udpPort)
 
@@ -45,7 +58,7 @@ func main() {
 
 	// Instruments
 	instSet := instruments.NewSet()
-	cfg := config.New(configPath, instSet)
+	cfg := config.New(getConfigPath(), instSet)
 	check("MidiSynth initialization", cfg.InitMidiSynth())
 	check("Config StartUpdateLoop", cfg.StartUpdateLoop())
 	// .
@@ -90,4 +103,16 @@ func check(msg string, err error) {
 	if err != nil {
 		log.Fatal(msg, err)
 	}
+}
+
+func getConfigPath() string {
+	log.Printf("[debug] fileInput = %v", fileInput)
+	if fileInput != "" {
+		confPath := fmt.Sprintf("%v.yml", strings.TrimSuffix(fileInput, filepath.Ext(fileInput)))
+		log.Printf("[debug] confPath = %v", confPath)
+		if _, err := os.Stat(confPath); err == nil {
+			return confPath
+		}
+	}
+	return configPath
 }
