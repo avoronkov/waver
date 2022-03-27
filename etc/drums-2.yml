@@ -1,0 +1,21 @@
+samples:
+  2k:
+    sample: "samples/2-1-kick.wav"
+  2s:
+    sample: "samples/2-3-snare.wav"
+  2h:
+    sample: "samples/2-9-hat.wav"
+  2r:
+    sample: "samples/2-14-ride.wav"
+  2c:
+    sample: "samples/2-16-crash.wav"
+  2o:
+    sample: "samples/2-11-hat-open.wav"
+  2l:
+    sample: "samples/2-6-clap.wav"
+  2t:
+    sample: "samples/2-2-tom.wav"
+  2a:
+    sample: "samples/2-7-tambourine.wav"
+  2i:
+    sample: "samples/2-5-rim.wav"
