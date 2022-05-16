@@ -197,6 +197,8 @@ func (c *Config) handleFilter(instr int, f Filter) (filters.Filter, error) {
 			return c.handleHarmonizer(instr, opts)
 		case "flanger":
 			return c.handleFlanger(instr, opts)
+		case "exp":
+			return c.handleExp(instr, opts)
 		}
 		return nil, fmt.Errorf("Unknown filter: %v", name)
 	}
@@ -383,6 +385,21 @@ func (c *Config) handleFlanger(inst int, opts map[string]interface{}) (filters.F
 	}
 
 	return filters.NewFlanger(o...), nil
+}
+
+func (c *Config) handleExp(inst int, opts map[string]interface{}) (filters.Filter, error) {
+	c.log(inst, "> Using Exponent filter")
+	val := 1.0
+	for param, value := range opts {
+		switch param {
+		case "value":
+			val = c.valueFloat64(inst, value)
+			c.log(inst, "  >> with %v = %v", param, val)
+		default:
+			return nil, fmt.Errorf("Unknown Exponent parameter: %v", param)
+		}
+	}
+	return filters.NewExponent(val), nil
 }
 
 func (c *Config) log(inst int, format string, args ...interface{}) {
