@@ -13,6 +13,7 @@ func Every(n types.ValueFn) types.Modifier {
 			val := n.Val(bit, ctx)
 			if nVal, ok := val.(Num); ok {
 				if bit%int64(nVal) == 0 {
+					_ = ctx.Put("_dur", Const(int64(nVal)))
 					return fn.Eval(bit, ctx)
 				}
 			} else if nList, ok := val.(List); ok {
@@ -27,10 +28,12 @@ func Every(n types.ValueFn) types.Modifier {
 				x := bit % loop
 				var s int64
 				for _, item := range nList {
+					cur := int64(item.(Num))
 					if x == s {
+						_ = ctx.Put("_dur", Const(cur))
 						return fn.Eval(bit, ctx)
 					}
-					s += int64(item.(Num))
+					s += cur
 				}
 			} else {
 				panic(fmt.Errorf("Unknown type: %v (%T)", val, val))
