@@ -2,9 +2,11 @@ package parser
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
+	"gitlab.com/avoronkov/waver/lib/notes"
 	"gitlab.com/avoronkov/waver/lib/seq/common"
 	"gitlab.com/avoronkov/waver/lib/seq/types"
 )
@@ -13,19 +15,20 @@ import (
 // variable: $a, $b, $c
 // function: seq [ 1 2 3 ]
 // atom in braces: ( rand [ 1 2 3 ] )
-func parseAtom(fields []string) (types.ValueFn, int, error) {
+func parseAtom(scale notes.Scale, fields []string) (types.ValueFn, int, error) {
 	token := fields[0]
 	if n, err := strconv.Atoi(token); err == nil {
 		return common.Const(int64(n)), 1, nil
 	}
-	if n, err := common.ParseStandardNote(token); err == nil {
-		return common.Const(n.Number), 1, nil
+	if n, ok := scale.Parse(token); ok {
+		log.Printf("Scale.Parse(%v) = %v", token, n)
+		return common.Const(int64(n.Num)), 1, nil
 	}
 	if strings.HasPrefix(token, "$") {
 		return common.Var(token[1:]), 1, nil
 	}
 	if token == "[" {
-		fn, shift, err := parseList(fields)
+		fn, shift, err := parseList(scale, fields)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -33,7 +36,7 @@ func parseAtom(fields []string) (types.ValueFn, int, error) {
 		return common.Lst(fn...), shift + 2, nil
 	}
 	if parser, ok := valueFnParser[token]; ok {
-		fn, shift, err := parser(fields)
+		fn, shift, err := parser(scale, fields)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -42,7 +45,7 @@ func parseAtom(fields []string) (types.ValueFn, int, error) {
 	return nil, 0, fmt.Errorf("Don't know how to parse: %v", fields)
 }
 
-func parseList(fields []string) ([]types.ValueFn, int, error) {
+func parseList(scale notes.Scale, fields []string) ([]types.ValueFn, int, error) {
 	atoms := []types.ValueFn{}
 	l := len(fields)
 	i := 1
@@ -51,7 +54,7 @@ func parseList(fields []string) ([]types.ValueFn, int, error) {
 		if token == "]" {
 			return atoms, i + 1, nil
 		}
-		fn, shift, err := parseAtom(fields[i:])
+		fn, shift, err := parseAtom(scale, fields[i:])
 		if err != nil {
 			return nil, 0, err
 		}

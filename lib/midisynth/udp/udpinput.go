@@ -7,19 +7,23 @@ import (
 	"net"
 
 	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
+	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
 type UdpInput struct {
 	port int
 
 	listener net.PacketConn
+
+	scale notes.Scale
 }
 
 var _ signals.Input = (*UdpInput)(nil)
 
-func New(port int) *UdpInput {
+func New(port int, scale notes.Scale) *UdpInput {
 	return &UdpInput{
-		port: port,
+		port:  port,
+		scale: scale,
 	}
 }
 
@@ -43,7 +47,7 @@ func (u *UdpInput) Start(ch chan<- *signals.Signal) (err error) {
 				log.Printf("[ERROR] %v (%T, %v)", err, err, err.(*net.OpError).Unwrap())
 				continue
 			}
-			sig, err := ParseMessage(buff[:n])
+			sig, err := ParseMessage(buff[:n], u.scale)
 			if err != nil {
 				log.Printf("[ERROR] %v", err)
 				continue
@@ -60,13 +64,14 @@ func (u *UdpInput) Close() error {
 	return u.listener.Close()
 }
 
-func ParseMessage(msg []byte) (*signals.Signal, error) {
+func ParseMessage(msg []byte, scale notes.Scale) (*signals.Signal, error) {
 	if len(msg) < 3 {
 		return nil, nil
 	}
 	inst := parseValue(msg[0])
 	octave := int(msg[1] - '0')
-	note := string(msg[2])
+	nt := string(msg[2])
+
 	amp := 0.5
 	if len(msg) >= 4 {
 		amp = 0.1 * float64(parseValue(msg[3]))
@@ -86,10 +91,14 @@ func ParseMessage(msg []byte) (*signals.Signal, error) {
 		}, nil
 	}
 
+	note, ok := scale.Note(octave, nt)
+	if !ok {
+		return nil, fmt.Errorf("Cannot parse UDP note: %v%v", octave, nt)
+	}
+
 	// regular notes
 	return &signals.Signal{
 		Instrument:   inst,
-		Octave:       octave,
 		Note:         note,
 		DurationBits: dur,
 		Amp:          amp,

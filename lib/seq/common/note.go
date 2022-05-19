@@ -4,19 +4,21 @@ import (
 	"fmt"
 
 	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
-	"gitlab.com/avoronkov/waver/lib/midisynth/udp"
+	"gitlab.com/avoronkov/waver/lib/notes"
 	"gitlab.com/avoronkov/waver/lib/seq/types"
 )
 
 type note struct {
+	scale notes.Scale
 	instr types.ValueFn
 	note  types.ValueFn
 	amp   types.ValueFn
 	dur   types.ValueFn
 }
 
-func Note(instr, nt types.ValueFn, opts ...func(*note)) types.Signaler {
+func Note(scale notes.Scale, instr, nt types.ValueFn, opts ...func(*note)) types.Signaler {
 	n := &note{
+		scale: scale,
 		instr: instr,
 		note:  nt,
 		amp:   Const(5),
@@ -43,12 +45,13 @@ func (n *note) Eval(bit int64, ctx types.Context) (res []signals.Signal) {
 func (n *note) evalInstr(bit int64, ctx types.Context, in int64) (res []signals.Signal) {
 	nt := n.note.Val(bit, ctx)
 	for _, i := range toInt64List(nt) {
-		res = append(res, n.evalInstrNote(bit, ctx, in, i)...)
+		nt := n.seqNoteNumberToNote(i)
+		res = append(res, n.evalInstrNote(bit, ctx, in, nt)...)
 	}
 	return
 }
 
-func (n *note) evalInstrNote(bit int64, ctx types.Context, in, nt int64) (res []signals.Signal) {
+func (n *note) evalInstrNote(bit int64, ctx types.Context, in int64, nt notes.Note) (res []signals.Signal) {
 	amp := n.amp.Val(bit, ctx)
 	for _, i := range toInt64List(amp) {
 		res = append(res, n.evalIntrNoteAmp(bit, ctx, in, nt, i)...)
@@ -56,7 +59,15 @@ func (n *note) evalInstrNote(bit int64, ctx types.Context, in, nt int64) (res []
 	return
 }
 
-func (n *note) evalIntrNoteAmp(bit int64, ctx types.Context, inst, note, amp int64) (res []signals.Signal) {
+func (n *note) seqNoteNumberToNote(num int64) notes.Note {
+	nt, ok := n.scale.ByNumber(int(num))
+	if !ok {
+		panic(fmt.Errorf("Unknown note index: %v", num))
+	}
+	return nt
+}
+
+func (n *note) evalIntrNoteAmp(bit int64, ctx types.Context, inst int64, note notes.Note, amp int64) (res []signals.Signal) {
 	dur := n.dur.Val(bit, ctx)
 	durList := toInt64List(dur)
 	for _, d := range durList {
@@ -65,19 +76,17 @@ func (n *note) evalIntrNoteAmp(bit int64, ctx types.Context, inst, note, amp int
 	return
 }
 
-func (n *note) format(inst, note, amp, dur int64) signals.Signal {
-	noteT, err := ParseStandardNoteCode(note)
-	if err != nil {
-		panic(err)
-	}
-	s := fmt.Sprintf("%c%s%c%c", toRune(inst), noteT.String(), toRune(amp), toRune(dur))
-	sig, err := udp.ParseMessage([]byte(s))
-	if err != nil {
-		panic(err)
+func (n *note) format(inst int64, note notes.Note, amp, dur int64) signals.Signal {
+	sig := &signals.Signal{
+		Instrument:   int(inst),
+		Note:         note,
+		DurationBits: int(dur),
+		Amp:          float64(amp) / 16.0,
 	}
 	return *sig
 }
 
+/*
 func toRune(n int64) rune {
 	if n >= 0 && n < 10 {
 		return '0' + rune(n)
@@ -87,6 +96,7 @@ func toRune(n int64) rune {
 	}
 	panic(fmt.Errorf("Cannot convert value: %v", n))
 }
+*/
 
 // Options
 func NoteInstr(in types.ValueFn) func(*note) {

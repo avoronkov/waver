@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
+	"gitlab.com/avoronkov/waver/lib/notes"
 )
 
 type Input struct {
@@ -17,15 +18,17 @@ type Input struct {
 	dumpProcess *exec.Cmd
 
 	keyMap map[int]OctaveNote
+	scale  notes.Scale
 }
 
 var _ signals.Input = (*Input)(nil)
 
-func NewInput(midiPort int) *Input {
+func NewInput(midiPort int, scale notes.Scale) *Input {
 	return &Input{
 		midiPort: midiPort,
 		// TODO configure keymap
 		keyMap: KeyMap,
+		scale:  scale,
 	}
 }
 
@@ -45,7 +48,7 @@ func (i *Input) Start(ch chan<- *signals.Signal) (err error) {
 		for scanner.Scan() {
 			text := scanner.Text()
 			log.Printf("[MIDI] Got event: %v", text)
-			sig, err := parseLine(i.keyMap, text)
+			sig, err := parseLine(i.keyMap, i.scale, text)
 			if err != nil {
 				log.Printf("[ERROR] parseLine failed: %v", text)
 				continue
@@ -68,7 +71,7 @@ func (i *Input) Close() error {
 	return nil
 }
 
-func parseLine(keyMap map[int]OctaveNote, line string) (*signals.Signal, error) {
+func parseLine(keyMap map[int]OctaveNote, scale notes.Scale, line string) (*signals.Signal, error) {
 	fields := strings.Fields(line)
 	log.Printf("> %#v", fields)
 	if len(fields) < 3 {
@@ -77,14 +80,14 @@ func parseLine(keyMap map[int]OctaveNote, line string) (*signals.Signal, error) 
 	switch fmt.Sprintf("%v %v", fields[1], fields[2]) {
 	case "Note on":
 		log.Printf("Note on")
-		key, err := parseNote(keyMap, fields)
+		key, err := parseNote(keyMap, fields, scale)
 		if err != nil {
 			log.Printf("parseNote failed: %v (%v)", err, fields)
 		}
 		return key, nil
 	case "Note off":
 		log.Printf("Note off")
-		key, err := parseNote(keyMap, fields)
+		key, err := parseNote(keyMap, fields, scale)
 		if err != nil {
 			log.Printf("parseNote failed: %v (%v)", err, fields)
 		}
@@ -104,7 +107,7 @@ func parseLine(keyMap map[int]OctaveNote, line string) (*signals.Signal, error) 
 	return nil, nil
 }
 
-func parseNote(keyMap map[int]OctaveNote, fields []string) (key *signals.Signal, err error) {
+func parseNote(keyMap map[int]OctaveNote, fields []string, scale notes.Scale) (key *signals.Signal, err error) {
 	key = &signals.Signal{
 		Manual: true,
 	}
@@ -122,8 +125,11 @@ func parseNote(keyMap map[int]OctaveNote, fields []string) (key *signals.Signal,
 		if !ok {
 			return nil, fmt.Errorf("Unknown note index: %v", noteIdx)
 		}
-		key.Octave = on.Octave
-		key.Note = on.Note
+		note, ok := scale.Note(on.Octave, on.Note)
+		if !ok {
+			return nil, fmt.Errorf("Unknown note: %v%v", on.Octave, on.Note)
+		}
+		key.Note = note
 	} else {
 		return nil, fmt.Errorf("Cannot parse 'note' section")
 	}

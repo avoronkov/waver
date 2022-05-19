@@ -19,6 +19,7 @@ import (
 	"gitlab.com/avoronkov/waver/lib/notes"
 	"gitlab.com/avoronkov/waver/lib/project"
 	"gitlab.com/avoronkov/waver/lib/seq"
+	"gitlab.com/avoronkov/waver/lib/seq/common"
 	"gitlab.com/avoronkov/waver/lib/seq/parser"
 )
 
@@ -32,20 +33,32 @@ func main() {
 		return
 	}
 
-	udpInput := udp.New(udpPort)
+	var scale notes.Scale
+	if edo19 {
+		log.Printf("Using EDO-19 scale.")
+		scale = notes.NewEdo19()
+	} else {
+		log.Printf("Using Standard 12 tone scale.")
+		scale = notes.NewStandard()
+	}
+
+	// TODO fix this a little
+	common.Scale = scale
+
+	udpInput := udp.New(udpPort, scale)
 
 	opts := []func(*midisynth.MidiSynth){
 		midisynth.WithSignalInput(udpInput),
 	}
 
 	if midiPort > 0 {
-		midiInput := midi.NewInput(midiPort)
+		midiInput := midi.NewInput(midiPort, scale)
 		opts = append(opts, midisynth.WithSignalInput(midiInput))
 	}
 
 	if fileInput != "" {
 		sequencer := seq.NewSequencer()
-		ps := parser.New(fileInput, sequencer)
+		ps := parser.New(fileInput, sequencer, scale)
 		check("Parser start", ps.Start(true))
 		opts = append(opts, midisynth.WithSignalInput(sequencer))
 	}
@@ -66,13 +79,7 @@ func main() {
 	// Audio output
 	audioOpts := []func(*synth.Output){
 		synth.WithInstruments(instSet),
-	}
-	if edo19 {
-		log.Printf("Using EDO-19 scale.")
-		audioOpts = append(audioOpts, synth.WithScale(notes.NewEdo19()))
-	} else {
-		log.Printf("Using Standard 12 tone scale.")
-		audioOpts = append(audioOpts, synth.WithScale(notes.NewStandard()))
+		synth.WithScale(scale),
 	}
 	audioOutput, err := synth.New(audioOpts...)
 	check("Syntheziser output", err)

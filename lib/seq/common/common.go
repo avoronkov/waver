@@ -3,8 +3,11 @@ package common
 import (
 	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
 	"gitlab.com/avoronkov/waver/lib/midisynth/udp"
+	"gitlab.com/avoronkov/waver/lib/notes"
 	"gitlab.com/avoronkov/waver/lib/seq/types"
 )
+
+var Scale notes.Scale
 
 func Chain(fn types.Signaler, modifiers ...types.Modifier) types.Signaler {
 	res := fn
@@ -15,7 +18,7 @@ func Chain(fn types.Signaler, modifiers ...types.Modifier) types.Signaler {
 }
 
 func Sig(signal string) (types.SignalFn, error) {
-	sig, err := udp.ParseMessage([]byte(signal))
+	sig, err := udp.ParseMessage([]byte(signal), Scale)
 	if err != nil {
 		return nil, err
 	}

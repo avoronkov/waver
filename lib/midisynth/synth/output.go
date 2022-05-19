@@ -29,7 +29,7 @@ type Output struct {
 	instruments InstrumentSet
 
 	// Octave -> Note -> Release fn()
-	notesReleases map[int]map[string]func()
+	notesReleases map[notes.Note]func()
 }
 
 var _ signals.Output = (*Output)(nil)
@@ -44,7 +44,7 @@ func New(opts ...func(*Output)) (*Output, error) {
 	output := &Output{
 		settings:      wav.Default,
 		tempo:         120,
-		notesReleases: make(map[int]map[string]func()),
+		notesReleases: make(map[notes.Note]func()),
 	}
 	for _, opt := range opts {
 		opt(output)
@@ -82,15 +82,14 @@ func (o *Output) ProcessAsync(tm float64, s *signals.Signal) {
 		err = o.PlaySample(s.Sample, dur, s.Amp)
 	} else if !s.Manual {
 		// Play note
-		err = o.PlayNote(s.Instrument, s.Octave, s.Note, s.DurationBits, s.Amp)
+		err = o.PlayNote(s.Instrument, s.Note, s.DurationBits, s.Amp)
 	} else if s.Stop {
 		// Stop manual note
-		o.releaseNote(s.Octave, s.Note)
+		o.releaseNote(s.Note)
 	} else {
 		// Play manual note
 		stop, err := o.PlayNoteControlled(
 			s.Instrument,
-			s.Octave,
 			s.Note,
 			s.Amp,
 		)
@@ -98,7 +97,7 @@ func (o *Output) ProcessAsync(tm float64, s *signals.Signal) {
 			log.Printf("[Manual] error: %v", err)
 			return
 		}
-		o.storeNoteReleaseFn(s.Octave, s.Note, stop)
+		o.storeNoteReleaseFn(s.Note, stop)
 	}
 	if err != nil {
 		log.Printf("Error: %v", err)
@@ -127,11 +126,8 @@ func (o *Output) PlaySample(name string, duration float64, amp float64) error {
 	return nil
 }
 
-func (o *Output) PlayNote(instr int, octave int, note string, durationBits int, amp float64) error {
-	freq, ok := o.scale.Note(octave, note)
-	if !ok {
-		return fmt.Errorf("Unknown note: %v%v", octave, note)
-	}
+func (o *Output) PlayNote(instr int, note notes.Note, durationBits int, amp float64) error {
+	freq := note.Freq
 	dur := 15.0 * float64(durationBits) / float64(o.tempo)
 	o.playNote(instr, freq, dur, amp)
 	return nil
@@ -154,40 +150,24 @@ func (o *Output) playNote(inst int, hz float64, dur float64, amp float64) {
 	runtime.KeepAlive(p)
 }
 
-func (o *Output) storeNoteReleaseFn(octave int, note string, release func()) {
-	if _, ok := o.notesReleases[octave]; ok {
-		o.notesReleases[octave][note] = release
-	} else {
-		o.notesReleases[octave] = map[string]func(){
-			note: release,
-		}
+func (o *Output) storeNoteReleaseFn(note notes.Note, release func()) {
+	o.notesReleases[note] = release
+}
+
+func (o *Output) releaseNote(note notes.Note) {
+	if release, ok := o.notesReleases[note]; ok {
+		release()
+		delete(o.notesReleases, note)
 	}
 }
 
-func (o *Output) releaseNote(octave int, note string) {
-	if notes, ok := o.notesReleases[octave]; ok {
-		if release, ok := notes[note]; ok {
-			release()
-			delete(notes, note)
-		}
-	}
-}
-
-func (o *Output) PlayNoteControlled(instr int, octave int, note string, amp float64) (stop func(), err error) {
-	freq, ok := o.scale.Note(octave, note)
-	if !ok {
-		return nil, fmt.Errorf("Unknown note: %v%v", octave, note)
-	}
-
-	return o.playNoteControlled(instr, freq, amp)
-}
-
-func (o *Output) playNoteControlled(inst int, hz float64, amp float64) (stop func(), err error) {
+func (o *Output) PlayNoteControlled(inst int, note notes.Note, amp float64) (stop func(), err error) {
 	wave, ok := o.instruments.WaveControlled(inst)
 	if !ok {
 		return nil, fmt.Errorf("Unknown instrument: %v", inst)
 	}
 
+	hz := note.Freq
 	data, done := o.play.PlayContext(wave, waves.NewNoteCtx(hz, amp, math.Inf(+1)))
 
 	go func() {

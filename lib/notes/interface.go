@@ -1,7 +1,9 @@
 package notes
 
 type Scale interface {
-	Note(octave int, note string) (hz float64, ok bool)
+	Note(octave int, note string) (Note, bool)
+	Parse(s string) (Note, bool)
+	ByNumber(n int) (Note, bool)
 }
 
 type EdoScale interface {

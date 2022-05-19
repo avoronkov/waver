@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"gitlab.com/avoronkov/waver/lib/notes"
 	"gitlab.com/avoronkov/waver/lib/seq/common"
 	"gitlab.com/avoronkov/waver/lib/seq/types"
 	"gitlab.com/avoronkov/waver/lib/watch"
@@ -44,12 +45,15 @@ type Parser struct {
 
 	modParsers map[string]ModParser
 	sigParsers map[string]SigParser
+
+	scale notes.Scale
 }
 
-func New(file string, seq Seq) *Parser {
+func New(file string, seq Seq, scale notes.Scale) *Parser {
 	return &Parser{
 		file:       file,
 		seq:        seq,
+		scale:      scale,
 		modParsers: modParsers,
 		sigParsers: sigParsers,
 	}
@@ -116,7 +120,7 @@ func (p *Parser) parseLine(line string) error {
 	} else if len(fields) >= 2 && fields[1] == "=" {
 		// var = atom
 		// TODO check shift
-		vfn, _, err := parseAtom(fields[2:])
+		vfn, _, err := parseAtom(p.scale, fields[2:])
 		if err != nil {
 			return err
 		}
@@ -131,7 +135,7 @@ func (p *Parser) parseModifiers(fields []string) (result []types.Modifier, err e
 	l := len(fields)
 	for i := 0; i < l; {
 		if parser, ok := p.modParsers[fields[i]]; ok {
-			mod, shift, err := parser(fields[i:])
+			mod, shift, err := parser(p.scale, fields[i:])
 			if err != nil {
 				return nil, err
 			}
@@ -155,7 +159,7 @@ func (p *Parser) parseSignal(fields []string) (result []types.Signaler, err erro
 				return nil, fmt.Errorf("Don't know how to parse signal: %q", fields[i])
 			}
 		}
-		sig, shift, err := parser(fields[i:])
+		sig, shift, err := parser(p.scale, fields[i:])
 		if err != nil {
 			return nil, err
 		}

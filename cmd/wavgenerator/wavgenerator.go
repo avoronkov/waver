@@ -112,7 +112,7 @@ func (g *WavGenerator) processSignal(s *dumper.SignalJson) error {
 		return err
 	}
 	// 3. TODO Calculate the frequency
-	freq, _ := g.scale.Note(s.Octave, s.Note)
+	freq := s.Note.Freq
 
 	// 4. Calculate the duration
 	if s.DurationBits == 0 {
