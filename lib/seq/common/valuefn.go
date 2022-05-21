@@ -17,3 +17,9 @@ func Lst(values ...types.ValueFn) types.ValueFn {
 		return res
 	})
 }
+
+func FloatConst(f float64) types.ValueFn {
+	return types.ValueFunc(func(bit int64, ctx types.Context) types.Value {
+		return Float(f)
+	})
+}

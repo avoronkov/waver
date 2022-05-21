@@ -44,9 +44,24 @@ func (n *note) Eval(bit int64, ctx types.Context) (res []signals.Signal) {
 
 func (n *note) evalInstr(bit int64, ctx types.Context, in int64) (res []signals.Signal) {
 	nt := n.note.Val(bit, ctx)
-	for _, i := range toInt64List(nt) {
-		nt := n.seqNoteNumberToNote(i)
-		res = append(res, n.evalInstrNote(bit, ctx, in, nt)...)
+	if v, ok := nt.(Num); ok {
+		nt := n.seqNoteNumberToNote(int64(v))
+		return n.evalInstrNote(bit, ctx, in, nt)
+	} else if f, ok := nt.(Float); ok {
+		nt := notes.Note{Freq: float64(f)}
+		return n.evalInstrNote(bit, ctx, in, nt)
+	} else if l, ok := nt.(List); ok {
+		for _, item := range l {
+			if i, ok := item.(Num); ok {
+				nt := n.seqNoteNumberToNote(int64(i))
+				res = append(res, n.evalInstrNote(bit, ctx, in, nt)...)
+			} else if f, ok := item.(Float); ok {
+				nt := notes.Note{Freq: float64(f)}
+				res = append(res, n.evalInstrNote(bit, ctx, in, nt)...)
+			} else {
+				panic(fmt.Errorf("Don't know how to convert to Note: %v (%T)", item, item))
+			}
+		}
 	}
 	return
 }
@@ -85,18 +100,6 @@ func (n *note) format(inst int64, note notes.Note, amp, dur int64) signals.Signa
 	}
 	return *sig
 }
-
-/*
-func toRune(n int64) rune {
-	if n >= 0 && n < 10 {
-		return '0' + rune(n)
-	}
-	if n >= 10 {
-		return 'A' + rune(n) - 10
-	}
-	panic(fmt.Errorf("Cannot convert value: %v", n))
-}
-*/
 
 // Options
 func NoteInstr(in types.ValueFn) func(*note) {

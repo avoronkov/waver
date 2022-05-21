@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -20,8 +19,10 @@ func parseAtom(scale notes.Scale, fields []string) (types.ValueFn, int, error) {
 	if n, err := strconv.Atoi(token); err == nil {
 		return common.Const(int64(n)), 1, nil
 	}
+	if n, err := strconv.ParseFloat(token, 64); err == nil {
+		return common.FloatConst(n), 1, nil
+	}
 	if n, ok := scale.Parse(token); ok {
-		log.Printf("Scale.Parse(%v) = %v", token, n)
 		return common.Const(int64(n.Num)), 1, nil
 	}
 	if strings.HasPrefix(token, "$") {
