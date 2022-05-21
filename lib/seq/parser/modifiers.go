@@ -37,3 +37,16 @@ func parseShift(scale notes.Scale, fields []string) (types.Modifier, int, error)
 
 	return common.Shift(fn), shift + 1, nil
 }
+
+func parseBefore(scale notes.Scale, fields []string) (types.Modifier, int, error) {
+	if len(fields) < 2 {
+		return nil, 0, fmt.Errorf("Not enough arguments for Before ('<')")
+	}
+
+	fn, shift, err := parseAtom(scale, fields[1:])
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return common.Before(fn), shift + 1, nil
+}

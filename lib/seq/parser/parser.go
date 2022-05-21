@@ -17,6 +17,7 @@ var modParsers = map[string]ModParser{
 	":": parseEvery,
 	"+": parseShift,
 	"-": parseShift,
+	"<": parseBefore,
 }
 
 var sigParsers = map[string]SigParser{

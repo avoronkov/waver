@@ -22,7 +22,7 @@ func Every(n types.ValueFn) types.Modifier {
 					if it, ok := item.(Num); ok {
 						loop += int64(it)
 					} else {
-						panic(fmt.Errorf("Cannot use item as argument for Every: %v (%v)", item, item))
+						panic(fmt.Errorf("Cannot use item as argument for Every: %v (%T)", item, item))
 					}
 				}
 				x := bit % loop
