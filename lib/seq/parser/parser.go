@@ -38,6 +38,8 @@ func init() {
 		"min":  makeMusParser("min", 0, 3, 7),
 		"min7": makeMusParser("min", 0, 3, 7, 10),
 		"min9": makeMusParser("min", 0, 3, 7, 10, 14),
+		"up":   parseUpDown,
+		"down": parseUpDown,
 	}
 }
 
