@@ -34,3 +34,17 @@ func (c *contextImpl) Get(name string, bit int64) Value {
 	c.values[name] = value
 	return value
 }
+
+func (c *contextImpl) Copy() Context {
+	cc := &contextImpl{
+		data:   map[string]ValueFn{},
+		values: map[string]Value{},
+	}
+	for k, v := range c.data {
+		cc.data[k] = v
+	}
+	for k, v := range c.values {
+		cc.values[k] = v
+	}
+	return cc
+}

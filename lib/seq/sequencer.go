@@ -82,10 +82,11 @@ func (s *Sequencer) processFuncs(bit int64) error {
 	}
 
 	for _, fn := range s.current {
-
-		signals := fn.Eval(bit, ctx)
+		ct := ctx.Copy()
+		signals := fn.Eval(bit, ct)
 		for _, sig := range signals {
-			s.ch <- &sig
+			sg := sig
+			s.ch <- &sg
 		}
 	}
 	return nil

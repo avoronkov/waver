@@ -35,4 +35,5 @@ func (f ValueFunc) Val(bit int64, ctx Context) Value {
 type Context interface {
 	Put(name string, fn ValueFn) error
 	Get(name string, bit int64) Value
+	Copy() Context
 }
