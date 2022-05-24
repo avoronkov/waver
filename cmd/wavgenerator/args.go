@@ -7,6 +7,7 @@ var (
 	output     string
 	configPath string
 	edo19      bool
+	mono       bool
 )
 
 func init() {
@@ -21,4 +22,6 @@ func init() {
 
 	flag.BoolVar(&edo19, "edo19", false, "Use EDO19 scale")
 	flag.BoolVar(&edo19, "19", false, "Use EDO19 scale (shorthand)")
+
+	flag.BoolVar(&mono, "mono", false, "Generate mono wav file")
 }

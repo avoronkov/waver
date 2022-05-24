@@ -199,6 +199,8 @@ func (c *Config) handleFilter(instr int, f Filter) (filters.Filter, error) {
 			return c.handleFlanger(instr, opts)
 		case "exp":
 			return c.handleExp(instr, opts)
+		case "movexp":
+			return c.handleMovExp(instr, opts)
 		}
 		return nil, fmt.Errorf("Unknown filter: %v", name)
 	}
@@ -379,6 +381,10 @@ func (c *Config) handleFlanger(inst int, opts map[string]interface{}) (filters.F
 			v := c.valueFloat64(inst, value)
 			c.log(inst, "  >> with %v = %v", param, v)
 			o = append(o, filters.FlangerFreq(v))
+		case "shift":
+			v := c.valueFloat64(inst, value)
+			c.log(inst, "  >> with %v = %v", param, v)
+			o = append(o, filters.FlangerShift(v))
 		default:
 			return nil, fmt.Errorf("Unknown Flanger parameter: %v", param)
 		}
@@ -400,6 +406,30 @@ func (c *Config) handleExp(inst int, opts map[string]interface{}) (filters.Filte
 		}
 	}
 	return filters.NewExponent(val), nil
+}
+
+func (c *Config) handleMovExp(inst int, opts map[string]interface{}) (filters.Filter, error) {
+	c.log(inst, "> Using Moving Exponent filter")
+	var o []func(*filters.MovingExponent)
+	for param, value := range opts {
+		switch param {
+		case "initialValue":
+			val := c.valueFloat64(inst, value)
+			c.log(inst, "  >> with %v = %v", param, val)
+			o = append(o, filters.MovingExponentInitialValue(val))
+		case "speed":
+			val := c.valueFloat64(inst, value)
+			c.log(inst, "  >> with %v = %v", param, val)
+			o = append(o, filters.MovingExponentSpeed(val))
+		case "inverse":
+			val := value.(bool)
+			c.log(inst, "  >> with %v = %v", param, val)
+			o = append(o, filters.MovingExponentInverse(val))
+		default:
+			return nil, fmt.Errorf("Unknon Moving Exponent parameter: %v", param)
+		}
+	}
+	return filters.NewMovingExponent(o...), nil
 }
 
 func (c *Config) log(inst int, format string, args ...interface{}) {

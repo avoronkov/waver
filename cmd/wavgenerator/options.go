@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
 	"gitlab.com/avoronkov/waver/lib/notes"
@@ -35,5 +37,14 @@ var _ = WithWavSettings
 func WithScale(scale notes.Scale) func(*WavGenerator) {
 	return func(g *WavGenerator) {
 		g.scale = scale
+	}
+}
+
+func WithChannels(n int) func(*WavGenerator) {
+	if !(n == 1 || n == 2) {
+		panic(fmt.Errorf("Unsupported number of channels: %v", n))
+	}
+	return func(g *WavGenerator) {
+		g.channels = n
 	}
 }

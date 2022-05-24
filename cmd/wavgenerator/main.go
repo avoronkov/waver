@@ -30,6 +30,10 @@ func main() {
 		log.Printf("Using Standard 12 tone scale.")
 		opts = append(opts, WithScale(notes.NewStandard()))
 	}
+	if mono {
+		log.Printf("Using mono output.")
+		opts = append(opts, WithChannels(1))
+	}
 	gen, err := NewWavGenerator(opts...)
 	if err != nil {
 		log.Fatal(err)

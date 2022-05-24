@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"io"
 	"log"
 
@@ -12,7 +13,11 @@ import (
 )
 
 func main() {
-	snare, err := waves.ReadSample("../../samples/4-snare.wav")
+	flag.Parse()
+	if input == "" {
+		log.Fatal("Input file name not specified")
+	}
+	snare, err := waves.ReadSample(input)
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +45,7 @@ func main() {
 		log.Fatal(err)
 	}
 	draw := &Drawer{}
-	if err := draw.Draw(data, "wave.html"); err != nil {
+	if err := draw.Draw(data, input+".html"); err != nil {
 		log.Fatal(err)
 	}
 }

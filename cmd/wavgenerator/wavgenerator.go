@@ -24,6 +24,8 @@ type WavGenerator struct {
 	tempo    int
 	scale    notes.Scale
 
+	channels int
+
 	storage *SamplesStorage
 
 	inputFile *os.File
@@ -32,8 +34,9 @@ type WavGenerator struct {
 
 func NewWavGenerator(opts ...func(*WavGenerator)) (*WavGenerator, error) {
 	g := &WavGenerator{
-		tempo:   120,
-		storage: new(SamplesStorage),
+		tempo:    120,
+		channels: 2,
+		storage:  new(SamplesStorage),
 	}
 
 	for _, opt := range opts {
@@ -160,9 +163,12 @@ func (g *WavGenerator) getWaveForSignal(sig *dumper.SignalJson) (waves.Wave, err
 
 func (g *WavGenerator) writeSamplesIntoWavFile(samples []int16) error {
 	w := wavfmt.CreateDefaultWav()
+	w.Fmt.NumberOfChannels = uint16(g.channels)
 	for _, sample := range samples {
 		w.Data.AddSample(sample) // left
-		w.Data.AddSample(sample) // right
+		if g.channels == 2 {
+			w.Data.AddSample(sample) // right
+		}
 	}
 
 	f, err := os.OpenFile(g.output, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)

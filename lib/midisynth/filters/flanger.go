@@ -55,3 +55,10 @@ func FlangerFreq(freq float64) func(f *Flanger) {
 		f.freq = freq
 	}
 }
+
+// Maximum value of shift (in seconds)
+func FlangerShift(shift float64) func(f *Flanger) {
+	return func(f *Flanger) {
+		f.maxShift = shift
+	}
+}
