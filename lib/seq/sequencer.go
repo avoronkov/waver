@@ -61,23 +61,30 @@ func (s *Sequencer) run() error {
 	var bit int64
 	for {
 		start := time.Now()
-		if err := s.processFuncs(bit); err != nil {
+		ok, err := s.processFuncs(bit)
+		if err != nil {
 			log.Printf("File processing failed: %v", err)
 		}
 		dt := time.Since(start)
 		currentDelay := delay - dt
 		time.Sleep(currentDelay)
 
-		bit++
+		if ok || bit > 0 {
+			bit++
+		}
 	}
 }
 
-func (s *Sequencer) processFuncs(bit int64) error {
+func (s *Sequencer) processFuncs(bit int64) (bool, error) {
+	if len(s.current) == 0 {
+		return false, nil
+	}
+
 	// eval variables first
 	ctx := types.NewContext()
 	for _, as := range s.currentVars {
 		if err := ctx.Put(as.name, as.valueFn); err != nil {
-			return err
+			return false, err
 		}
 	}
 
@@ -89,7 +96,7 @@ func (s *Sequencer) processFuncs(bit int64) error {
 			s.ch <- &sg
 		}
 	}
-	return nil
+	return true, nil
 }
 
 func (s *Sequencer) Close() error {
