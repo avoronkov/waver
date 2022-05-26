@@ -51,6 +51,8 @@ type Parser struct {
 	sigParsers map[string]SigParser
 
 	scale notes.Scale
+
+	globalCtx map[string]interface{}
 }
 
 func New(file string, seq Seq, scale notes.Scale) *Parser {
@@ -60,6 +62,7 @@ func New(file string, seq Seq, scale notes.Scale) *Parser {
 		scale:      scale,
 		modParsers: modParsers,
 		sigParsers: sigParsers,
+		globalCtx:  map[string]interface{}{},
 	}
 }
 
@@ -110,14 +113,16 @@ func (p *Parser) parse() error {
 func (p *Parser) parseLine(num int, line string) error {
 	fields := strings.Fields(line)
 	lineCtx := &LineCtx{
-		Num:    num,
-		Fields: fields,
+		Num:       num,
+		Fields:    fields,
+		GlobalCtx: p.globalCtx,
 	}
 	if idx := stringsFind(fields, "->"); idx >= 0 {
 		// modifiers -> signals
 		modCtx := &LineCtx{
-			Num:    num,
-			Fields: fields[:idx],
+			Num:       num,
+			Fields:    fields[:idx],
+			GlobalCtx: p.globalCtx,
 		}
 		mods, err := p.parseModifiers(modCtx)
 		if err != nil {

@@ -55,11 +55,7 @@ func parseList(scale notes.Scale, line *LineCtx) ([]types.ValueFn, int, error) {
 		if token == "]" {
 			return atoms, i + 1, nil
 		}
-		newLine := &LineCtx{
-			Num:    line.Num,
-			Fields: line.Fields[i:],
-		}
-		fn, shift, err := parseAtom(scale, newLine)
+		fn, shift, err := parseAtom(scale, line.Shift(i))
 		if err != nil {
 			return nil, 0, err
 		}

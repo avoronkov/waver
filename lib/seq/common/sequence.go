@@ -6,13 +6,20 @@ import (
 	"gitlab.com/avoronkov/waver/lib/seq/types"
 )
 
-func Sequence(values types.ValueFn) types.ValueFn {
-	return &sequenceImpl{fn: values}
+type Index struct {
+	N int
+}
+
+func Sequence(idx *Index, values types.ValueFn) types.ValueFn {
+	return &sequenceImpl{
+		fn:  values,
+		idx: idx,
+	}
 }
 
 type sequenceImpl struct {
 	fn  types.ValueFn
-	idx int
+	idx *Index
 }
 
 func (s *sequenceImpl) Val(bit int64, ctx types.Context) types.Value {
@@ -25,10 +32,10 @@ func (s *sequenceImpl) Val(bit int64, ctx types.Context) types.Value {
 	if l == 0 {
 		panic(fmt.Errorf("seq expects non-empty list"))
 	}
-	if s.idx >= l {
-		s.idx = 0
+	if s.idx.N >= l {
+		s.idx.N = 0
 	}
-	res := list[s.idx]
-	s.idx = (s.idx + 1) % l
+	res := list[s.idx.N]
+	s.idx.N = (s.idx.N + 1) % l
 	return res
 }

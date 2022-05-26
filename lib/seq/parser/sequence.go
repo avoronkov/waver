@@ -20,5 +20,13 @@ func parseSequence(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error)
 	if err != nil {
 		return nil, 0, err
 	}
-	return common.Sequence(values), shift + 1, nil
+	key := fmt.Sprintf("seq:%v", line.Num)
+	var idx *common.Index
+	if i, ok := line.GlobalCtx[key].(*common.Index); ok {
+		idx = i
+	} else {
+		idx = new(common.Index)
+		line.GlobalCtx[key] = idx
+	}
+	return common.Sequence(idx, values), shift + 1, nil
 }
