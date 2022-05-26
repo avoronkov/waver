@@ -9,11 +9,11 @@ import (
 )
 
 func makeMusParser(name string, shifts ...int64) ValueFnParser {
-	return func(scale notes.Scale, fields []string) (types.ValueFn, int, error) {
-		if len(fields) < 2 {
-			return nil, 0, fmt.Errorf("Not enough arguments for '%v': %v", name, fields)
+	return func(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
+		if line.Len() < 2 {
+			return nil, 0, fmt.Errorf("Not enough arguments for '%v': %v", name, line)
 		}
-		x, shift, err := parseAtom(scale, fields[1:])
+		x, shift, err := parseAtom(scale, line.Shift(1))
 		if err != nil {
 			return nil, 0, err
 		}

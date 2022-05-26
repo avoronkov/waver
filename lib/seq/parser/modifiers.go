@@ -8,15 +8,15 @@ import (
 	"gitlab.com/avoronkov/waver/lib/seq/types"
 )
 
-type ModParser = func(scale notes.Scale, fields []string) (types.Modifier, int, error)
+type ModParser = func(scale notes.Scale, line *LineCtx) (types.Modifier, int, error)
 
 // : 4
-func parseEvery(scale notes.Scale, fields []string) (types.Modifier, int, error) {
-	if len(fields) < 2 {
-		return nil, 0, fmt.Errorf("Not enough arguments for Every (':')")
+func parseEvery(scale notes.Scale, line *LineCtx) (types.Modifier, int, error) {
+	if line.Len() < 2 {
+		return nil, 0, fmt.Errorf("Not enough arguments for Every (':'): %v", line)
 	}
 
-	fn, shift, err := parseAtom(scale, fields[1:])
+	fn, shift, err := parseAtom(scale, line.Shift(1))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -25,12 +25,12 @@ func parseEvery(scale notes.Scale, fields []string) (types.Modifier, int, error)
 }
 
 // "+ 2", "- 2"
-func parseShift(scale notes.Scale, fields []string) (types.Modifier, int, error) {
-	if len(fields) < 2 {
-		return nil, 0, fmt.Errorf("Not enough arguments for Shift ('+' / '-')")
+func parseShift(scale notes.Scale, line *LineCtx) (types.Modifier, int, error) {
+	if line.Len() < 2 {
+		return nil, 0, fmt.Errorf("Not enough arguments for Shift ('+' / '-'): %v", line)
 	}
 
-	fn, shift, err := parseAtom(scale, fields[1:])
+	fn, shift, err := parseAtom(scale, line.Shift(1))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -38,12 +38,12 @@ func parseShift(scale notes.Scale, fields []string) (types.Modifier, int, error)
 	return common.Shift(fn), shift + 1, nil
 }
 
-func parseBefore(scale notes.Scale, fields []string) (types.Modifier, int, error) {
-	if len(fields) < 2 {
-		return nil, 0, fmt.Errorf("Not enough arguments for Before ('<')")
+func parseBefore(scale notes.Scale, line *LineCtx) (types.Modifier, int, error) {
+	if line.Len() < 2 {
+		return nil, 0, fmt.Errorf("Not enough arguments for Before ('<'): %v", line)
 	}
 
-	fn, shift, err := parseAtom(scale, fields[1:])
+	fn, shift, err := parseAtom(scale, line.Shift(1))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -51,12 +51,12 @@ func parseBefore(scale notes.Scale, fields []string) (types.Modifier, int, error
 	return common.Before(fn), shift + 1, nil
 }
 
-func parseAfter(scale notes.Scale, fields []string) (types.Modifier, int, error) {
-	if len(fields) < 2 {
+func parseAfter(scale notes.Scale, line *LineCtx) (types.Modifier, int, error) {
+	if line.Len() < 2 {
 		return nil, 0, fmt.Errorf("Not enough arguments for After ('>')")
 	}
 
-	fn, shift, err := parseAtom(scale, fields[1:])
+	fn, shift, err := parseAtom(scale, line.Shift(1))
 	if err != nil {
 		return nil, 0, err
 	}

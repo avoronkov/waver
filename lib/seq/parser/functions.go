@@ -14,8 +14,8 @@ import (
 // variable: $a, $b, $c
 // function: seq [ 1 2 3 ]
 // atom in braces: ( rand [ 1 2 3 ] )
-func parseAtom(scale notes.Scale, fields []string) (types.ValueFn, int, error) {
-	token := fields[0]
+func parseAtom(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
+	token := line.Fields[0]
 	if n, err := strconv.Atoi(token); err == nil {
 		return common.Const(int64(n)), 1, nil
 	}
@@ -29,7 +29,7 @@ func parseAtom(scale notes.Scale, fields []string) (types.ValueFn, int, error) {
 		return common.Var(token[1:]), 1, nil
 	}
 	if token == "[" {
-		fn, shift, err := parseList(scale, fields)
+		fn, shift, err := parseList(scale, line)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -37,25 +37,29 @@ func parseAtom(scale notes.Scale, fields []string) (types.ValueFn, int, error) {
 		return common.Lst(fn...), shift + 2, nil
 	}
 	if parser, ok := valueFnParser[token]; ok {
-		fn, shift, err := parser(scale, fields)
+		fn, shift, err := parser(scale, line)
 		if err != nil {
 			return nil, 0, err
 		}
 		return fn, shift, nil
 	}
-	return nil, 0, fmt.Errorf("Don't know how to parse: %v", fields)
+	return nil, 0, fmt.Errorf("Don't know how to parse: %v", line)
 }
 
-func parseList(scale notes.Scale, fields []string) ([]types.ValueFn, int, error) {
+func parseList(scale notes.Scale, line *LineCtx) ([]types.ValueFn, int, error) {
 	atoms := []types.ValueFn{}
-	l := len(fields)
+	l := len(line.Fields)
 	i := 1
 	for i < l {
-		token := fields[i]
+		token := line.Fields[i]
 		if token == "]" {
 			return atoms, i + 1, nil
 		}
-		fn, shift, err := parseAtom(scale, fields[i:])
+		newLine := &LineCtx{
+			Num:    line.Num,
+			Fields: line.Fields[i:],
+		}
+		fn, shift, err := parseAtom(scale, newLine)
 		if err != nil {
 			return nil, 0, err
 		}

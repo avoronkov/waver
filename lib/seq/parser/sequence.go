@@ -8,15 +8,15 @@ import (
 	"gitlab.com/avoronkov/waver/lib/seq/types"
 )
 
-type ValueFnParser = func(scale notes.Scale, fields []string) (types.ValueFn, int, error)
+type ValueFnParser = func(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error)
 
 // seq [ 1 2 3 ]
-func parseSequence(scale notes.Scale, fields []string) (types.ValueFn, int, error) {
-	if len(fields) < 2 {
-		return nil, 0, fmt.Errorf("Not enough arguments for 'seq': %v", fields)
+func parseSequence(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
+	if line.Len() < 2 {
+		return nil, 0, fmt.Errorf("Not enough arguments for 'seq': %v", line)
 	}
 
-	values, shift, err := parseAtom(scale, fields[1:])
+	values, shift, err := parseAtom(scale, line.Shift(1))
 	if err != nil {
 		return nil, 0, err
 	}

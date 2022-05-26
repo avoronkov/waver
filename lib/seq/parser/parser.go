@@ -89,12 +89,14 @@ func (p *Parser) parse() error {
 
 	sc := bufio.NewScanner(f)
 	sc.Split(bufio.ScanLines)
+	lineNum := 0
 	for sc.Scan() {
+		lineNum++
 		text := sc.Text()
 		if text == "" || text[0] == '#' {
 			continue
 		}
-		if err := p.parseLine(text); err != nil {
+		if err := p.parseLine(lineNum, text); err != nil {
 			return err
 		}
 	}
@@ -105,15 +107,23 @@ func (p *Parser) parse() error {
 }
 
 // : 5 -> { 4 E3 1 5 }
-func (p *Parser) parseLine(line string) error {
+func (p *Parser) parseLine(num int, line string) error {
 	fields := strings.Fields(line)
+	lineCtx := &LineCtx{
+		Num:    num,
+		Fields: fields,
+	}
 	if idx := stringsFind(fields, "->"); idx >= 0 {
 		// modifiers -> signals
-		mods, err := p.parseModifiers(fields[:idx])
+		modCtx := &LineCtx{
+			Num:    num,
+			Fields: fields[:idx],
+		}
+		mods, err := p.parseModifiers(modCtx)
 		if err != nil {
 			return err
 		}
-		signals, err := p.parseSignal(fields[idx+1:])
+		signals, err := p.parseSignal(lineCtx.Shift(idx + 1))
 		if err != nil {
 			return err
 		}
@@ -124,7 +134,7 @@ func (p *Parser) parseLine(line string) error {
 	} else if len(fields) >= 2 && fields[1] == "=" {
 		// var = atom
 		// TODO check shift
-		vfn, _, err := parseAtom(p.scale, fields[2:])
+		vfn, _, err := parseAtom(p.scale, lineCtx.Shift(2))
 		if err != nil {
 			return err
 		}
@@ -135,35 +145,35 @@ func (p *Parser) parseLine(line string) error {
 	return nil
 }
 
-func (p *Parser) parseModifiers(fields []string) (result []types.Modifier, err error) {
-	l := len(fields)
+func (p *Parser) parseModifiers(line *LineCtx) (result []types.Modifier, err error) {
+	l := line.Len()
 	for i := 0; i < l; {
-		if parser, ok := p.modParsers[fields[i]]; ok {
-			mod, shift, err := parser(p.scale, fields[i:])
+		if parser, ok := p.modParsers[line.Fields[i]]; ok {
+			mod, shift, err := parser(p.scale, line.Shift(i))
 			if err != nil {
 				return nil, err
 			}
 			result = append(result, mod)
 			i += shift
 		} else {
-			return nil, fmt.Errorf("Unknown modifier: %v", fields[i])
+			return nil, fmt.Errorf("Unknown modifier: %v", line.Fields[i])
 		}
 	}
 	// OK
 	return
 }
 
-func (p *Parser) parseSignal(fields []string) (result []types.Signaler, err error) {
-	l := len(fields)
+func (p *Parser) parseSignal(line *LineCtx) (result []types.Signaler, err error) {
+	l := line.Len()
 	for i := 0; i < l; {
-		parser, ok := p.sigParsers[fields[i]]
+		parser, ok := p.sigParsers[line.Fields[i]]
 		if !ok {
 			parser, ok = p.sigParsers[""]
 			if !ok {
-				return nil, fmt.Errorf("Don't know how to parse signal: %q", fields[i])
+				return nil, fmt.Errorf("Don't know how to parse signal: %q", line.Fields[i])
 			}
 		}
-		sig, shift, err := parser(p.scale, fields[i:])
+		sig, shift, err := parser(p.scale, line.Shift(i))
 		if err != nil {
 			return nil, err
 		}

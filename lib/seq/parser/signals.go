@@ -8,48 +8,48 @@ import (
 	"gitlab.com/avoronkov/waver/lib/seq/types"
 )
 
-type SigParser = func(scale notes.Scale, fields []string) (types.Signaler, int, error)
+type SigParser = func(scale notes.Scale, line *LineCtx) (types.Signaler, int, error)
 
 // { 2 A4 }
-func parseSignal(scale notes.Scale, fields []string) (types.Signaler, int, error) {
-	l := len(fields)
+func parseSignal(scale notes.Scale, line *LineCtx) (types.Signaler, int, error) {
+	l := line.Len()
 	if l < 4 {
-		return nil, 0, fmt.Errorf("Not enough arguments for signal: %v", fields)
+		return nil, 0, fmt.Errorf("Not enough arguments for signal: %v", line)
 	}
 
 	// skip '{'
 	shift := 1
 	// parse instrument
-	in, sh, err := parseAtom(scale, fields[shift:])
+	in, sh, err := parseAtom(scale, line.Shift(shift))
 	if err != nil {
 		return nil, 0, err
 	}
 	shift += sh
 
 	// parse note
-	nt, sh, err := parseAtom(scale, fields[shift:])
+	nt, sh, err := parseAtom(scale, line.Shift(shift))
 	if err != nil {
 		return nil, 0, err
 	}
 	shift += sh
 
-	if fields[shift] == "}" {
+	if line.Fields[shift] == "}" {
 		return common.Note(scale, in, nt), shift + 1, nil
 	}
 
 	// parse amplitude
-	amp, sh, err := parseAtom(scale, fields[shift:])
+	amp, sh, err := parseAtom(scale, line.Shift(shift))
 	if err != nil {
 		return nil, 0, err
 	}
 	shift += sh
 
-	if fields[shift] == "}" {
+	if line.Fields[shift] == "}" {
 		return common.Note(scale, in, nt, common.NoteAmp(amp)), shift + 1, nil
 	}
 
 	// parse duration
-	dur, sh, err := parseAtom(scale, fields[shift:])
+	dur, sh, err := parseAtom(scale, line.Shift(shift))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -58,11 +58,11 @@ func parseSignal(scale notes.Scale, fields []string) (types.Signaler, int, error
 	return common.Note(scale, in, nt, common.NoteAmp(amp), common.NoteDur(dur)), shift + 1, nil
 }
 
-func parseRawSignal(scale notes.Scale, fields []string) (types.Signaler, int, error) {
-	if len(fields) < 1 {
+func parseRawSignal(scale notes.Scale, line *LineCtx) (types.Signaler, int, error) {
+	if line.Len() < 1 {
 		return nil, 0, fmt.Errorf("No arguments for raw signal")
 	}
-	raw := fields[0]
+	raw := line.Fields[0]
 	rawLen := len(raw)
 	if rawLen > 2 && ((raw[0] == '\'' && raw[rawLen-1] == '\'') || (raw[0] == '"' && raw[rawLen-1] == '"')) {
 		// TODO avoronkov fix here
