@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"gitlab.com/avoronkov/waver/lib/notes"
 	"gitlab.com/avoronkov/waver/lib/seq/common"
@@ -25,9 +24,6 @@ func parseAtom(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
 	if n, ok := scale.Parse(token); ok {
 		return common.Const(int64(n.Num)), 1, nil
 	}
-	if strings.HasPrefix(token, "$") {
-		return common.Var(token[1:]), 1, nil
-	}
 	if token == "[" {
 		fn, shift, err := parseList(scale, line)
 		if err != nil {
@@ -43,7 +39,7 @@ func parseAtom(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
 		}
 		return fn, shift, nil
 	}
-	return nil, 0, fmt.Errorf("Don't know how to parse: %v", line)
+	return common.Var(token), 1, nil
 }
 
 func parseList(scale notes.Scale, line *LineCtx) ([]types.ValueFn, int, error) {
