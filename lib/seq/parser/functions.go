@@ -29,8 +29,7 @@ func parseAtom(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
 		if err != nil {
 			return nil, 0, err
 		}
-		// Include '[' and ']'
-		return common.Lst(fn...), shift + 2, nil
+		return common.Lst(fn...), shift, nil
 	}
 	if parser, ok := valueFnParser[token]; ok {
 		fn, shift, err := parser(scale, line)
