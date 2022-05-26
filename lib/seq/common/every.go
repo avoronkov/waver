@@ -18,7 +18,9 @@ func Every(n types.ValueFn) types.Modifier {
 				}
 			} else if nList, ok := val.(List); ok {
 				var loop int64
-				for _, item := range nList {
+				l := nList.Len()
+				for i := 0; i < l; i++ {
+					item := nList.Get(i, bit, ctx)
 					if it, ok := item.(Num); ok {
 						loop += int64(it)
 					} else {
@@ -27,7 +29,8 @@ func Every(n types.ValueFn) types.Modifier {
 				}
 				x := bit % loop
 				var s int64
-				for _, item := range nList {
+				for i := 0; i < l; i++ {
+					item := nList.Get(i, bit, ctx)
 					cur := int64(item.(Num))
 					if x == s {
 						_ = ctx.Put("_dur", Const(cur))

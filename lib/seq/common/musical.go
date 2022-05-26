@@ -8,7 +8,7 @@ func ChordFn(keyNote types.ValueFn, steps ...int64) types.ValueFn {
 		k := int64(kn.(Num))
 		res := List{}
 		for _, step := range steps {
-			res = append(res, Num(k+step))
+			res = append(res, Const(k+step))
 		}
 		return res
 	}

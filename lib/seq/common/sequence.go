@@ -37,5 +37,5 @@ func (s *sequenceImpl) Val(bit int64, ctx types.Context) types.Value {
 	}
 	res := list[s.idx.N]
 	s.idx.N = (s.idx.N + 1) % l
-	return res
+	return res.Val(bit, ctx)
 }

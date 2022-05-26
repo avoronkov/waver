@@ -21,9 +21,9 @@ func Up(shift, value types.ValueFn, invert bool) types.ValueFn {
 		case Num:
 			return Num(v + shInt)
 		case List:
-			res := []types.Value{}
+			res := []types.ValueFn{}
 			for _, item := range v {
-				res = append(res, Num(item.(Num)+shInt))
+				res = append(res, Const(int64(item.Val(bit, ctx).(Num)+shInt)))
 			}
 			return List(res)
 		default:

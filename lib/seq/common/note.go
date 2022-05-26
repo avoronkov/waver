@@ -36,7 +36,7 @@ var _ types.Signaler = (*note)(nil)
 
 func (n *note) Eval(bit int64, ctx types.Context) (res []signals.Signal) {
 	instr := n.instr.Val(bit, ctx)
-	for _, i := range toInt64List(instr) {
+	for _, i := range toInt64List(instr, bit, ctx) {
 		res = append(res, n.evalInstr(bit, ctx, i)...)
 	}
 	return
@@ -51,7 +51,9 @@ func (n *note) evalInstr(bit int64, ctx types.Context, in int64) (res []signals.
 		nt := notes.Note{Freq: float64(f)}
 		return n.evalInstrNote(bit, ctx, in, nt)
 	} else if l, ok := nt.(List); ok {
-		for _, item := range l {
+		llen := l.Len()
+		for i := 0; i < llen; i++ {
+			item := l.Get(i, bit, ctx)
 			if i, ok := item.(Num); ok {
 				nt := n.seqNoteNumberToNote(int64(i))
 				res = append(res, n.evalInstrNote(bit, ctx, in, nt)...)
@@ -68,7 +70,7 @@ func (n *note) evalInstr(bit int64, ctx types.Context, in int64) (res []signals.
 
 func (n *note) evalInstrNote(bit int64, ctx types.Context, in int64, nt notes.Note) (res []signals.Signal) {
 	amp := n.amp.Val(bit, ctx)
-	for _, i := range toInt64List(amp) {
+	for _, i := range toInt64List(amp, bit, ctx) {
 		res = append(res, n.evalIntrNoteAmp(bit, ctx, in, nt, i)...)
 	}
 	return
@@ -84,7 +86,7 @@ func (n *note) seqNoteNumberToNote(num int64) notes.Note {
 
 func (n *note) evalIntrNoteAmp(bit int64, ctx types.Context, inst int64, note notes.Note, amp int64) (res []signals.Signal) {
 	dur := n.dur.Val(bit, ctx)
-	durList := toInt64List(dur)
+	durList := toInt64List(dur, bit, ctx)
 	for _, d := range durList {
 		res = append(res, n.format(inst, note, amp, d))
 	}
@@ -126,13 +128,15 @@ func NoteDur(o types.ValueFn) func(*note) {
 	}
 }
 
-func toInt64List(v types.Value) []int64 {
+func toInt64List(v types.Value, bit int64, ctx types.Context) []int64 {
 	if n, ok := v.(Num); ok {
 		return []int64{int64(n)}
 	}
 	if l, ok := v.(List); ok {
 		var res []int64
-		for _, item := range l {
+		llen := l.Len()
+		for i := 0; i < llen; i++ {
+			item := l.Get(i, bit, ctx)
 			i := item.(Num)
 			res = append(res, int64(i))
 		}

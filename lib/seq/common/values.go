@@ -9,16 +9,24 @@ var _ types.Value = Num(0)
 
 func (n Num) IsValue() {}
 
-// List of values
-type List []types.Value
-
-var _ types.Value = List(nil)
-
-func (l List) IsValue() {}
-
 // Float
 type Float float64
 
 var _ types.Value = Float(0.0)
 
 func (f Float) IsValue() {}
+
+// List of values
+type List []types.ValueFn
+
+var _ types.Value = List(nil)
+
+func (l List) IsValue() {}
+
+func (l List) Len() int {
+	return len(l)
+}
+
+func (l List) Get(i int, bit int64, ctx types.Context) types.Value {
+	return l[i].Val(bit, ctx)
+}

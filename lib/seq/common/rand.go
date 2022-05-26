@@ -15,7 +15,7 @@ func Random(values types.ValueFn) types.ValueFn {
 			panic(fmt.Errorf("rand expects list, found: %v", vals))
 		}
 		i := rand.Intn(len(list))
-		return list[i]
+		return list.Get(i, bit, ctx)
 	}
 	return types.ValueFunc(f)
 }
