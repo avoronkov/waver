@@ -33,7 +33,7 @@ instruments:
           fade: 0.5
           times: 4
   7:
-    wave: square
+    wave: sine
     filters:
       - am:
           wave: sine
@@ -45,8 +45,8 @@ instruments:
     filters:
       - vibrato:
           wave: sine
-          frequency: 5.0
-          amplitude: 1.0
+          frequency: 4.0
+          amplitude: 0.005
   9:
     wave: sine
     filters:
@@ -67,4 +67,28 @@ samples:
           interval: 0.125
           fade: 0.5
           times: 3
+  2k:
+    sample: "samples/2-1-kick.wav"
+  2t:
+    sample: "samples/2-2-tom.wav"
+  2s:
+    sample: "samples/2-3-snare.wav"
+  2r:
+    sample: "samples/2-5-rim.wav"
+  2l:
+    sample: "samples/2-6-clap.wav"
+  2a:
+    sample: "samples/2-7-tambourine.wav"
+  2h:
+    sample: "samples/2-9-hat.wav"
+  2o:
+    sample: "samples/2-10-high-tom.wav"
+  2p:
+    sample: "samples/2-11-hat-open.wav"
+  2n:
+    sample: "samples/2-13-snare-2.wav"
+  2i:
+    sample: "samples/2-14-ride.wav"
+  2z:
+    sample: "samples/2-16-crash.wav"
 
