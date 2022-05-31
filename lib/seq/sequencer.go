@@ -10,6 +10,7 @@ import (
 
 type Sequencer struct {
 	tempo int
+	bit   int64
 
 	current []types.Signaler
 	next    []types.Signaler
@@ -61,10 +62,9 @@ func (s *Sequencer) Assign(name string, value types.ValueFn) {
 
 func (s *Sequencer) run() error {
 	delay := time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
-	var bit int64
 	for {
 		start := time.Now()
-		ok, err := s.processFuncs(bit)
+		ok, err := s.processFuncs(s.bit)
 		if err != nil {
 			log.Printf("File processing failed: %v", err)
 		}
@@ -72,8 +72,8 @@ func (s *Sequencer) run() error {
 		currentDelay := delay - dt
 		time.Sleep(currentDelay)
 
-		if ok || bit > 0 {
-			bit++
+		if ok || s.bit > 0 {
+			s.bit++
 		}
 	}
 }

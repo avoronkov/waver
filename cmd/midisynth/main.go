@@ -57,7 +57,10 @@ func main() {
 	}
 
 	if fileInput != "" {
-		sequencer := seq.NewSequencer(seq.WithTempo(tempo))
+		sequencer := seq.NewSequencer(
+			seq.WithTempo(tempo),
+			seq.WithStart(startBit),
+		)
 		ps := parser.New(fileInput, sequencer, scale)
 		check("Parser start", ps.Start(true))
 		opts = append(opts, midisynth.WithSignalInput(sequencer))

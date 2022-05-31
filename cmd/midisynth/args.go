@@ -17,7 +17,8 @@ var (
 
 	newProject string
 
-	tempo int
+	tempo    int
+	startBit int64
 )
 
 func init() {
@@ -44,4 +45,6 @@ func init() {
 
 	flag.IntVar(&tempo, "tempo", 120, "set tempo")
 	flag.IntVar(&tempo, "t", 120, "set tempo")
+
+	flag.Int64Var(&startBit, "start", 0, "starting bit")
 }
