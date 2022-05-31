@@ -22,9 +22,12 @@ type Sequencer struct {
 
 var _ signals.Input = (*Sequencer)(nil)
 
-func NewSequencer() *Sequencer {
+func NewSequencer(opts ...func(*Sequencer)) *Sequencer {
 	s := &Sequencer{
 		tempo: 120,
+	}
+	for _, o := range opts {
+		o(s)
 	}
 	return s
 }

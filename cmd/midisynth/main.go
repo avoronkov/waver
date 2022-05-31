@@ -57,7 +57,7 @@ func main() {
 	}
 
 	if fileInput != "" {
-		sequencer := seq.NewSequencer()
+		sequencer := seq.NewSequencer(seq.WithTempo(tempo))
 		ps := parser.New(fileInput, sequencer, scale)
 		check("Parser start", ps.Start(true))
 		opts = append(opts, midisynth.WithSignalInput(sequencer))
@@ -80,6 +80,7 @@ func main() {
 	audioOpts := []func(*synth.Output){
 		synth.WithInstruments(instSet),
 		synth.WithScale(scale),
+		synth.WithTempo(tempo),
 	}
 	audioOutput, err := synth.New(audioOpts...)
 	check("Syntheziser output", err)

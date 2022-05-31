@@ -38,8 +38,6 @@ type delayImpl struct {
 
 var _ waves.Wave = (*delayImpl)(nil)
 
-// var _ waves.WithDuration = (*delayImpl)(nil)
-
 func (d *delayImpl) Value(tm float64, ctx *waves.NoteCtx) (res float64) {
 	value := d.wave.Value(tm, ctx)
 	has := false

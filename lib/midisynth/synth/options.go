@@ -22,3 +22,9 @@ func WithInstruments(set InstrumentSet) func(*Output) {
 		o.instruments = set
 	}
 }
+
+func WithTempo(n int) func(*Output) {
+	return func(o *Output) {
+		o.tempo = n
+	}
+}

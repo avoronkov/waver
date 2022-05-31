@@ -16,6 +16,8 @@ var (
 	fileInput string
 
 	newProject string
+
+	tempo int
 )
 
 func init() {
@@ -39,4 +41,7 @@ func init() {
 	flag.StringVar(&fileInput, "i", "", "input sequencer file (shorthand)")
 
 	flag.StringVar(&newProject, "new", "", "initialize new project")
+
+	flag.IntVar(&tempo, "tempo", 120, "set tempo")
+	flag.IntVar(&tempo, "t", 120, "set tempo")
 }
