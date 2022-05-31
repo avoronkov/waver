@@ -201,6 +201,8 @@ func (c *Config) handleFilter(instr int, f Filter) (filters.Filter, error) {
 			return c.handleExp(instr, opts)
 		case "movexp":
 			return c.handleMovExp(instr, opts)
+		case "ratio":
+			return c.handleRatio(instr, opts)
 		}
 		return nil, fmt.Errorf("Unknown filter: %v", name)
 	}
@@ -430,6 +432,23 @@ func (c *Config) handleMovExp(inst int, opts map[string]interface{}) (filters.Fi
 		}
 	}
 	return filters.NewMovingExponent(o...), nil
+}
+
+func (c *Config) handleRatio(inst int, opts map[string]interface{}) (filters.Filter, error) {
+	c.log(inst, "> Using Moving Exponent filter")
+	ratio := 1.0
+	for param, value := range opts {
+		switch param {
+		case "value":
+			val := c.valueFloat64(inst, value)
+			c.log(inst, "  >> with %v = %v", param, val)
+			ratio = val
+		default:
+			return nil, fmt.Errorf("Unknon Ratio parameter: %v", param)
+		}
+	}
+	return filters.NewRatio(ratio), nil
+
 }
 
 func (c *Config) log(inst int, format string, args ...interface{}) {
