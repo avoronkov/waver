@@ -2,4 +2,5 @@
 /midisynth
 /controller
 /wasm/server
+/public
 *.wasm

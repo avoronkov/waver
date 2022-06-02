@@ -5,6 +5,6 @@ pages:
   - ./wasm/pub.sh
   artifacts:
     paths:
-    - wasm/static/assets
+    - public
   only:
   - master

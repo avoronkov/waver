@@ -15,5 +15,6 @@ BASE_DIR="$(base_dir)"
 cd "$BASE_DIR" || dir "Failed to chdir '$BASE_DIR'"
 
 env GOOS=js GOARCH=wasm go build -o ./static/assets/demo.wasm ./cmd/wasm
+cp -r ./static/assets ../public
 
 echo 'OK'
