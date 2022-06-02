@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"wasm/static"
+	"gitlab.com/avoronkov/waver/wasm/static"
 )
 
 func main() {

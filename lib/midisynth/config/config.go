@@ -1,7 +1,9 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"sort"
@@ -11,7 +13,6 @@ import (
 	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
 	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
 	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
-	"gitlab.com/avoronkov/waver/lib/watch"
 	"gitlab.com/avoronkov/waver/static"
 
 	yaml "gopkg.in/yaml.v3"
@@ -61,25 +62,22 @@ func (c *Config) InitMidiSynth() error {
 		return nil
 	}
 	c.updatedAt = modTime
-	if err := yaml.NewDecoder(f).Decode(c.data); err != nil {
+	log.Printf("Loading configuration from %v", c.filename)
+	return c.updateReader(f)
+}
+
+func (c *Config) UpdateData(data []byte) error {
+	return c.updateReader(bytes.NewReader(data))
+}
+
+func (c *Config) updateReader(r io.Reader) error {
+	if err := yaml.NewDecoder(r).Decode(c.data); err != nil {
 		return fmt.Errorf("Error parsing data: %w", err)
 	}
-	log.Printf("Loading configuration from %v", c.filename)
 	if err := c.handleData(c.data, c.m); err != nil {
 		return err
 	}
 	return nil
-}
-
-func (c *Config) StartUpdateLoop() error {
-	callback := func() {
-		log.Printf("Updating Midisynth...")
-		if err := c.InitMidiSynth(); err != nil {
-			log.Printf("Failed to update MidiSynth: %v", err)
-		}
-		log.Printf("Updating Midisynth... DONE.")
-	}
-	return watch.OnFileUpdate(c.filename, callback)
 }
 
 func (c *Config) handleData(data *Data, m InstrumentSet) error {

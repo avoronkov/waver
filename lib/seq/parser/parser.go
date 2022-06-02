@@ -12,7 +12,6 @@ import (
 	"gitlab.com/avoronkov/waver/lib/notes"
 	"gitlab.com/avoronkov/waver/lib/seq/common"
 	"gitlab.com/avoronkov/waver/lib/seq/types"
-	"gitlab.com/avoronkov/waver/lib/watch"
 )
 
 var modParsers = map[string]ModParser{
@@ -57,32 +56,20 @@ type Parser struct {
 	globalCtx map[string]interface{}
 }
 
-func New(file string, seq Seq, scale notes.Scale) *Parser {
-	return &Parser{
-		file:       file,
+func New(seq Seq, scale notes.Scale, opts ...func(*Parser)) *Parser {
+	p := &Parser{
 		seq:        seq,
 		scale:      scale,
 		modParsers: modParsers,
 		sigParsers: sigParsers,
 		globalCtx:  map[string]interface{}{},
 	}
-}
 
-func (p *Parser) Start(wtch bool) error {
-	if err := p.parse(); err != nil {
-		return err
+	for _, opt := range opts {
+		opt(p)
 	}
-	if wtch {
-		err := watch.OnFileUpdate(p.file, func() {
-			if err := p.parse(); err != nil {
-				log.Printf("Parsing %v failed: %v", p.file, err)
-			}
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+
+	return p
 }
 
 func (p *Parser) ParseData(data []byte) error {

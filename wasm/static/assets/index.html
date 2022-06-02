@@ -11,9 +11,31 @@
 			).then((result) => {
 				go.run(result.instance);
 			});
+
+			const updateCode = () => {
+				const input = document.getElementById("story").value;
+				goPlay(input);
+			};
 		</script>
 	</head>
 	<body>
-		<button onclick="goPlay()">Play me!</button>
+		<p>
+			<textarea id="story" name="story" rows="10" cols="40">
+: 4 -> "33A11"
+: 5 + 1 -> "34C11"
+: 6 + 3 -> "34D11"
+: 7 + 4 -> "34E11"
+: 8 + 6 -> "34G11"
+: 9 + 7 -> "34A11"
+: 10 + 8 -> "35C11"
+: 11 + 9 -> "35D11"
+: 12 + 10 -> "35E11"
+: 13 + 11 -> "35G11"
+		</textarea
+			>
+		</p>
+		<p>
+			<button onclick="updateCode()">Play me!</button>
+		</p>
 	</body>
 </html>

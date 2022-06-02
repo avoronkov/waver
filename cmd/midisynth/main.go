@@ -61,7 +61,7 @@ func main() {
 			seq.WithTempo(tempo),
 			seq.WithStart(startBit),
 		)
-		ps := parser.New(fileInput, sequencer, scale)
+		ps := parser.New(sequencer, scale, parser.WithFileInput(fileInput))
 		check("Parser start", ps.Start(true))
 		opts = append(opts, midisynth.WithSignalInput(sequencer))
 	}
