@@ -2,7 +2,9 @@ package parser
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -83,14 +85,12 @@ func (p *Parser) Start(wtch bool) error {
 	return nil
 }
 
-func (p *Parser) parse() error {
-	f, err := os.Open(p.file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+func (p *Parser) ParseData(data []byte) error {
+	return p.parseReader(bytes.NewReader(data))
+}
 
-	sc := bufio.NewScanner(f)
+func (p *Parser) parseReader(reader io.Reader) error {
+	sc := bufio.NewScanner(reader)
 	sc.Split(bufio.ScanLines)
 	lineNum := 0
 	for sc.Scan() {
@@ -107,6 +107,16 @@ func (p *Parser) parse() error {
 		return fmt.Errorf("Scanner failed: %v", err)
 	}
 	return p.seq.Commit()
+}
+
+func (p *Parser) parse() error {
+	f, err := os.Open(p.file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return p.parseReader(f)
 }
 
 // : 5 -> { 4 E3 1 5 }
