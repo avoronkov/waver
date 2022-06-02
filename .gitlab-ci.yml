@@ -1,0 +1,10 @@
+image: golang:alpine
+
+pages:
+  script:
+  - ./wasm/pub.sh
+  artifacts:
+    paths:
+    - ./wasm/static/assets
+  only:
+  - master
