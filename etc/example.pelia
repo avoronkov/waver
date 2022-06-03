@@ -1,0 +1,63 @@
+# Kick drum
+# `: 8` stands for "every 8 bits"
+# `->` sends message on the right hand when condition on the left hand is true
+# `"zk21" is a kick ('k') sample ('z') from second ('2') samples set with volume '1'
+
+: 8 -> "z2k1"
+
+
+# Hi-hat
+# `> 16` sends signals after 16th bit
+# `: [ 3 2 ]` sends signals on each 1st and 4th bits of 5 (`*..*.`)
+
+> 16 : [ 2 1 ] -> "z2h1"
+
+
+# Snare drum
+# `+ 4` shifts bits count by 4
+
+> 32 : 8 + 4 -> "z2s1"
+
+# Variable `ch1` containing C minor chord (4th octave)
+
+ch1 = [ C4 Eb4 G4 ]
+
+
+# Variable `ch2` containing E flat major chord.
+# (Same as `ch2 = [ Eb4 G4 Bb4 ]`.)
+# Available functions: maj min, maj7, min7, maj9, min9
+
+ch2 = maj Eb4
+
+
+# Chords
+# `seq` describes iterator which returns specified elements in a loop.
+
+chords = seq [ ch1 ch2 ]
+
+
+# `{ Inst None Vol Dur }`:
+# - `Inst` - number of instrument (see "Instruments" section)
+# - `Note` - note or chord to play
+# - `Vol` - volume (1..16)
+# - `Dur` - duration
+
+> 64 : 32 -> { 1 chords 1 32 }
+
+
+# Bass
+
+bass = seq [ C2 G2 Eb2 Bb1 ]
+
+
+# `_dur` is a special variable containing duration of current note
+# set by operator `:`.
+
+> 96 : 16 -> { 3 bass 2 _dur }
+
+
+# Melody
+# `rand` chooses random item from the list
+
+melody = rand [ C4 Eb4 F4 G4 Bb4 C5 Eb5 ]
+> 128 : [ 6 ] -> { 6 melody 3 1 }
