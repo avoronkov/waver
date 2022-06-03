@@ -19,7 +19,7 @@ type MidiSynth struct {
 func NewMidiSynth(opts ...func(*MidiSynth)) (*MidiSynth, error) {
 	m := &MidiSynth{
 		osSignals: make(chan os.Signal),
-		ch:        make(chan *signals.Signal),
+		ch:        make(chan *signals.Signal, 128),
 	}
 	for _, opt := range opts {
 		opt(m)

@@ -19,12 +19,12 @@
 
 > 32 < 256 : 8 + 4 -> "z2s1"
 
-# Variable `ch1` containing C minor chord (4th octave)
+# Variable `ch1` contains C minor chord (4th octave)
 
 ch1 = [ C4 Eb4 G4 ]
 
 
-# Variable `ch2` containing E flat major chord.
+# Variable `ch2` contains E flat major chord.
 # (Same as `ch2 = [ Eb4 G4 Bb4 ]`.)
 # Available functions: maj min, maj7, min7, maj9, min9
 
