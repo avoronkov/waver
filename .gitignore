@@ -3,4 +3,4 @@
 /controller
 /wasm/server
 /public
-*.wasm
+*.wasm.gz

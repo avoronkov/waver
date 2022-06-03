@@ -4,11 +4,11 @@ function initPage() {
 }
 
 const initGo = async () => {
-    const go = new Go();
-    const result = await WebAssembly.instantiateStreaming(
-        fetch("demo.wasm"),
-        go.importObject
+    const buffer = pako.ungzip(
+        await (await fetch("demo.wasm.gz")).arrayBuffer()
     );
+    const go = new Go();
+    const result = await WebAssembly.instantiate(buffer, go.importObject);
     go.run(result.instance);
 };
 // initGo();
