@@ -18,6 +18,15 @@ import (
 var goParser *parser.Parser
 
 func main() {
+	// Export JS functions
+	fmt.Println("Go Web Assembly: goPlay, goGetDefaultCode")
+
+	js.Global().Set("goPlay", js.FuncOf(jsPlay))
+	js.Global().Set("goGetDefaultCode", js.FuncOf(jsGetDefaultCode))
+	js.Global().Set("goLoaded", js.ValueOf(true))
+	js.Global().Call("initPage")
+
+	// Init waver
 	tempo := 120
 	var startBit int64 = 0
 
@@ -57,9 +66,6 @@ func main() {
 
 	//
 	c := make(chan struct{}, 0)
-	fmt.Println("Go Web Assembly")
-
-	js.Global().Set("goPlay", js.FuncOf(jsPlay))
 
 	// Finally starting sequencer
 	check(m.Start())
