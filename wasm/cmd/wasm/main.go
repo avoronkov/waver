@@ -15,7 +15,11 @@ import (
 	"gitlab.com/avoronkov/waver/lib/seq/parser"
 )
 
-var goParser *parser.Parser
+var (
+	goParser    *parser.Parser
+	goSequencer *seq.Sequencer
+	goCfg       *config.Config
+)
 
 func main() {
 	// Export JS functions
@@ -23,7 +27,10 @@ func main() {
 
 	js.Global().Set("goPlay", js.FuncOf(jsPlay))
 	js.Global().Set("goGetDefaultCode", js.FuncOf(jsGetDefaultCode))
-	js.Global().Set("goLoaded", js.ValueOf(true))
+	js.Global().Set("goPause", js.FuncOf(jsPause))
+	js.Global().Set("goUpdateInstruments", js.FuncOf(jsUpdateInstruments))
+	js.Global().Set("goGetDefaultInstruments", js.FuncOf(jsGetDefaultInstruments))
+
 	js.Global().Call("initPage")
 
 	// Init waver
@@ -35,20 +42,20 @@ func main() {
 	scale := notes.NewStandard()
 	common.Scale = scale
 
-	sequencer := seq.NewSequencer(
+	goSequencer = seq.NewSequencer(
 		seq.WithTempo(tempo),
 		seq.WithStart(startBit),
 	)
 
-	goParser = parser.New(sequencer, scale)
+	goParser = parser.New(goSequencer, scale)
 	// TODO method to send data to parser
 
-	opts = append(opts, midisynth.WithSignalInput(sequencer))
+	opts = append(opts, midisynth.WithSignalInput(goSequencer))
 
 	// Instruments
 	instSet := instruments.NewSet()
-	cfg := config.New("", instSet)
-	check(cfg.UpdateData(etc.DefaultConfig))
+	goCfg = config.New("", instSet)
+	check(goCfg.UpdateData(etc.DefaultConfig))
 
 	// Audio output
 	audioOpts := []func(*synth.Output){

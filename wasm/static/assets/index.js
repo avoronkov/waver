@@ -1,8 +1,6 @@
 function initPage() {
-    console.log("initPage...");
-    console.log("initPage continue");
     loadDefaultCode();
-    console.log("initPage OK");
+    loadDefaultInstruments();
 }
 
 const initGo = async () => {
@@ -16,6 +14,7 @@ const initGo = async () => {
 // initGo();
 
 const updateCode = () => {
+    goPause(false);
     const input = document.getElementById("code-story").value;
     goPlay(input);
 };
@@ -25,4 +24,13 @@ const loadDefaultCode = () => {
     document.getElementById("code-story").value = code;
 };
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const updateInstruments = () => {
+    goPause(false);
+    const input = document.getElementById("inst-story").value;
+    goUpdateInstruments(input);
+};
+
+const loadDefaultInstruments = () => {
+    const inst = goGetDefaultInstruments();
+    document.getElementById("inst-story").value = inst;
+};

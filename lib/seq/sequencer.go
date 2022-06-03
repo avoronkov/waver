@@ -18,6 +18,8 @@ type Sequencer struct {
 	currentVars assignments
 	nextVars    assignments
 
+	pause bool
+
 	ch chan<- *signals.Signal
 }
 
@@ -44,6 +46,10 @@ func (s *Sequencer) Start(ch chan<- *signals.Signal) error {
 	return nil
 }
 
+func (s *Sequencer) Pause(v bool) {
+	s.pause = v
+}
+
 func (s *Sequencer) Add(sig types.Signaler) {
 	s.next = append(s.next, sig)
 }
@@ -64,15 +70,19 @@ func (s *Sequencer) run() error {
 	delay := time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
 	for {
 		start := time.Now()
-		ok, err := s.processFuncs(s.bit)
-		if err != nil {
-			log.Printf("File processing failed: %v", err)
+		var ok bool
+		if !s.pause {
+			var err error
+			ok, err = s.processFuncs(s.bit)
+			if err != nil {
+				log.Printf("File processing failed: %v", err)
+			}
 		}
 		dt := time.Since(start)
 		currentDelay := delay - dt
 		time.Sleep(currentDelay)
 
-		if ok || s.bit > 0 {
+		if !s.pause && (ok || s.bit > 0) {
 			s.bit++
 		}
 	}
