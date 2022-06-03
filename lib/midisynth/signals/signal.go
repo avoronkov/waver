@@ -1,8 +1,13 @@
 package signals
 
-import "gitlab.com/avoronkov/waver/lib/notes"
+import (
+	"time"
+
+	"gitlab.com/avoronkov/waver/lib/notes"
+)
 
 type Signal struct {
+	Time         time.Time
 	Instrument   int
 	Note         notes.Note
 	Sample       string `json:",omitempty"`

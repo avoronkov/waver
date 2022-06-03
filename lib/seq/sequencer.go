@@ -93,6 +93,8 @@ func (s *Sequencer) processFuncs(bit int64) (bool, error) {
 		return false, nil
 	}
 
+	now := time.Now()
+
 	// eval variables first
 	ctx := types.NewContext()
 	for _, as := range s.currentVars {
@@ -106,6 +108,7 @@ func (s *Sequencer) processFuncs(bit int64) (bool, error) {
 		signals := fn.Eval(bit, ct)
 		for _, sig := range signals {
 			sg := sig
+			sg.Time = now
 			s.ch <- &sg
 		}
 	}

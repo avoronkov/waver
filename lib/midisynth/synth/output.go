@@ -75,14 +75,15 @@ func New(opts ...func(*Output)) (*Output, error) {
 }
 
 func (o *Output) ProcessAsync(tm float64, s *signals.Signal) {
+	at := s.Time.Add(20 * time.Millisecond)
 	var err error
 	if s.Sample != "" {
 		// Play sample
 		dur := 15.0 * float64(s.DurationBits) / float64(o.tempo)
-		err = o.PlaySample(s.Sample, dur, s.Amp)
+		err = o.PlaySampleAt(at, s.Sample, dur, s.Amp)
 	} else if !s.Manual {
 		// Play note
-		err = o.PlayNote(s.Instrument, s.Note, s.DurationBits, s.Amp)
+		err = o.PlayNoteAt(at, s.Instrument, s.Note, s.DurationBits, s.Amp)
 	} else if s.Stop {
 		// Stop manual note
 		o.releaseNote(s.Note)
@@ -110,7 +111,7 @@ func (o *Output) Close() error {
 	return nil
 }
 
-func (o *Output) PlaySample(name string, duration float64, amp float64) error {
+func (o *Output) PlaySampleAt(at time.Time, name string, duration float64, amp float64) error {
 	in, ok := o.instruments.Sample(name)
 	if !ok {
 		return fmt.Errorf("Unknown sample: %q", name)
@@ -118,6 +119,8 @@ func (o *Output) PlaySample(name string, duration float64, amp float64) error {
 	data, done := o.play.PlayContext(in, waves.NewNoteCtx(0, amp, duration))
 
 	p := o.context.NewPlayer(data)
+
+	time.Sleep(at.Sub(time.Now()))
 	p.Play()
 
 	<-done
@@ -126,14 +129,14 @@ func (o *Output) PlaySample(name string, duration float64, amp float64) error {
 	return nil
 }
 
-func (o *Output) PlayNote(instr int, note notes.Note, durationBits int, amp float64) error {
+func (o *Output) PlayNoteAt(at time.Time, instr int, note notes.Note, durationBits int, amp float64) error {
 	freq := note.Freq
 	dur := 15.0 * float64(durationBits) / float64(o.tempo)
-	o.playNote(instr, freq, dur, amp)
+	o.playNoteAt(at, instr, freq, dur, amp)
 	return nil
 }
 
-func (o *Output) playNote(inst int, hz float64, dur float64, amp float64) {
+func (o *Output) playNoteAt(at time.Time, inst int, hz float64, dur float64, amp float64) {
 	in, ok := o.instruments.Wave(inst)
 	if !ok {
 		log.Printf("Unknown instrument: %v", inst)
@@ -143,6 +146,8 @@ func (o *Output) playNote(inst int, hz float64, dur float64, amp float64) {
 	data, done := o.play.PlayContext(in, waves.NewNoteCtx(hz, amp, dur))
 
 	p := o.context.NewPlayer(data)
+
+	time.Sleep(at.Sub(time.Now()))
 	p.Play()
 
 	<-done
