@@ -13,16 +13,16 @@ const initGo = async () => {
     );
     go.run(result.instance);
 };
-initGo();
+// initGo();
 
 const updateCode = () => {
-    const input = document.getElementById("story").value;
+    const input = document.getElementById("code-story").value;
     goPlay(input);
 };
 
 const loadDefaultCode = () => {
     const code = goGetDefaultCode();
-    document.getElementById("story").value = code;
+    document.getElementById("code-story").value = code;
 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
