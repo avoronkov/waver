@@ -1,8 +1,8 @@
 package synth
 
 import (
-	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
-	"gitlab.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/midisynth/wav"
+	"github.com/avoronkov/waver/lib/notes"
 )
 
 func WithWavSettings(settings *wav.Settings) func(*Output) {

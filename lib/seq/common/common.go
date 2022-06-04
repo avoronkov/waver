@@ -1,10 +1,10 @@
 package common
 
 import (
-	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
-	"gitlab.com/avoronkov/waver/lib/midisynth/udp"
-	"gitlab.com/avoronkov/waver/lib/notes"
-	"gitlab.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/midisynth/udp"
+	"github.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 var Scale notes.Scale

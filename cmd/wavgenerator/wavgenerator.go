@@ -8,12 +8,12 @@ import (
 	"math"
 	"os"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/dumper"
-	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
-	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
-	"gitlab.com/avoronkov/waver/lib/notes"
-	wavfmt "gitlab.com/avoronkov/waver/wav"
+	"github.com/avoronkov/waver/lib/midisynth/dumper"
+	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/midisynth/wav"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/lib/notes"
+	wavfmt "github.com/avoronkov/waver/wav"
 )
 
 type WavGenerator struct {

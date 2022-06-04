@@ -6,7 +6,7 @@ package parser
 import (
 	"log"
 
-	"gitlab.com/avoronkov/waver/lib/watch"
+	"github.com/avoronkov/waver/lib/watch"
 )
 
 func (p *Parser) Start(wtch bool) error {

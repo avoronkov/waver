@@ -1,6 +1,6 @@
 package instruments
 
-import "gitlab.com/avoronkov/waver/lib/midisynth/waves"
+import "github.com/avoronkov/waver/lib/midisynth/waves"
 
 type SampledInstrument struct {
 }

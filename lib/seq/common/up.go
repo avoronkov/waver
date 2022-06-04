@@ -3,7 +3,7 @@ package common
 import (
 	"fmt"
 
-	"gitlab.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 func Up(shift, value types.ValueFn, invert bool) types.ValueFn {

@@ -3,7 +3,7 @@ package main
 import (
 	"math/rand"
 
-	"gitlab.com/avoronkov/waver/lib/seq"
+	"github.com/avoronkov/waver/lib/seq"
 )
 
 func RandomNote(notes ...rune) Modifier {

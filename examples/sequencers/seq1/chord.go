@@ -1,6 +1,6 @@
 package main
 
-import "gitlab.com/avoronkov/waver/lib/seq"
+import "github.com/avoronkov/waver/lib/seq"
 
 func Chord(notes ...rune) Modifier {
 	return func(fn seq.Signaler) seq.Signaler {

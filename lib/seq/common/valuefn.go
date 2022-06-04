@@ -1,6 +1,6 @@
 package common
 
-import "gitlab.com/avoronkov/waver/lib/seq/types"
+import "github.com/avoronkov/waver/lib/seq/types"
 
 func Const(n int64) types.ValueFn {
 	return types.ValueFunc(func(int64, types.Context) types.Value {

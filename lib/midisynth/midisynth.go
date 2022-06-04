@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
 )
 
 type MidiSynth struct {

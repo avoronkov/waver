@@ -1,6 +1,6 @@
 package filters
 
-import "gitlab.com/avoronkov/waver/lib/midisynth/waves"
+import "github.com/avoronkov/waver/lib/midisynth/waves"
 
 // Ring (amplitude) modulation.
 type Ring struct {

@@ -3,8 +3,8 @@ package common
 import (
 	"fmt"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
-	"gitlab.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 func Every(n types.ValueFn) types.Modifier {

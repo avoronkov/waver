@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
 )
 
 type Json struct {

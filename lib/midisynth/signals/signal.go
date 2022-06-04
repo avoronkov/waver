@@ -3,7 +3,7 @@ package signals
 import (
 	"time"
 
-	"gitlab.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/notes"
 )
 
 type Signal struct {

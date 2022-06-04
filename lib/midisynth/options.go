@@ -1,7 +1,7 @@
 package midisynth
 
 import (
-	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
 )
 
 func WithSignalInput(input signals.Input) func(m *MidiSynth) {

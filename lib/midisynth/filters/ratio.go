@@ -1,6 +1,6 @@
 package filters
 
-import "gitlab.com/avoronkov/waver/lib/midisynth/waves"
+import "github.com/avoronkov/waver/lib/midisynth/waves"
 
 type Ratio struct {
 	value float64

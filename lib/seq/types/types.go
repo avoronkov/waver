@@ -1,6 +1,6 @@
 package types
 
-import "gitlab.com/avoronkov/waver/lib/midisynth/signals"
+import "github.com/avoronkov/waver/lib/midisynth/signals"
 
 // Signaler
 type Signaler interface {

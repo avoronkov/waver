@@ -6,8 +6,8 @@ import (
 	"log"
 	"net"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
-	"gitlab.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/notes"
 )
 
 type UdpInput struct {

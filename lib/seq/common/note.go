@@ -3,9 +3,9 @@ package common
 import (
 	"fmt"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
-	"gitlab.com/avoronkov/waver/lib/notes"
-	"gitlab.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 type note struct {

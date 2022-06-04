@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"syscall/js"
 
-	"gitlab.com/avoronkov/waver/etc"
-	"gitlab.com/avoronkov/waver/lib/midisynth"
-	"gitlab.com/avoronkov/waver/lib/midisynth/config"
-	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
-	"gitlab.com/avoronkov/waver/lib/midisynth/synth"
-	"gitlab.com/avoronkov/waver/lib/notes"
-	"gitlab.com/avoronkov/waver/lib/seq"
-	"gitlab.com/avoronkov/waver/lib/seq/common"
-	"gitlab.com/avoronkov/waver/lib/seq/parser"
+	"github.com/avoronkov/waver/etc"
+	"github.com/avoronkov/waver/lib/midisynth"
+	"github.com/avoronkov/waver/lib/midisynth/config"
+	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/midisynth/synth"
+	"github.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/seq"
+	"github.com/avoronkov/waver/lib/seq/common"
+	"github.com/avoronkov/waver/lib/seq/parser"
 )
 
 var (

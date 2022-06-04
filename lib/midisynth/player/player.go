@@ -7,8 +7,8 @@ import (
 	"io"
 	"math"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/lib/midisynth/wav"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 type Player struct {

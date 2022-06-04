@@ -3,9 +3,9 @@ package parser
 import (
 	"fmt"
 
-	"gitlab.com/avoronkov/waver/lib/notes"
-	"gitlab.com/avoronkov/waver/lib/seq/common"
-	"gitlab.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/seq/common"
+	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 func parseUpDown(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {

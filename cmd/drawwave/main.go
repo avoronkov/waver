@@ -5,11 +5,11 @@ import (
 	"io"
 	"log"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
-	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
-	"gitlab.com/avoronkov/waver/lib/midisynth/player"
-	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/lib/midisynth/filters"
+	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/midisynth/player"
+	"github.com/avoronkov/waver/lib/midisynth/wav"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 func main() {

@@ -10,10 +10,10 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
-	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
-	"gitlab.com/avoronkov/waver/static"
+	"github.com/avoronkov/waver/lib/midisynth/filters"
+	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/static"
 
 	yaml "gopkg.in/yaml.v3"
 )

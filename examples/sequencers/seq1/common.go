@@ -1,6 +1,6 @@
 package main
 
-import "gitlab.com/avoronkov/waver/lib/seq"
+import "github.com/avoronkov/waver/lib/seq"
 
 type Modifier = func(seq.Signaler) seq.Signaler
 

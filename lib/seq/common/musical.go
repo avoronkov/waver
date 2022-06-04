@@ -1,6 +1,6 @@
 package common
 
-import "gitlab.com/avoronkov/waver/lib/seq/types"
+import "github.com/avoronkov/waver/lib/seq/types"
 
 func ChordFn(keyNote types.ValueFn, steps ...int64) types.ValueFn {
 	f := func(bit int64, ctx types.Context) types.Value {

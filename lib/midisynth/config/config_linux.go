@@ -6,7 +6,7 @@ package config
 import (
 	"log"
 
-	"gitlab.com/avoronkov/waver/lib/watch"
+	"github.com/avoronkov/waver/lib/watch"
 )
 
 func (c *Config) StartUpdateLoop() error {

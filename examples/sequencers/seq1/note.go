@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"gitlab.com/avoronkov/waver/lib/seq"
+	"github.com/avoronkov/waver/lib/seq"
 )
 
 func newInt(n int) *int {

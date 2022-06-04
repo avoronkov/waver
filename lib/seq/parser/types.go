@@ -1,6 +1,6 @@
 package parser
 
-import "gitlab.com/avoronkov/waver/lib/seq/types"
+import "github.com/avoronkov/waver/lib/seq/types"
 
 type Seq interface {
 	Add(types.Signaler)

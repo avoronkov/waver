@@ -3,9 +3,9 @@ package parser
 import (
 	"fmt"
 
-	"gitlab.com/avoronkov/waver/lib/notes"
-	"gitlab.com/avoronkov/waver/lib/seq/common"
-	"gitlab.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/seq/common"
+	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 type SigParser = func(scale notes.Scale, line *LineCtx) (types.Signaler, int, error)

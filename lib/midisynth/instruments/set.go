@@ -3,7 +3,7 @@ package instruments
 import (
 	"log"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 type Set struct {

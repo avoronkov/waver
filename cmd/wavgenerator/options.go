@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
-	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
-	"gitlab.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/midisynth/wav"
+	"github.com/avoronkov/waver/lib/notes"
 )
 
 func WithInput(file string) func(*WavGenerator) {

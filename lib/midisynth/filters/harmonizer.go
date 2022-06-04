@@ -1,7 +1,7 @@
 package filters
 
 import (
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 type Harmonizer struct {

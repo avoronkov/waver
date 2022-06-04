@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"gitlab.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 func Random(values types.ValueFn) types.ValueFn {

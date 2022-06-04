@@ -8,11 +8,11 @@ import (
 	"syscall/js"
 	"time"
 
+	"github.com/avoronkov/waver/lib/midisynth/player"
+	"github.com/avoronkov/waver/lib/midisynth/wav"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/static"
 	oto "github.com/hajimehoshi/oto/v2"
-	"gitlab.com/avoronkov/waver/lib/midisynth/player"
-	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
-	"gitlab.com/avoronkov/waver/static"
 )
 
 func goPlay(this js.Value, inputs []js.Value) any {

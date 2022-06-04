@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gitlab.com/avoronkov/waver/lib/seq"
+	"github.com/avoronkov/waver/lib/seq"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"log"
 	"syscall/js"
 
-	"gitlab.com/avoronkov/waver/etc"
+	"github.com/avoronkov/waver/etc"
 )
 
 func jsPlay(this js.Value, inputs []js.Value) any {

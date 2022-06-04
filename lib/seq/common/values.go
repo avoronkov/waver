@@ -1,6 +1,6 @@
 package common
 
-import "gitlab.com/avoronkov/waver/lib/seq/types"
+import "github.com/avoronkov/waver/lib/seq/types"
 
 // Number
 type Num int64

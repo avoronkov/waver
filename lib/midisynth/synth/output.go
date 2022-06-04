@@ -9,11 +9,11 @@ import (
 
 	oto "github.com/hajimehoshi/oto/v2"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/player"
-	"gitlab.com/avoronkov/waver/lib/midisynth/signals"
-	"gitlab.com/avoronkov/waver/lib/midisynth/wav"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
-	"gitlab.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/midisynth/player"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/midisynth/wav"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/lib/notes"
 )
 
 type Output struct {

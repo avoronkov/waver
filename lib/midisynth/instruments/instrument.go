@@ -1,8 +1,8 @@
 package instruments
 
 import (
-	"gitlab.com/avoronkov/waver/lib/midisynth/filters"
-	"gitlab.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/lib/midisynth/filters"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 type Instrument struct {

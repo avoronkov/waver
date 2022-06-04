@@ -4,9 +4,9 @@ import (
 	"flag"
 	"log"
 
-	"gitlab.com/avoronkov/waver/lib/midisynth/config"
-	"gitlab.com/avoronkov/waver/lib/midisynth/instruments"
-	"gitlab.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/midisynth/config"
+	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/notes"
 )
 
 func main() {
