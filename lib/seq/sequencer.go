@@ -68,19 +68,21 @@ func (s *Sequencer) Assign(name string, value types.ValueFn) {
 
 func (s *Sequencer) run() error {
 	delay := time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
+	start := time.Now()
+	frameTime := start
 	for {
-		start := time.Now()
 		var ok bool
 		if !s.pause {
 			var err error
-			ok, err = s.processFuncs(s.bit)
+			ok, err = s.processFuncs(frameTime, s.bit)
 			if err != nil {
 				log.Printf("File processing failed: %v", err)
 			}
 		}
-		dt := time.Since(start)
+		dt := time.Since(frameTime)
 		currentDelay := delay - dt
 		time.Sleep(currentDelay)
+		frameTime = frameTime.Add(delay)
 
 		if !s.pause && (ok || s.bit > 0) {
 			s.bit++
@@ -88,12 +90,10 @@ func (s *Sequencer) run() error {
 	}
 }
 
-func (s *Sequencer) processFuncs(bit int64) (bool, error) {
+func (s *Sequencer) processFuncs(tm time.Time, bit int64) (bool, error) {
 	if len(s.current) == 0 {
 		return false, nil
 	}
-
-	now := time.Now()
 
 	// eval variables first
 	ctx := types.NewContext()
@@ -108,7 +108,7 @@ func (s *Sequencer) processFuncs(bit int64) (bool, error) {
 		signals := fn.Eval(bit, ct)
 		for _, sig := range signals {
 			sg := sig
-			sg.Time = now
+			sg.Time = tm
 			s.ch <- &sg
 		}
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/avoronkov/waver/lib/midisynth"
 	"github.com/avoronkov/waver/lib/midisynth/config"
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
-	"github.com/avoronkov/waver/lib/midisynth/synth"
+	synth "github.com/avoronkov/waver/lib/midisynth/unisynth"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq"
 	"github.com/avoronkov/waver/lib/seq/common"
