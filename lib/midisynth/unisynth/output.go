@@ -18,8 +18,9 @@ type Output struct {
 	settings *wav.Settings
 	play     *multiplayer.MultiPlayer
 
-	context *oto.Context
-	player  oto.Player
+	context       *oto.Context
+	player        oto.Player
+	playerStarted bool
 
 	scale notes.Scale
 
@@ -70,12 +71,16 @@ func New(opts ...func(*Output)) (*Output, error) {
 
 	output.context = c
 	output.player = output.context.NewPlayer(output.play)
-	output.player.Play()
 
 	return output, nil
 }
 
 func (o *Output) ProcessAsync(tm float64, s *signals.Signal) {
+	if !o.playerStarted {
+		o.playerStarted = true
+		o.player.Play()
+	}
+
 	at := s.Time.Add(1 * time.Second)
 	var err error
 	if s.Sample != "" {
