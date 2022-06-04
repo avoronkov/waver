@@ -9,7 +9,7 @@
 
 # Hi-hat
 # `> 16` sends signals after 16th bit
-# `: [ 3 2 ]` sends signals on each 1st and 4th bits of 5 (`*..*.`)
+# `: [ 2 1 ]` sends signals on each 1st and 2nd bits of 3 (`**.`)
 
 > 16 < 128 : [ 2 1 ] -> "z2h1"
 
