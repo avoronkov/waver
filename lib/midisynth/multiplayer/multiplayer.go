@@ -44,10 +44,7 @@ func (m *MultiPlayer) Read(data []byte) (n int, err error) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	l := 640
-	if len(data) < l {
-		l = len(data)
-	}
+	l := len(data)
 
 	buff := new(bytes.Buffer)
 	for buff.Len() < l {
@@ -69,7 +66,9 @@ func (m *MultiPlayer) Read(data []byte) (n int, err error) {
 			_ = binary.Write(buff, binary.LittleEndian, intValue)
 		}
 		m.sampleCount++
-		m.removePlayingWaves(finishedWaves)
+		if len(finishedWaves) > 0 {
+			m.removePlayingWaves(finishedWaves)
+		}
 	}
 	n = copy(data, buff.Bytes())
 	return n, nil
