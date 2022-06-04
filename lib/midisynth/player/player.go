@@ -70,7 +70,7 @@ func (pi *playerImpl) Read(data []byte) (n int, err error) {
 			pi.eof = true
 			break
 		}
-		value := int16(maxInt16Amp * pi.wave.Value(pi.tm, pi.ctx))
+		value := int16(maxInt16Amp * waveValue)
 		for ch := 0; ch < pi.settings.ChannelNum; ch++ {
 			_ = binary.Write(buff, binary.LittleEndian, value)
 		}
