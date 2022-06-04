@@ -22,6 +22,7 @@ const updateCode = () => {
 const loadDefaultCode = () => {
     const code = goGetDefaultCode();
     document.getElementById("code-story").value = code;
+    document.getElementById("update-code").disabled = false;
 };
 
 const updateInstruments = () => {
