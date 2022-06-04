@@ -1,19 +1,21 @@
 # Waver project
 
+[Waver Playground](https://avoronkov.github.io/waver/)
+
 ## TODO
 
-- [+] Yaml config instead of json
+-   [x] Yaml config instead of json
 
-- [+] Autoreload on config changes
+-   [x] Autoreload on config changes
 
-- [+] Flanger filter
+-   [x] Flanger filter
 
-- [+] Samples support in config
+-   [x] Samples support in config
 
-- [+] More drum samples!
+-   [x] More drum samples!
 
-- [+] Handle samples as separate instrument (`z`)
+-   [x] Handle samples as separate instrument (`z`)
 
-- [+] Semisine wave
+-   [x] Semisine wave
 
-- [ ] Improve amplitude parameter
+-   [ ] Improve amplitude parameter
