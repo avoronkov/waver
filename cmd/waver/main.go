@@ -14,8 +14,8 @@ import (
 	"github.com/avoronkov/waver/lib/midisynth/dumper"
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
 	"github.com/avoronkov/waver/lib/midisynth/midi"
-	"github.com/avoronkov/waver/lib/midisynth/synth"
 	"github.com/avoronkov/waver/lib/midisynth/udp"
+	"github.com/avoronkov/waver/lib/midisynth/unisynth"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/project"
 	"github.com/avoronkov/waver/lib/seq"
@@ -80,12 +80,12 @@ func main() {
 	// .
 
 	// Audio output
-	audioOpts := []func(*synth.Output){
-		synth.WithInstruments(instSet),
-		synth.WithScale(scale),
-		synth.WithTempo(tempo),
+	audioOpts := []func(*unisynth.Output){
+		unisynth.WithInstruments(instSet),
+		unisynth.WithScale(scale),
+		unisynth.WithTempo(tempo),
 	}
-	audioOutput, err := synth.New(audioOpts...)
+	audioOutput, err := unisynth.New(audioOpts...)
 	check("Syntheziser output", err)
 	opts = append(opts, midisynth.WithSignalOutput(audioOutput))
 	// .
