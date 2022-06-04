@@ -1,15 +1,15 @@
-.PHONY: all run clean midisynth install
+.PHONY: all run clean waver install
 
-all: midisynth
+all: waver
 
-run: midisynth
-	./midisynth
+run: waver
+	./waver
 
-midisynth:
-	PKG_CONFIG_PATH=/usr/lib/pkgconfig go build ./cmd/midisynth
+waver:
+	PKG_CONFIG_PATH=/usr/lib/pkgconfig go build ./cmd/waver
 
 install:
-	PKG_CONFIG_PATH=/usr/lib/pkgconfig go install ./cmd/midisynth
+	PKG_CONFIG_PATH=/usr/lib/pkgconfig go install ./cmd/waver
 
 clean:
-	rm -f ./midisynth
+	rm -f ./waver

@@ -2,18 +2,18 @@
 
 ## TODO
 
-- [ ] Yaml config instead of json
+- [+] Yaml config instead of json
 
-- [ ] Autoreload on config changes
+- [+] Autoreload on config changes
 
-- [ ] Flanger filter
+- [+] Flanger filter
 
-- [ ] Samples support in config
+- [+] Samples support in config
 
-- [ ] More drum samples!
+- [+] More drum samples!
 
-- [ ] Handle samples as separate instrument (`z`)
+- [+] Handle samples as separate instrument (`z`)
 
-- [ ] Semisine wave
+- [+] Semisine wave
 
 - [ ] Improve amplitude parameter
