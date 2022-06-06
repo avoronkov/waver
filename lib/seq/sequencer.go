@@ -21,6 +21,9 @@ type Sequencer struct {
 	pause bool
 
 	ch chan<- *signals.Signal
+
+	startingBit int64
+	showBits    int64
 }
 
 var _ signals.Input = (*Sequencer)(nil)
@@ -68,13 +71,32 @@ func (s *Sequencer) Assign(name string, value types.ValueFn) {
 
 func (s *Sequencer) run() error {
 	delay := time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
+
+	// Skip until starting bit
+	for s.bit < s.startingBit {
+		_, err := s.processFuncs(time.Time{}, s.bit, true)
+		if err != nil {
+			log.Printf("File processing failed: %v", err)
+		}
+		s.bit++
+	}
+
 	start := time.Now()
 	frameTime := start
+
+	// Main loop
 	for {
 		var ok bool
 		if !s.pause {
+			if s.showBits > 0 && s.bit%s.showBits == 0 {
+				go func(bit int64) {
+					time.Sleep(1 * time.Second)
+					log.Printf("Bit: %v", bit)
+				}(s.bit)
+			}
+
 			var err error
-			ok, err = s.processFuncs(frameTime, s.bit)
+			ok, err = s.processFuncs(frameTime, s.bit, false)
 			if err != nil {
 				log.Printf("File processing failed: %v", err)
 			}
@@ -90,7 +112,7 @@ func (s *Sequencer) run() error {
 	}
 }
 
-func (s *Sequencer) processFuncs(tm time.Time, bit int64) (bool, error) {
+func (s *Sequencer) processFuncs(tm time.Time, bit int64, dryRun bool) (bool, error) {
 	if len(s.current) == 0 {
 		return false, nil
 	}
@@ -106,10 +128,12 @@ func (s *Sequencer) processFuncs(tm time.Time, bit int64) (bool, error) {
 	for _, fn := range s.current {
 		ct := ctx.Copy()
 		signals := fn.Eval(bit, ct)
-		for _, sig := range signals {
-			sg := sig
-			sg.Time = tm
-			s.ch <- &sg
+		if !dryRun {
+			for _, sig := range signals {
+				sg := sig
+				sg.Time = tm
+				s.ch <- &sg
+			}
 		}
 	}
 	return true, nil

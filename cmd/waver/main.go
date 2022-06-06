@@ -60,6 +60,7 @@ func main() {
 		sequencer := seq.NewSequencer(
 			seq.WithTempo(tempo),
 			seq.WithStart(startBit),
+			seq.WithShowingBits(showBits),
 		)
 		ps := parser.New(sequencer, scale, parser.WithFileInput(fileInput))
 		check("Parser start", ps.Start(true))
