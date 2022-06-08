@@ -100,9 +100,8 @@ func main() {
 			pragma.WithTempoSetter(sequencer),
 			pragma.WithTempoSetter(audioOutput),
 		)
-		check("Pragma parser", pragmaParser.Parse())
+		check("Pragma parser start", pragmaParser.Start(true))
 	}
-
 	// .
 
 	m, err := midisynth.NewMidiSynth(opts...)

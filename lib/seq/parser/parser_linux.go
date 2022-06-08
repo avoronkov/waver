@@ -13,15 +13,12 @@ func (p *Parser) Start(wtch bool) error {
 	if err := p.parse(); err != nil {
 		return err
 	}
-	if wtch {
-		err := watch.OnFileUpdate(p.file, func() {
-			if err := p.parse(); err != nil {
-				log.Printf("Parsing %v failed: %v", p.file, err)
-			}
-		})
-		if err != nil {
-			return err
-		}
+	if !wtch {
+		return nil
 	}
-	return nil
+	return watch.OnFileUpdate(p.file, func() {
+		if err := p.parse(); err != nil {
+			log.Printf("Parsing %v failed: %v", p.file, err)
+		}
+	})
 }

@@ -73,9 +73,11 @@ func (s *Sequencer) SetTempo(tempo int) {
 	s.tempo = tempo
 }
 
-func (s *Sequencer) run() error {
-	delay := time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
+func (s *Sequencer) delay() time.Duration {
+	return time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
+}
 
+func (s *Sequencer) run() error {
 	// Skip until starting bit
 	for s.bit < s.startingBit {
 		_, err := s.processFuncs(time.Time{}, s.bit, true)
@@ -106,9 +108,9 @@ func (s *Sequencer) run() error {
 			}
 		}
 		dt := time.Since(frameTime)
-		currentDelay := delay - dt
+		currentDelay := s.delay() - dt
 		time.Sleep(currentDelay)
-		frameTime = frameTime.Add(delay)
+		frameTime = frameTime.Add(s.delay())
 
 		if !s.pause && (ok || s.bit > 0) {
 			s.bit++
