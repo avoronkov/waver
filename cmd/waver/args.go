@@ -10,6 +10,7 @@ var (
 	edo19    bool
 
 	configPath string
+	useConfig  bool
 
 	dump string
 
@@ -36,6 +37,8 @@ func init() {
 	defaultConfig := "./etc/config.yml"
 	flag.StringVar(&configPath, "config-path", defaultConfig, "Midisynth configuration")
 	flag.StringVar(&configPath, "c", defaultConfig, "Midisynth configuration (shorthand)")
+
+	flag.BoolVar(&useConfig, "config", true, "use instruments yaml config")
 
 	flag.StringVar(&dump, "dump", "", "dump signals into file")
 	flag.StringVar(&dump, "d", "", "dump signals into file (shorthand)")

@@ -77,9 +77,11 @@ func main() {
 
 	// Instruments
 	instSet := instruments.NewSet()
-	cfg := config.New(getConfigPath(), instSet)
-	check("MidiSynth initialization", cfg.InitMidiSynth())
-	check("Config StartUpdateLoop", cfg.StartUpdateLoop())
+	if useConfig {
+		cfg := config.New(getConfigPath(), instSet)
+		check("MidiSynth initialization", cfg.InitMidiSynth())
+		check("Config StartUpdateLoop", cfg.StartUpdateLoop())
+	}
 	// .
 
 	// Audio output

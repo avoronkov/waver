@@ -64,6 +64,10 @@ func (p *PragmaParser) parseReader(reader io.Reader) error {
 				if err := p.parseSample(fields); err != nil {
 					return err
 				}
+			case "inst":
+				if err := p.parseInstrument(fields); err != nil {
+					return err
+				}
 			default:
 				return fmt.Errorf("Unknown pragma ('%%'): %v", pragma)
 			}
@@ -112,4 +116,44 @@ func (p *PragmaParser) handleSample(name, file string) error {
 	in := instruments.NewInstrument(w)
 	p.instSet.AddSampledInstrument(name, in)
 	return nil
+}
+
+// % inst 1 'sine'
+func (p *PragmaParser) parseInstrument(fields []string) error {
+	if len(fields) != 4 {
+		return fmt.Errorf("Incorrect number of arguments for 'inst' pragma: %v", fields)
+	}
+	instIdx, err := strconv.Atoi(fields[2])
+	if err != nil {
+		return fmt.Errorf("Instrument index is not an integer: %v", fields[2])
+	}
+	waveName := strings.Trim(fields[3], "'")
+	return p.handleInstrument(instIdx, waveName)
+}
+
+func (p *PragmaParser) handleInstrument(n int, wave string) error {
+	log.Printf("Using instument '%v' => '%v'", n, wave)
+	w, err := p.handleWave(wave)
+	if err != nil {
+		return err
+	}
+	in := instruments.NewInstrument(w)
+	p.instSet.AddInstrument(n, in)
+	return nil
+}
+
+func (p *PragmaParser) handleWave(wave string) (waves.Wave, error) {
+	switch wave {
+	case "sine":
+		return waves.Sine, nil
+	case "square":
+		return waves.Square, nil
+	case "triangle":
+		return waves.Triangle, nil
+	case "saw":
+		return waves.Saw, nil
+	case "semisine":
+		return waves.SemiSine, nil
+	}
+	return nil, fmt.Errorf("Unknown wave: %v", wave)
 }
