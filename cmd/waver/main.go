@@ -99,6 +99,7 @@ func main() {
 			fileInput,
 			pragma.WithTempoSetter(sequencer),
 			pragma.WithTempoSetter(audioOutput),
+			pragma.WithInstrumentSet(instSet),
 		)
 		check("Pragma parser start", pragmaParser.Start(true))
 	}
