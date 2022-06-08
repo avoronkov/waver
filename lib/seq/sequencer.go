@@ -69,6 +69,10 @@ func (s *Sequencer) Assign(name string, value types.ValueFn) {
 	s.nextVars = append(s.nextVars, assignment{name, value})
 }
 
+func (s *Sequencer) SetTempo(tempo int) {
+	s.tempo = tempo
+}
+
 func (s *Sequencer) run() error {
 	delay := time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
 

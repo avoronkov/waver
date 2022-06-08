@@ -109,7 +109,6 @@ func (o *Output) ProcessAsync(tm float64, s *signals.Signal) {
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}
-
 }
 
 func (o *Output) Close() error {
@@ -177,4 +176,8 @@ func (o *Output) PlayNoteControlled(inst int, note notes.Note, amp float64) (sto
 		}()
 		return wave.Release, nil
 	*/
+}
+
+func (o *Output) SetTempo(tempo int) {
+	o.tempo = tempo
 }

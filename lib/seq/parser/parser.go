@@ -84,7 +84,7 @@ func (p *Parser) parseReader(reader io.Reader) error {
 	for sc.Scan() {
 		lineNum++
 		text := sc.Text()
-		if text == "" || text[0] == '#' {
+		if text == "" || text[0] == '#' || text[0] == '%' {
 			continue
 		}
 		if err := p.parseLine(lineNum, text); err != nil {

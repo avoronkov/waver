@@ -17,6 +17,7 @@ import (
 	"github.com/avoronkov/waver/lib/midisynth/udp"
 	"github.com/avoronkov/waver/lib/midisynth/unisynth"
 	"github.com/avoronkov/waver/lib/notes"
+	"github.com/avoronkov/waver/lib/pragma"
 	"github.com/avoronkov/waver/lib/project"
 	"github.com/avoronkov/waver/lib/seq"
 	"github.com/avoronkov/waver/lib/seq/common"
@@ -56,8 +57,9 @@ func main() {
 		opts = append(opts, midisynth.WithSignalInput(midiInput))
 	}
 
+	var sequencer *seq.Sequencer
 	if fileInput != "" {
-		sequencer := seq.NewSequencer(
+		sequencer = seq.NewSequencer(
 			seq.WithTempo(tempo),
 			seq.WithStart(startBit),
 			seq.WithShowingBits(showBits),
@@ -91,20 +93,20 @@ func main() {
 	opts = append(opts, midisynth.WithSignalOutput(audioOutput))
 	// .
 
+	// Pragma parser
+	if fileInput != "" {
+		pragmaParser := pragma.New(
+			fileInput,
+			pragma.WithTempoSetter(sequencer),
+			pragma.WithTempoSetter(audioOutput),
+		)
+		check("Pragma parser", pragmaParser.Parse())
+	}
+
+	// .
+
 	m, err := midisynth.NewMidiSynth(opts...)
 	check("Midisynth creation", err)
-
-	// Experimantal section
-	/*
-		in := instruments.NewInstrument(
-			waves.SineSine,
-			filters.NewAdsrFilter(),
-		)
-
-		m.AddInstrument(10, in)
-
-	*/
-	// .
 
 	check("Start", m.Start())
 	check("Stop", m.Close())
