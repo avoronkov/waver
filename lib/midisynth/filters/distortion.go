@@ -1,6 +1,10 @@
 package filters
 
-import "github.com/avoronkov/waver/lib/midisynth/waves"
+import (
+	"fmt"
+
+	"github.com/avoronkov/waver/lib/midisynth/waves"
+)
 
 // Amplitude distortion filter
 type DistortionFilter struct {
@@ -11,6 +15,26 @@ func NewDistortionFilter(m float64) *DistortionFilter {
 	return &DistortionFilter{
 		Multiplier: m,
 	}
+}
+
+func (f DistortionFilter) Create(options any) (fx Filter, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+
+	opts := options.(map[string]any)
+	value := 1.0
+	for param, v := range opts {
+		switch param {
+		case "value":
+			value = float64Of(v)
+		default:
+			return nil, fmt.Errorf("Unknown Distortion parameter: %v", param)
+		}
+	}
+	return NewDistortionFilter(value), nil
 }
 
 func (df *DistortionFilter) Apply(w waves.Wave) waves.Wave {

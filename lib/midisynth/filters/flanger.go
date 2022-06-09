@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
@@ -27,6 +28,31 @@ func NewFlanger(opts ...func(*Flanger)) Filter {
 	}
 	f.shifterCtx = waves.NewNoteCtx(f.freq, 1.0, math.Inf(1))
 	return f
+}
+
+func (Flanger) Create(options any) (fx Filter, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+
+	opts := options.(map[string]any)
+	var o []func(*Flanger)
+	for param, value := range opts {
+		switch param {
+		case "freq", "frequency":
+			v := float64Of(value)
+			o = append(o, FlangerFreq(v))
+		case "shift":
+			v := float64Of(value)
+			o = append(o, FlangerShift(v))
+		default:
+			return nil, fmt.Errorf("Unknown Flanger parameter: %v", param)
+		}
+	}
+
+	return NewFlanger(o...), nil
 }
 
 func (f *Flanger) Apply(wave waves.Wave) waves.Wave {

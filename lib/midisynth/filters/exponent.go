@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
@@ -14,6 +15,29 @@ func NewExponent(value float64) Filter {
 	return &Exponent{
 		e: value,
 	}
+}
+
+func (Exponent) Create(options any) (fx Filter, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+	val := 1.0
+	if x, ok := options.(float64); ok {
+		val = x
+	} else {
+		opts := options.(map[string]any)
+		for param, value := range opts {
+			switch param {
+			case "value":
+				val = float64Of(value)
+			default:
+				return nil, fmt.Errorf("Unknown Exponent parameter: %v", param)
+			}
+		}
+	}
+	return NewExponent(val), nil
 }
 
 func (ef *Exponent) Apply(input waves.Wave) waves.Wave {

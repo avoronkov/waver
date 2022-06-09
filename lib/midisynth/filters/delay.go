@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
@@ -22,6 +23,33 @@ func NewDelayFilter(opts ...func(*DelayFilter)) Filter {
 		o(f)
 	}
 	return f
+}
+
+func (f DelayFilter) Create(options any) (fx Filter, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+
+	opts := options.(map[string]any)
+	var o []func(*DelayFilter)
+	for param, value := range opts {
+		switch param {
+		case "interval":
+			v := float64Of(value)
+			o = append(o, DelayInterval(v))
+		case "times":
+			v := value.(int)
+			o = append(o, DelayTimes(v))
+		case "fade":
+			v := float64Of(value)
+			o = append(o, DelayFadeOut(v))
+		default:
+			return nil, fmt.Errorf("Unknown Delay parameter: %v", param)
+		}
+	}
+	return NewDelayFilter(o...), nil
 }
 
 func (df *DelayFilter) Apply(w waves.Wave) waves.Wave {

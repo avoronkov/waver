@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
@@ -21,6 +22,33 @@ func NewMovingExponent(opts ...func(*MovingExponent)) Filter {
 	}
 
 	return f
+}
+
+func (MovingExponent) Create(options any) (fx Filter, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+
+	opts := options.(map[string]any)
+	var o []func(*MovingExponent)
+	for param, value := range opts {
+		switch param {
+		case "initialValue":
+			val := float64Of(value)
+			o = append(o, MovingExponentInitialValue(val))
+		case "speed":
+			val := float64Of(value)
+			o = append(o, MovingExponentSpeed(val))
+		case "inverse":
+			val := value.(bool)
+			o = append(o, MovingExponentInverse(val))
+		default:
+			return nil, fmt.Errorf("Unknon Moving Exponent parameter: %v", param)
+		}
+	}
+	return NewMovingExponent(o...), nil
 }
 
 func (e *MovingExponent) Apply(input waves.Wave) waves.Wave {

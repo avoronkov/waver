@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
@@ -30,6 +31,36 @@ func NewAdsrFilter(opts ...func(*AdsrFilter)) Filter {
 	}
 
 	return f
+}
+
+func (AdsrFilter) Create(options any) (fx Filter, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+
+	opts := options.(map[string]any)
+	var o []func(*AdsrFilter)
+	for param, value := range opts {
+		switch param {
+		case "attackLevel":
+			o = append(o, AdsrAttackLevel(float64Of(value)))
+		case "decayLevel":
+			o = append(o, AdsrDecayLevel(float64Of(value)))
+		case "attackLen":
+			o = append(o, AdsrAttackLen(float64Of(value)))
+		case "decayLen":
+			o = append(o, AdsrDecayLen(float64Of(value)))
+		case "susteinLen":
+			o = append(o, AdsrSusteinLen(float64Of(value)))
+		case "releaseLen":
+			o = append(o, AdsrReleaseLen(float64Of(value)))
+		default:
+			return nil, fmt.Errorf("Unknown ADSR parameter: %v", param)
+		}
+	}
+	return NewAdsrFilter(o...), nil
 }
 
 func (af *AdsrFilter) Apply(w waves.Wave) waves.Wave {

@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
@@ -26,6 +27,31 @@ func NewTimeShift(opts ...func(*TimeShift)) Filter {
 	f.shifterCtx = waves.NewNoteCtx(f.freq, f.amp, math.Inf(1))
 
 	return f
+}
+
+func (TimeShift) Create(options any) (fx Filter, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+
+	opts := options.(map[string]any)
+	var o []func(*TimeShift)
+	o = append(o, TimeShiftCarrierWave(waves.Sine))
+	for param, value := range opts {
+		switch param {
+		case "wave":
+			return nil, fmt.Errorf("Parameter 'wave' is not supported yet")
+		case "frequency":
+			o = append(o, TimeShiftFrequency(float64Of(value)))
+		case "amplitude":
+			o = append(o, TimeShiftAmplitude(float64Of(value)))
+		default:
+			return nil, fmt.Errorf("Unknown Time Shift parameter: %v", param)
+		}
+	}
+	return NewTimeShift(o...), nil
 }
 
 func (ts *TimeShift) Apply(w waves.Wave) waves.Wave {

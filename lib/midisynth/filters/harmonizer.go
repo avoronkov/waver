@@ -1,6 +1,10 @@
 package filters
 
 import (
+	"fmt"
+	"sort"
+	"strconv"
+
 	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
@@ -23,6 +27,32 @@ func NewHarmonizer(opts ...func(*Harmonizer)) Filter {
 		opt(h)
 	}
 	return h
+}
+
+func (Harmonizer) Create(options any) (fx Filter, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+
+	opts := options.(map[string]any)
+	keys := make([]string, 0, len(opts))
+	for param := range opts {
+		keys = append(keys, param)
+	}
+	sort.Strings(keys)
+	var o []func(*Harmonizer)
+	for _, param := range keys {
+		n, err := strconv.Atoi(param)
+		if err != nil {
+			return nil, fmt.Errorf("Incorrect Harmonizer param: %v", param)
+		}
+		value := opts[param]
+		v := float64Of(value)
+		o = append(o, Harmonic(n, v))
+	}
+	return NewHarmonizer(o...), nil
 }
 
 func (h *Harmonizer) Apply(w waves.Wave) waves.Wave {

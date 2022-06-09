@@ -26,17 +26,14 @@ instruments:
     filters:
       - adsr:
       - delay:
-          interval:
-            knob: 2
-            default: 1.0
-            delta: 0.125
+          interval: 1.0
           fade: 0.5
           times: 2
   7:
     wave: sine
     filters:
       - am:
-          wave: sine
+          # wave: sine
           frequency: 5.0
           amplitude: 1.0
       - adsr:
@@ -44,14 +41,14 @@ instruments:
     wave: sine
     filters:
       - vibrato:
-          wave: sine
+          # wave: sine
           frequency: 4.0
           amplitude: 0.005
   9:
     wave: sine
     filters:
     - timeshift:
-        wave: sine
+        # wave: sine
         frequency: 4.0
         amplitude: 0.05
 
