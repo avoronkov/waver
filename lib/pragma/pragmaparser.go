@@ -11,9 +11,6 @@ import (
 	"strings"
 
 	"github.com/avoronkov/waver/lib/midisynth/config"
-	"github.com/avoronkov/waver/lib/midisynth/instruments"
-	"github.com/avoronkov/waver/lib/midisynth/waves"
-	"github.com/avoronkov/waver/static"
 
 	yaml "gopkg.in/yaml.v3"
 )
@@ -129,27 +126,24 @@ func (p *PragmaParser) parseSample(fields []string, body string) error {
 	smp := fields[2]
 	filename := filepath.Join("samples", strings.Trim(fields[3], "\""))
 
-	return p.handleSample(smp, filename)
-}
-
-func (p *PragmaParser) handleSample(name, file string) error {
-	log.Printf("Using sample '%v' from '%v'", name, file)
-	data, err := static.Files.ReadFile(file)
+	var options []map[string]any
+	if body != "" {
+		var err error
+		options, err = p.parsePragmaOptions(body)
+		if err != nil {
+			return err
+		}
+	}
+	in, err := config.ParseSample(filename, options)
 	if err != nil {
 		return err
 	}
-	w, err := waves.ParseSample(data)
-	if err != nil {
-		return err
-	}
-	in := instruments.NewInstrument(w)
-	p.instSet.AddSampledInstrument(name, in)
+	p.instSet.AddSampledInstrument(smp, in)
 	return nil
 }
 
 // % inst 1 'sine'
 func (p *PragmaParser) parseInstrument(fields []string, body string) error {
-	log.Printf("parseInstrument: %v | %v", fields, body)
 	if len(fields) != 4 {
 		return fmt.Errorf("Incorrect number of arguments for 'inst' pragma: %v", fields)
 	}
@@ -181,11 +175,4 @@ func (p *PragmaParser) parsePragmaOptions(body string) ([]map[string]any, error)
 		return nil, err
 	}
 	return options, nil
-}
-
-func (p *PragmaParser) handleWave(wave string) (waves.Wave, error) {
-	if w, ok := waves.Waves[wave]; ok {
-		return w, nil
-	}
-	return nil, fmt.Errorf("Unknown wave: %v", wave)
 }

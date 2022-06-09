@@ -102,7 +102,7 @@ func (c *Config) handleData(data *Data, m InstrumentSet) error {
 
 	for name, sampleData := range data.Samples {
 		c.log(-1, "Loading sampled instrument %v...", name)
-		instr, err := c.handleSampleData(&sampleData)
+		instr, err := ParseSample(sampleData.Sample, sampleData.Filters)
 		if err != nil {
 			return fmt.Errorf("Failed to handle instrument %v: %v", name, err)
 		}
@@ -111,14 +111,14 @@ func (c *Config) handleData(data *Data, m InstrumentSet) error {
 	return nil
 }
 
-func (c *Config) handleSampleData(s *SampleData) (*instruments.Instrument, error) {
-	sample, err := c.handleSample(s.Sample)
+func ParseSample(file string, filtersData []map[string]any) (*instruments.Instrument, error) {
+	sample, err := handleSample(file)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to handle sample %v: %v", s.Sample, err)
+		return nil, err
 	}
 	var fs []filters.Filter
-	for _, f := range s.Filters {
-		fx, err := c.handleFilter(-1, f)
+	for _, f := range filtersData {
+		fx, err := handleFilter(f)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to handle filter: %w", err)
 		}
@@ -127,8 +127,7 @@ func (c *Config) handleSampleData(s *SampleData) (*instruments.Instrument, error
 	return instruments.NewInstrument(sample, fs...), nil
 }
 
-func (c *Config) handleSample(sample string) (waves.Wave, error) {
-	c.log(-1, "> Using sample '%v'", sample)
+func handleSample(sample string) (waves.Wave, error) {
 	data, err := static.Files.ReadFile(sample)
 	if err != nil {
 		return nil, err
@@ -137,7 +136,6 @@ func (c *Config) handleSample(sample string) (waves.Wave, error) {
 }
 
 func ParseInstrument(waveName string, filtersData []map[string]any) (*instruments.Instrument, error) {
-	log.Printf("config.ParseInstrument: %v | %v", waveName, filtersData)
 	w, ok := waves.Waves[waveName]
 	if !ok {
 		return nil, fmt.Errorf("Unknown wave: %v", waveName)
@@ -150,22 +148,7 @@ func ParseInstrument(waveName string, filtersData []map[string]any) (*instrument
 		}
 		fs = append(fs, fx)
 	}
-	log.Printf("NewInstrument: %v | %v", w, fs)
 	return instruments.NewInstrument(w, fs...), nil
-}
-
-func (c *Config) handleFilter(instr int, f Filter) (filters.Filter, error) {
-	if len(f) != 1 {
-		return nil, fmt.Errorf("Filter description should contain exactly 1 element: %+v", f)
-	}
-	for name, opts := range f {
-		fc, ok := filters.Filters[name]
-		if !ok {
-			return nil, fmt.Errorf("Unknown filter: %v", name)
-		}
-		return fc.Create(opts)
-	}
-	panic("unreachable")
 }
 
 func handleFilter(f map[string]any) (filters.Filter, error) {
