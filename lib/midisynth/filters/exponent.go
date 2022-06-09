@@ -26,7 +26,7 @@ func (Exponent) Create(options any) (fx Filter, err error) {
 	val := 1.0
 	if x, ok := options.(float64); ok {
 		val = x
-	} else {
+	} else if options != nil {
 		opts := options.(map[string]any)
 		for param, value := range opts {
 			switch param {

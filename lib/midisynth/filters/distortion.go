@@ -24,14 +24,16 @@ func (f DistortionFilter) Create(options any) (fx Filter, err error) {
 		}
 	}()
 
-	opts := options.(map[string]any)
 	value := 1.0
-	for param, v := range opts {
-		switch param {
-		case "value":
-			value = float64Of(v)
-		default:
-			return nil, fmt.Errorf("Unknown Distortion parameter: %v", param)
+	if options != nil {
+		opts := options.(map[string]any)
+		for param, v := range opts {
+			switch param {
+			case "value":
+				value = float64Of(v)
+			default:
+				return nil, fmt.Errorf("Unknown Distortion parameter: %v", param)
+			}
 		}
 	}
 	return NewDistortionFilter(value), nil

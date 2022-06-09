@@ -37,18 +37,20 @@ func (Flanger) Create(options any) (fx Filter, err error) {
 		}
 	}()
 
-	opts := options.(map[string]any)
 	var o []func(*Flanger)
-	for param, value := range opts {
-		switch param {
-		case "freq", "frequency":
-			v := float64Of(value)
-			o = append(o, FlangerFreq(v))
-		case "shift":
-			v := float64Of(value)
-			o = append(o, FlangerShift(v))
-		default:
-			return nil, fmt.Errorf("Unknown Flanger parameter: %v", param)
+	if options != nil {
+		opts := options.(map[string]any)
+		for param, value := range opts {
+			switch param {
+			case "freq", "frequency":
+				v := float64Of(value)
+				o = append(o, FlangerFreq(v))
+			case "shift":
+				v := float64Of(value)
+				o = append(o, FlangerShift(v))
+			default:
+				return nil, fmt.Errorf("Unknown Flanger parameter: %v", param)
+			}
 		}
 	}
 

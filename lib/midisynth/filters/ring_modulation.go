@@ -26,21 +26,23 @@ func (Ring) Create(options any) (fx Filter, err error) {
 		}
 	}()
 
-	opts := options.(map[string]any)
 	var carrier waves.Wave = waves.Sine
 	var freq float64
 	amp := 1.0
 
-	for param, value := range opts {
-		switch param {
-		case "wave":
-			return nil, fmt.Errorf("Parameter 'wave' is not supported yet")
-		case "freq", "frequency":
-			freq = float64Of(value)
-		case "amp", "amplitude":
-			amp = float64Of(value)
-		default:
-			return nil, fmt.Errorf("Unknown AM parameter: %v", param)
+	if options != nil {
+		opts := options.(map[string]any)
+		for param, value := range opts {
+			switch param {
+			case "wave":
+				return nil, fmt.Errorf("Parameter 'wave' is not supported yet")
+			case "freq", "frequency":
+				freq = float64Of(value)
+			case "amp", "amplitude":
+				amp = float64Of(value)
+			default:
+				return nil, fmt.Errorf("Unknown AM parameter: %v", param)
+			}
 		}
 	}
 	return NewRing(carrier, freq, amp), nil

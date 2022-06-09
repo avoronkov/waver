@@ -31,21 +31,23 @@ func (MovingExponent) Create(options any) (fx Filter, err error) {
 		}
 	}()
 
-	opts := options.(map[string]any)
 	var o []func(*MovingExponent)
-	for param, value := range opts {
-		switch param {
-		case "initialValue":
-			val := float64Of(value)
-			o = append(o, MovingExponentInitialValue(val))
-		case "speed":
-			val := float64Of(value)
-			o = append(o, MovingExponentSpeed(val))
-		case "inverse":
-			val := value.(bool)
-			o = append(o, MovingExponentInverse(val))
-		default:
-			return nil, fmt.Errorf("Unknon Moving Exponent parameter: %v", param)
+	if options != nil {
+		opts := options.(map[string]any)
+		for param, value := range opts {
+			switch param {
+			case "initialValue":
+				val := float64Of(value)
+				o = append(o, MovingExponentInitialValue(val))
+			case "speed":
+				val := float64Of(value)
+				o = append(o, MovingExponentSpeed(val))
+			case "inverse":
+				val := value.(bool)
+				o = append(o, MovingExponentInverse(val))
+			default:
+				return nil, fmt.Errorf("Unknon Moving Exponent parameter: %v", param)
+			}
 		}
 	}
 	return NewMovingExponent(o...), nil

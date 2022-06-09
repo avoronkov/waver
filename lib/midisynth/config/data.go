@@ -38,4 +38,4 @@ type SampleData struct {
 	Filters []Filter `yaml:"filters"`
 }
 
-type Filter map[string]map[string]interface{}
+type Filter = map[string]any

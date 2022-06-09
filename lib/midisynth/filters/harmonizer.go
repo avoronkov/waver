@@ -36,21 +36,23 @@ func (Harmonizer) Create(options any) (fx Filter, err error) {
 		}
 	}()
 
-	opts := options.(map[string]any)
-	keys := make([]string, 0, len(opts))
-	for param := range opts {
-		keys = append(keys, param)
-	}
-	sort.Strings(keys)
 	var o []func(*Harmonizer)
-	for _, param := range keys {
-		n, err := strconv.Atoi(param)
-		if err != nil {
-			return nil, fmt.Errorf("Incorrect Harmonizer param: %v", param)
+	if options != nil {
+		opts := options.(map[string]any)
+		keys := make([]string, 0, len(opts))
+		for param := range opts {
+			keys = append(keys, param)
 		}
-		value := opts[param]
-		v := float64Of(value)
-		o = append(o, Harmonic(n, v))
+		sort.Strings(keys)
+		for _, param := range keys {
+			n, err := strconv.Atoi(param)
+			if err != nil {
+				return nil, fmt.Errorf("Incorrect Harmonizer param: %v", param)
+			}
+			value := opts[param]
+			v := float64Of(value)
+			o = append(o, Harmonic(n, v))
+		}
 	}
 	return NewHarmonizer(o...), nil
 }

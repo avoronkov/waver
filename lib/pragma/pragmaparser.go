@@ -10,9 +10,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/avoronkov/waver/lib/midisynth/config"
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
 	"github.com/avoronkov/waver/lib/midisynth/waves"
 	"github.com/avoronkov/waver/static"
+
+	yaml "gopkg.in/yaml.v3"
 )
 
 type PragmaParser struct {
@@ -49,10 +52,20 @@ func (p *PragmaParser) parseReader(reader io.Reader) error {
 
 	for sc.Scan() {
 		text := sc.Text()
-		if strings.HasPrefix(text, "% ") {
+		singleLine := strings.HasPrefix(text, "% ")
+		multiline := strings.HasPrefix(text, "%% ")
+		if singleLine || multiline {
 			fields := strings.Fields(text)
 			if len(fields) < 2 {
 				return fmt.Errorf("Not enough arguments for pragma ('%%'): %v", text)
+			}
+			var body string
+			if multiline {
+				b, err := p.parseMultilinePragma(sc)
+				if err != nil {
+					return err
+				}
+				body = b
 			}
 			log.Printf("[PRAGMA] parsing: %v", text)
 			switch pragma := fields[1]; pragma {
@@ -61,11 +74,11 @@ func (p *PragmaParser) parseReader(reader io.Reader) error {
 					return err
 				}
 			case "sample":
-				if err := p.parseSample(fields); err != nil {
+				if err := p.parseSample(fields, body); err != nil {
 					return err
 				}
 			case "inst":
-				if err := p.parseInstrument(fields); err != nil {
+				if err := p.parseInstrument(fields, body); err != nil {
 					return err
 				}
 			default:
@@ -76,6 +89,22 @@ func (p *PragmaParser) parseReader(reader io.Reader) error {
 		}
 	}
 	return sc.Err()
+}
+
+func (p *PragmaParser) parseMultilinePragma(sc *bufio.Scanner) (string, error) {
+	var lines []string
+	for sc.Scan() {
+		line := sc.Text()
+		if line == "%%" {
+			return strings.Join(lines, "\n"), nil
+		}
+		lines = append(lines, line)
+	}
+	err := sc.Err()
+	if err == nil {
+		err = fmt.Errorf("Unexpected end-of-file")
+	}
+	return "", err
 }
 
 func (p *PragmaParser) parseTempo(fields []string) error {
@@ -93,7 +122,7 @@ func (p *PragmaParser) parseTempo(fields []string) error {
 }
 
 // % sample 2k "2-2-kick.wav"
-func (p *PragmaParser) parseSample(fields []string) error {
+func (p *PragmaParser) parseSample(fields []string, body string) error {
 	if len(fields) != 4 {
 		return fmt.Errorf("Incorrect number of arguments for 'sample' pragma: %v", fields)
 	}
@@ -119,7 +148,8 @@ func (p *PragmaParser) handleSample(name, file string) error {
 }
 
 // % inst 1 'sine'
-func (p *PragmaParser) parseInstrument(fields []string) error {
+func (p *PragmaParser) parseInstrument(fields []string, body string) error {
+	log.Printf("parseInstrument: %v | %v", fields, body)
 	if len(fields) != 4 {
 		return fmt.Errorf("Incorrect number of arguments for 'inst' pragma: %v", fields)
 	}
@@ -128,32 +158,34 @@ func (p *PragmaParser) parseInstrument(fields []string) error {
 		return fmt.Errorf("Instrument index is not an integer: %v", fields[2])
 	}
 	waveName := strings.Trim(fields[3], "'")
-	return p.handleInstrument(instIdx, waveName)
-}
-
-func (p *PragmaParser) handleInstrument(n int, wave string) error {
-	log.Printf("Using instument '%v' => '%v'", n, wave)
-	w, err := p.handleWave(wave)
+	var options []map[string]any
+	if body != "" {
+		options, err = p.parsePragmaOptions(body)
+		if err != nil {
+			return err
+		}
+	}
+	in, err := config.ParseInstrument(waveName, options)
 	if err != nil {
 		return err
 	}
-	in := instruments.NewInstrument(w)
-	p.instSet.AddInstrument(n, in)
+	p.instSet.AddInstrument(instIdx, in)
 	return nil
 }
 
+func (p *PragmaParser) parsePragmaOptions(body string) ([]map[string]any, error) {
+	options := []map[string]any{}
+	r := strings.NewReader(body)
+	err := yaml.NewDecoder(r).Decode(&options)
+	if err != nil {
+		return nil, err
+	}
+	return options, nil
+}
+
 func (p *PragmaParser) handleWave(wave string) (waves.Wave, error) {
-	switch wave {
-	case "sine":
-		return waves.Sine, nil
-	case "square":
-		return waves.Square, nil
-	case "triangle":
-		return waves.Triangle, nil
-	case "saw":
-		return waves.Saw, nil
-	case "semisine":
-		return waves.SemiSine, nil
+	if w, ok := waves.Waves[wave]; ok {
+		return w, nil
 	}
 	return nil, fmt.Errorf("Unknown wave: %v", wave)
 }

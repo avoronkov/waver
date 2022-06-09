@@ -40,24 +40,26 @@ func (AdsrFilter) Create(options any) (fx Filter, err error) {
 		}
 	}()
 
-	opts := options.(map[string]any)
 	var o []func(*AdsrFilter)
-	for param, value := range opts {
-		switch param {
-		case "attackLevel":
-			o = append(o, AdsrAttackLevel(float64Of(value)))
-		case "decayLevel":
-			o = append(o, AdsrDecayLevel(float64Of(value)))
-		case "attackLen":
-			o = append(o, AdsrAttackLen(float64Of(value)))
-		case "decayLen":
-			o = append(o, AdsrDecayLen(float64Of(value)))
-		case "susteinLen":
-			o = append(o, AdsrSusteinLen(float64Of(value)))
-		case "releaseLen":
-			o = append(o, AdsrReleaseLen(float64Of(value)))
-		default:
-			return nil, fmt.Errorf("Unknown ADSR parameter: %v", param)
+	if options != nil {
+		opts := options.(map[string]any)
+		for param, value := range opts {
+			switch param {
+			case "attackLevel":
+				o = append(o, AdsrAttackLevel(float64Of(value)))
+			case "decayLevel":
+				o = append(o, AdsrDecayLevel(float64Of(value)))
+			case "attackLen":
+				o = append(o, AdsrAttackLen(float64Of(value)))
+			case "decayLen":
+				o = append(o, AdsrDecayLen(float64Of(value)))
+			case "susteinLen":
+				o = append(o, AdsrSusteinLen(float64Of(value)))
+			case "releaseLen":
+				o = append(o, AdsrReleaseLen(float64Of(value)))
+			default:
+				return nil, fmt.Errorf("Unknown ADSR parameter: %v", param)
+			}
 		}
 	}
 	return NewAdsrFilter(o...), nil

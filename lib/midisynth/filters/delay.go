@@ -32,21 +32,23 @@ func (f DelayFilter) Create(options any) (fx Filter, err error) {
 		}
 	}()
 
-	opts := options.(map[string]any)
 	var o []func(*DelayFilter)
-	for param, value := range opts {
-		switch param {
-		case "interval":
-			v := float64Of(value)
-			o = append(o, DelayInterval(v))
-		case "times":
-			v := value.(int)
-			o = append(o, DelayTimes(v))
-		case "fade":
-			v := float64Of(value)
-			o = append(o, DelayFadeOut(v))
-		default:
-			return nil, fmt.Errorf("Unknown Delay parameter: %v", param)
+	if options != nil {
+		opts := options.(map[string]any)
+		for param, value := range opts {
+			switch param {
+			case "interval":
+				v := float64Of(value)
+				o = append(o, DelayInterval(v))
+			case "times":
+				v := value.(int)
+				o = append(o, DelayTimes(v))
+			case "fade":
+				v := float64Of(value)
+				o = append(o, DelayFadeOut(v))
+			default:
+				return nil, fmt.Errorf("Unknown Delay parameter: %v", param)
+			}
 		}
 	}
 	return NewDelayFilter(o...), nil

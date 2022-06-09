@@ -36,20 +36,22 @@ func (VibratoFilter) Create(options any) (fx Filter, err error) {
 		}
 	}()
 
-	opts := options.(map[string]any)
 	var o []func(*VibratoFilter)
-	for param, value := range opts {
-		switch param {
-		case "wave":
-			return nil, fmt.Errorf("Parameter 'wave' is not supported yet")
-		case "freq", "frequency":
-			v := float64Of(value)
-			o = append(o, VibratoFrequency(v))
-		case "amp", "amplitude":
-			v := float64Of(value)
-			o = append(o, VibratoAmplitude(v))
-		default:
-			return nil, fmt.Errorf("Unknown Vibrato parameter: %v", param)
+	if options != nil {
+		opts := options.(map[string]any)
+		for param, value := range opts {
+			switch param {
+			case "wave":
+				return nil, fmt.Errorf("Parameter 'wave' is not supported yet")
+			case "freq", "frequency":
+				v := float64Of(value)
+				o = append(o, VibratoFrequency(v))
+			case "amp", "amplitude":
+				v := float64Of(value)
+				o = append(o, VibratoAmplitude(v))
+			default:
+				return nil, fmt.Errorf("Unknown Vibrato parameter: %v", param)
+			}
 		}
 	}
 	return NewVibrato(o...), nil

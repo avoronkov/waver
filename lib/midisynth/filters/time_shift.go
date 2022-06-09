@@ -36,19 +36,21 @@ func (TimeShift) Create(options any) (fx Filter, err error) {
 		}
 	}()
 
-	opts := options.(map[string]any)
 	var o []func(*TimeShift)
 	o = append(o, TimeShiftCarrierWave(waves.Sine))
-	for param, value := range opts {
-		switch param {
-		case "wave":
-			return nil, fmt.Errorf("Parameter 'wave' is not supported yet")
-		case "frequency":
-			o = append(o, TimeShiftFrequency(float64Of(value)))
-		case "amplitude":
-			o = append(o, TimeShiftAmplitude(float64Of(value)))
-		default:
-			return nil, fmt.Errorf("Unknown Time Shift parameter: %v", param)
+	if options != nil {
+		opts := options.(map[string]any)
+		for param, value := range opts {
+			switch param {
+			case "wave":
+				return nil, fmt.Errorf("Parameter 'wave' is not supported yet")
+			case "frequency":
+				o = append(o, TimeShiftFrequency(float64Of(value)))
+			case "amplitude":
+				o = append(o, TimeShiftAmplitude(float64Of(value)))
+			default:
+				return nil, fmt.Errorf("Unknown Time Shift parameter: %v", param)
+			}
 		}
 	}
 	return NewTimeShift(o...), nil
