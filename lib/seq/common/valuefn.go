@@ -19,3 +19,9 @@ func FloatConst(f float64) types.ValueFn {
 		return Float(f)
 	})
 }
+
+func StrConst(s string) types.ValueFn {
+	return types.ValueFunc(func(bit int64, ctx types.Context) types.Value {
+		return Str(s)
+	})
+}

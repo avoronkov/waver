@@ -58,6 +58,11 @@ func (n *note) evalInstr(bit int64, ctx types.Context, in string) (res []signals
 	} else if f, ok := nt.(Float); ok {
 		nt := notes.Note{Freq: float64(f)}
 		return n.evalInstrNote(bit, ctx, in, nt)
+	} else if s, ok := nt.(Str); ok {
+		if string(s) == "_" {
+			return n.evalInstrNote(bit, ctx, in, notes.Note{})
+		}
+		panic(fmt.Errorf("Don't know how to use for note: %v", s))
 	} else if l, ok := nt.(List); ok {
 		llen := l.Len()
 		for i := 0; i < llen; i++ {

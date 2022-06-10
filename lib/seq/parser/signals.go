@@ -13,7 +13,7 @@ type SigParser = func(scale notes.Scale, line *LineCtx) (types.Signaler, int, er
 // { 2 A4 }
 func parseSignal(scale notes.Scale, line *LineCtx) (types.Signaler, int, error) {
 	l := line.Len()
-	if l < 4 {
+	if l < 3 {
 		return nil, 0, fmt.Errorf("Not enough arguments for signal: %v", line)
 	}
 
@@ -25,6 +25,10 @@ func parseSignal(scale notes.Scale, line *LineCtx) (types.Signaler, int, error) 
 		return nil, 0, err
 	}
 	shift += sh
+
+	if line.Fields[shift] == "}" {
+		return common.Note(scale, in, common.StrConst("_")), shift + 1, nil
+	}
 
 	// parse note
 	nt, sh, err := parseAtom(scale, line.Shift(shift))
