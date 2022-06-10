@@ -35,9 +35,9 @@ type Output struct {
 var _ signals.Output = (*Output)(nil)
 
 type InstrumentSet interface {
-	Wave(inst int) (waves.Wave, bool)
-	Sample(name string) (waves.Wave, bool)
-	WaveControlled(inst int) (waves.WaveControlled, bool)
+	Wave(inst string) (waves.Wave, bool)
+	// Sample(name string) (waves.Wave, bool)
+	WaveControlled(inst string) (waves.WaveControlled, bool)
 }
 
 func New(opts ...func(*Output)) (*Output, error) {
@@ -117,7 +117,7 @@ func (o *Output) Close() error {
 }
 
 func (o *Output) PlaySampleAt(at time.Time, name string, duration float64, amp float64) error {
-	in, ok := o.instruments.Sample(name)
+	in, ok := o.instruments.Wave(name)
 	if !ok {
 		return fmt.Errorf("Unknown sample: %q", name)
 	}
@@ -126,14 +126,14 @@ func (o *Output) PlaySampleAt(at time.Time, name string, duration float64, amp f
 	return nil
 }
 
-func (o *Output) PlayNoteAt(at time.Time, instr int, note notes.Note, durationBits int, amp float64) error {
+func (o *Output) PlayNoteAt(at time.Time, instr string, note notes.Note, durationBits int, amp float64) error {
 	freq := note.Freq
 	dur := 15.0 * float64(durationBits) / float64(o.tempo)
 	o.playNoteAt(at, instr, freq, dur, amp)
 	return nil
 }
 
-func (o *Output) playNoteAt(at time.Time, inst int, hz float64, dur float64, amp float64) {
+func (o *Output) playNoteAt(at time.Time, inst string, hz float64, dur float64, amp float64) {
 	in, ok := o.instruments.Wave(inst)
 	if !ok {
 		log.Printf("Unknown instrument: %v", inst)
@@ -154,7 +154,7 @@ func (o *Output) releaseNote(note notes.Note) {
 	}
 }
 
-func (o *Output) PlayNoteControlled(inst int, note notes.Note, amp float64) (stop func(), err error) {
+func (o *Output) PlayNoteControlled(inst string, note notes.Note, amp float64) (stop func(), err error) {
 	panic("NIY")
 	/*
 		wave, ok := o.instruments.WaveControlled(inst)

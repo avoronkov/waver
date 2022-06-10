@@ -36,13 +36,21 @@ var _ types.Signaler = (*note)(nil)
 
 func (n *note) Eval(bit int64, ctx types.Context) (res []signals.Signal) {
 	instr := n.instr.Val(bit, ctx)
-	for _, i := range toInt64List(instr, bit, ctx) {
-		res = append(res, n.evalInstr(bit, ctx, i)...)
+	if s, ok := instr.(Str); ok {
+		return n.evalInstr(bit, ctx, string(s))
+	} else if l, ok := instr.(List); ok {
+		llen := l.Len()
+		for i := 0; i < llen; i++ {
+			item := l.Get(i, bit, ctx)
+			s := item.(Str)
+			res = append(res, n.evalInstr(bit, ctx, string(s))...)
+		}
+		return res
 	}
-	return
+	panic(fmt.Errorf("Don't know how to use for instrument: %v (%T)", instr, instr))
 }
 
-func (n *note) evalInstr(bit int64, ctx types.Context, in int64) (res []signals.Signal) {
+func (n *note) evalInstr(bit int64, ctx types.Context, in string) (res []signals.Signal) {
 	nt := n.note.Val(bit, ctx)
 	if v, ok := nt.(Num); ok {
 		nt := n.seqNoteNumberToNote(int64(v))
@@ -68,7 +76,7 @@ func (n *note) evalInstr(bit int64, ctx types.Context, in int64) (res []signals.
 	return
 }
 
-func (n *note) evalInstrNote(bit int64, ctx types.Context, in int64, nt notes.Note) (res []signals.Signal) {
+func (n *note) evalInstrNote(bit int64, ctx types.Context, in string, nt notes.Note) (res []signals.Signal) {
 	amp := n.amp.Val(bit, ctx)
 	if v, ok := amp.(Num); ok {
 		a := float64(v) / 16.0
@@ -100,7 +108,7 @@ func (n *note) seqNoteNumberToNote(num int64) notes.Note {
 	return nt
 }
 
-func (n *note) evalIntrNoteAmp(bit int64, ctx types.Context, inst int64, note notes.Note, amp float64) (res []signals.Signal) {
+func (n *note) evalIntrNoteAmp(bit int64, ctx types.Context, inst string, note notes.Note, amp float64) (res []signals.Signal) {
 	dur := n.dur.Val(bit, ctx)
 	durList := toInt64List(dur, bit, ctx)
 	for _, d := range durList {
@@ -109,9 +117,9 @@ func (n *note) evalIntrNoteAmp(bit int64, ctx types.Context, inst int64, note no
 	return
 }
 
-func (n *note) format(inst int64, note notes.Note, amp float64, dur int64) signals.Signal {
+func (n *note) format(inst string, note notes.Note, amp float64, dur int64) signals.Signal {
 	sig := &signals.Signal{
-		Instrument:   int(inst),
+		Instrument:   inst,
 		Note:         note,
 		DurationBits: int(dur),
 		Amp:          amp,

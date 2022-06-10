@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/avoronkov/waver/lib/midisynth/filters"
@@ -19,8 +18,8 @@ import (
 )
 
 type InstrumentSet interface {
-	AddInstrument(n int, in *instruments.Instrument)
-	AddSampledInstrument(name string, in *instruments.Instrument)
+	AddInstrument(n string, in *instruments.Instrument)
+	// AddSampledInstrument(name string, in *instruments.Instrument)
 }
 
 type Config struct {
@@ -30,9 +29,9 @@ type Config struct {
 
 	data *Data
 	// channel -> knob -> value
-	knobs map[int]map[int]int
+	knobs map[string]map[int]int
 
-	showInst int
+	showInst string
 }
 
 func New(filename string, m InstrumentSet) *Config {
@@ -40,8 +39,8 @@ func New(filename string, m InstrumentSet) *Config {
 		m:        m,
 		filename: filename,
 		data:     new(Data),
-		knobs:    make(map[int]map[int]int),
-		showInst: -1, // all
+		knobs:    make(map[string]map[int]int),
+		showInst: "", // all
 	}
 }
 
@@ -88,25 +87,21 @@ func (c *Config) handleData(data *Data, m InstrumentSet) error {
 	sort.Strings(indexes)
 	for _, inst := range indexes {
 		instData := data.Instruments[inst]
-		instIdx, err := strconv.Atoi(inst)
-		if err != nil {
-			return fmt.Errorf("Instrument index is not an integer: %v", inst)
-		}
-		c.log(instIdx, "Loading instrument %v...", instIdx)
+		c.log(inst, "Loading instrument %v...", inst)
 		instr, err := ParseInstrument(instData.Wave, instData.Filters)
 		if err != nil {
 			return err
 		}
-		m.AddInstrument(instIdx, instr)
+		m.AddInstrument(inst, instr)
 	}
 
 	for name, sampleData := range data.Samples {
-		c.log(-1, "Loading sampled instrument %v...", name)
+		c.log(name, "Loading sampled instrument %v...", name)
 		instr, err := ParseSample(sampleData.Sample, sampleData.Filters)
 		if err != nil {
 			return fmt.Errorf("Failed to handle instrument %v: %v", name, err)
 		}
-		m.AddSampledInstrument(name, instr)
+		m.AddInstrument(name, instr)
 	}
 	return nil
 }
@@ -165,13 +160,13 @@ func handleFilter(f map[string]any) (filters.Filter, error) {
 	panic("unreachable")
 }
 
-func (c *Config) log(inst int, format string, args ...interface{}) {
-	if c.showInst < 0 || c.showInst == inst {
+func (c *Config) log(inst string, format string, args ...interface{}) {
+	if c.showInst == "" || c.showInst == inst {
 		log.Printf(format, args...)
 	}
 }
 
-func (c *Config) knobValue(inst int, knob int, def float64, delta float64) float64 {
+func (c *Config) knobValue(inst string, knob int, def float64, delta float64) float64 {
 	ik, ok := c.knobs[inst]
 	if !ok {
 		return def
@@ -183,7 +178,7 @@ func (c *Config) knobValue(inst int, knob int, def float64, delta float64) float
 	return def + (float64(kv) * delta)
 }
 
-func (c *Config) Up(inst, knob int) {
+func (c *Config) Up(inst string, knob int) {
 	ik, ok := c.knobs[inst]
 	if !ok {
 		c.knobs[inst] = map[int]int{
@@ -198,10 +193,10 @@ func (c *Config) Up(inst, knob int) {
 	if err := c.handleData(c.data, c.m); err != nil {
 		log.Printf("Cannot update configuration: %v", err)
 	}
-	c.showInst = -1
+	c.showInst = ""
 }
 
-func (c *Config) Down(inst, knob int) {
+func (c *Config) Down(inst string, knob int) {
 	ik, ok := c.knobs[inst]
 	if !ok {
 		c.knobs[inst] = map[int]int{
@@ -216,5 +211,5 @@ func (c *Config) Down(inst, knob int) {
 	if err := c.handleData(c.data, c.m); err != nil {
 		log.Printf("Cannot update configuration: %v", err)
 	}
-	c.showInst = -1
+	c.showInst = ""
 }

@@ -68,7 +68,7 @@ func ParseMessage(msg []byte, scale notes.Scale) (*signals.Signal, error) {
 	if len(msg) < 3 {
 		return nil, nil
 	}
-	inst := parseValue(msg[0])
+	inst := msg[0]
 	octave := int(msg[1] - '0')
 	nt := string(msg[2])
 
@@ -82,7 +82,7 @@ func ParseMessage(msg []byte, scale notes.Scale) (*signals.Signal, error) {
 		dur = parseDuration(msg[4:])
 	}
 
-	if inst == 35 { // 'z'
+	if inst == 'z' { // 'z'
 		// handle samples
 		return &signals.Signal{
 			Sample:       string(msg[1:3]),
@@ -98,7 +98,7 @@ func ParseMessage(msg []byte, scale notes.Scale) (*signals.Signal, error) {
 
 	// regular notes
 	return &signals.Signal{
-		Instrument:   inst,
+		Instrument:   string(inst),
 		Note:         note,
 		DurationBits: dur,
 		Amp:          amp,

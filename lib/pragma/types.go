@@ -9,6 +9,5 @@ type TempoSetter interface {
 }
 
 type InstrumentSet interface {
-	AddInstrument(n int, in *instruments.Instrument)
-	AddSampledInstrument(name string, in *instruments.Instrument)
+	AddInstrument(n string, in *instruments.Instrument)
 }

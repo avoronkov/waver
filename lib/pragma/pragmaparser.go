@@ -138,19 +138,16 @@ func (p *PragmaParser) parseSample(fields []string, body string) error {
 	if err != nil {
 		return err
 	}
-	p.instSet.AddSampledInstrument(smp, in)
+	p.instSet.AddInstrument(smp, in)
 	return nil
 }
 
 // % inst 1 'sine'
-func (p *PragmaParser) parseInstrument(fields []string, body string) error {
+func (p *PragmaParser) parseInstrument(fields []string, body string) (err error) {
 	if len(fields) != 4 {
 		return fmt.Errorf("Incorrect number of arguments for 'inst' pragma: %v", fields)
 	}
-	instIdx, err := strconv.Atoi(fields[2])
-	if err != nil {
-		return fmt.Errorf("Instrument index is not an integer: %v", fields[2])
-	}
+	inst := fields[2]
 	waveName := strings.Trim(fields[3], "'")
 	var options []map[string]any
 	if body != "" {
@@ -163,7 +160,7 @@ func (p *PragmaParser) parseInstrument(fields []string, body string) error {
 	if err != nil {
 		return err
 	}
-	p.instSet.AddInstrument(instIdx, in)
+	p.instSet.AddInstrument(inst, in)
 	return nil
 }
 

@@ -38,7 +38,12 @@ func Shift(n types.ValueFn) types.Modifier {
 }
 
 func Var(name string) types.ValueFn {
-	return types.ValueFunc(func(n int64, ctx types.Context) types.Value {
+	return types.ValueFunc(func(n int64, ctx types.Context) (res types.Value) {
+		defer func() {
+			if r := recover(); r != nil {
+				res = Str(name)
+			}
+		}()
 		return ctx.Get(name, n)
 	})
 }

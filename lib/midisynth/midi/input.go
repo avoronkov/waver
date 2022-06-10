@@ -111,11 +111,11 @@ func parseNote(keyMap map[int]OctaveNote, fields []string, scale notes.Scale) (k
 	key = &signals.Signal{
 		Manual: true,
 	}
-	key.Instrument, err = strconv.Atoi(strings.TrimRight(fields[3], ","))
+	inst, err := strconv.Atoi(strings.TrimRight(fields[3], ","))
 	if err != nil {
 		return nil, err
 	}
-	key.Instrument++
+	key.Instrument = strconv.Itoa(inst + 1)
 	if fields[4] == "note" {
 		noteIdx, err := strconv.Atoi(strings.TrimRight(fields[5], ","))
 		if err != nil {

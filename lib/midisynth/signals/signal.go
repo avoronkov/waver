@@ -8,7 +8,7 @@ import (
 
 type Signal struct {
 	Time         time.Time
-	Instrument   int
+	Instrument   string
 	Note         notes.Note
 	Sample       string `json:",omitempty"`
 	DurationBits int

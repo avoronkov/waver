@@ -7,18 +7,18 @@ import (
 )
 
 type Set struct {
-	waved   map[int]*Instrument
-	sampled map[string]*Instrument
+	waved map[string]*Instrument
+	// sampled map[string]*Instrument
 }
 
 func NewSet() *Set {
 	return &Set{
-		waved:   make(map[int]*Instrument),
-		sampled: make(map[string]*Instrument),
+		waved: make(map[string]*Instrument),
+		// sampled: make(map[string]*Instrument),
 	}
 }
 
-func (s *Set) Wave(inst int) (waves.Wave, bool) {
+func (s *Set) Wave(inst string) (waves.Wave, bool) {
 	in, ok := s.waved[inst]
 	if !ok {
 		return nil, false
@@ -26,6 +26,7 @@ func (s *Set) Wave(inst int) (waves.Wave, bool) {
 	return in.Wave(), true
 }
 
+/*
 func (s *Set) Sample(name string) (waves.Wave, bool) {
 	in, ok := s.sampled[name]
 	if !ok {
@@ -33,8 +34,9 @@ func (s *Set) Sample(name string) (waves.Wave, bool) {
 	}
 	return in.Wave(), true
 }
+*/
 
-func (s *Set) WaveControlled(inst int) (waves.WaveControlled, bool) {
+func (s *Set) WaveControlled(inst string) (waves.WaveControlled, bool) {
 	in, ok := s.waved[inst]
 	if !ok {
 		return nil, false
@@ -42,12 +44,14 @@ func (s *Set) WaveControlled(inst int) (waves.WaveControlled, bool) {
 	return in.WaveControlled(), true
 }
 
-func (s *Set) AddInstrument(n int, inst *Instrument) {
+func (s *Set) AddInstrument(n string, inst *Instrument) {
 	log.Printf("Set: AddInstrument %v", n)
 	s.waved[n] = inst
 }
 
+/*
 func (s *Set) AddSampledInstrument(name string, inst *Instrument) {
 	log.Printf("Set: AddSampledInstrument %v", name)
 	s.sampled[name] = inst
 }
+*/

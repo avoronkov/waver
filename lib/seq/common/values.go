@@ -16,6 +16,13 @@ var _ types.Value = Float(0.0)
 
 func (f Float) IsValue() {}
 
+// Str
+type Str string
+
+var _ types.Value = Str("")
+
+func (Str) IsValue() {}
+
 // List of values
 type List []types.ValueFn
 
