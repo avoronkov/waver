@@ -38,7 +38,7 @@ func init() {
 	flag.StringVar(&configPath, "config-path", defaultConfig, "Midisynth configuration")
 	flag.StringVar(&configPath, "c", defaultConfig, "Midisynth configuration (shorthand)")
 
-	flag.BoolVar(&useConfig, "config", true, "use instruments yaml config")
+	flag.BoolVar(&useConfig, "config", false, "use instruments yaml config")
 
 	flag.StringVar(&dump, "dump", "", "dump signals into file")
 	flag.StringVar(&dump, "d", "", "dump signals into file (shorthand)")
