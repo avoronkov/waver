@@ -44,9 +44,9 @@ func (TimeShift) Create(options any) (fx Filter, err error) {
 			switch param {
 			case "wave":
 				return nil, fmt.Errorf("Parameter 'wave' is not supported yet")
-			case "frequency":
+			case "freq", "frequency":
 				o = append(o, TimeShiftFrequency(float64Of(value)))
-			case "amplitude":
+			case "amp", "amplitude":
 				o = append(o, TimeShiftAmplitude(float64Of(value)))
 			default:
 				return nil, fmt.Errorf("Unknown Time Shift parameter: %v", param)

@@ -37,7 +37,7 @@ func (f DelayFilter) Create(options any) (fx Filter, err error) {
 		opts := options.(map[string]any)
 		for param, value := range opts {
 			switch param {
-			case "interval":
+			case "int", "interval":
 				v := float64Of(value)
 				o = append(o, DelayInterval(v))
 			case "times":
