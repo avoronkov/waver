@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -124,7 +123,7 @@ func (p *PragmaParser) parseSample(fields []string, body string) error {
 		return fmt.Errorf("Incorrect number of arguments for 'sample' pragma: %v", fields)
 	}
 	smp := fields[2]
-	filename := filepath.Join("samples", strings.Trim(fields[3], "\""))
+	filename := strings.Trim(fields[3], "\"")
 
 	var options []map[string]any
 	if body != "" {

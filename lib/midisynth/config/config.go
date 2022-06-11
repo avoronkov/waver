@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/avoronkov/waver/lib/midisynth/filters"
@@ -107,7 +109,7 @@ func (c *Config) handleData(data *Data, m InstrumentSet) error {
 }
 
 func ParseSample(file string, filtersData []map[string]any) (*instruments.Instrument, error) {
-	sample, err := handleSample(file)
+	sample, err := handleSample2(file)
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +130,62 @@ func handleSample(sample string) (waves.Wave, error) {
 		return nil, err
 	}
 	return waves.ParseSample(data)
+}
+
+func handleSample2(sample string) (waves.Wave, error) {
+	data, err := findFile(static.Files, sample)
+	if err != nil {
+		return nil, err
+	}
+	return waves.ParseSample(data)
+}
+
+func findFile(dir fs.FS, filename string) ([]byte, error) {
+	comps := strings.Split(filename, "/")
+	if len(comps) != 2 {
+		return nil, fmt.Errorf("Cannot handle sample name: %v", filename)
+	}
+	d := comps[0]
+	file := comps[1]
+	sub, err := fs.Sub(static.Files, fmt.Sprintf("samples/%v", d))
+	if err != nil {
+		return nil, err
+	}
+	// 1. Exact file match
+	if f, err := sub.Open(file); err == nil {
+		defer f.Close()
+		log.Printf("Sample file: %v -> %v", filename, file)
+		return io.ReadAll(f)
+	}
+	// 2. File match w/o extension
+	if f, err := sub.Open(file + ".wav"); err == nil {
+		defer f.Close()
+		log.Printf("Sample file: %v -> %v", filename, file+".wav")
+		return io.ReadAll(f)
+	}
+	// 3. prefix match
+	matches, _ := fs.Glob(sub, file+"-*.wav")
+	if len(matches) == 1 {
+		f, err := sub.Open(matches[0])
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		log.Printf("Sample file: %v -> %v", filename, matches[0])
+		return io.ReadAll(f)
+	}
+	// 4. suffix match
+	matches, _ = fs.Glob(sub, "??-"+file+".wav")
+	if len(matches) == 1 {
+		f, err := sub.Open(matches[0])
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		log.Printf("Sample file: %v -> %v", filename, matches[0])
+		return io.ReadAll(f)
+	}
+	return nil, fmt.Errorf("Cannot find matching file: %v", file)
 }
 
 func ParseInstrument(waveName string, filtersData []map[string]any) (*instruments.Instrument, error) {
