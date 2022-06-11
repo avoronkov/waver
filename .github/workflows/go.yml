@@ -2,7 +2,7 @@ name: Deploy to github pages
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "release" ]
 
 jobs:
 
@@ -19,7 +19,7 @@ jobs:
     - name: Build
       run: ./wasm/pub.sh
  
-    - name: Deploy 🚀
+    - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages # The branch the action should deploy to.
