@@ -5,6 +5,8 @@ type NoteCtx struct {
 	Period float64
 	Amp    float64
 	Dur    float64
+
+	Channel int
 }
 
 func NewNoteCtx(freq float64, amp float64, dur float64) *NoteCtx {

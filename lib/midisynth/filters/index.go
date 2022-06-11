@@ -18,4 +18,5 @@ var Filters = map[string]FilterCreator{
 	"exp":        Exponent{},
 	"movexp":     MovingExponent{},
 	"ratio":      Ratio{},
+	"pan":        Pan{},
 }
