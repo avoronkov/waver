@@ -17,7 +17,7 @@ func main() {
 		AttackLevel: 16000,
 		DecayLen:    10000,
 		DecayLevel:  8000,
-		SusteinLen:  100,
+		SustainLen:  100,
 		ReleaseLen:  3000,
 	}
 

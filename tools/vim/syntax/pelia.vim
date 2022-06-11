@@ -34,7 +34,7 @@ syn match celComment "#.*$" contains=celTodo
 
 " instruments options
 syn keyword celFilter adsr delay dist distortion vibrato am timeshift harmonizer harm flanger exp movexp ratio
-syn keyword celFilterOption attackLevel decayLevel attackLen decayLen susteinLen releaseLen
+syn keyword celFilterOption attackLevel decayLevel attackLen decayLen sustainLen releaseLen
 syn keyword celFilterOption int interval times fade
 syn keyword celFilterOption value
 syn keyword celFilterOption freq frequency shift amp amplitude wave

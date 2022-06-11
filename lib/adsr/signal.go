@@ -7,7 +7,7 @@ type Signal struct {
 	AttackLen   int
 	DecayLevel  int16
 	DecayLen    int
-	SusteinLen  int
+	SustainLen  int
 	ReleaseLen  int
 }
 
@@ -37,7 +37,7 @@ func (s *Signal) PutSignal(hz float64, sampler Sampler) {
 	}
 
 	// sustain
-	for j := 0; j < int(s.SusteinLen); j++ {
+	for j := 0; j < int(s.SustainLen); j++ {
 		i++
 		x := 2.0 * math.Pi * float64(i) / waveDuration
 		l := int16(float64(s.DecayLevel) * math.Sin(x))

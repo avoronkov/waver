@@ -16,13 +16,15 @@ type note struct {
 	dur   types.ValueFn
 }
 
+const defaultDurationBits = 4
+
 func Note(scale notes.Scale, instr, nt types.ValueFn, opts ...func(*note)) types.Signaler {
 	n := &note{
 		scale: scale,
 		instr: instr,
 		note:  nt,
 		amp:   Const(5),
-		dur:   Const(4),
+		dur:   Var("_dur"),
 	}
 
 	for _, opt := range opts {

@@ -13,7 +13,7 @@ type AdsrFilter struct {
 
 	AttackLen  float64
 	DecayLen   float64
-	SusteinLen float64
+	SustainLen float64
 	ReleaseLen float64
 }
 
@@ -53,8 +53,8 @@ func (AdsrFilter) Create(options any) (fx Filter, err error) {
 				o = append(o, AdsrAttackLen(float64Of(value)))
 			case "decayLen":
 				o = append(o, AdsrDecayLen(float64Of(value)))
-			case "susteinLen":
-				o = append(o, AdsrSusteinLen(float64Of(value)))
+			case "sustainLen":
+				o = append(o, AdsrSustainLen(float64Of(value)))
 			case "releaseLen":
 				o = append(o, AdsrReleaseLen(float64Of(value)))
 			default:
@@ -84,7 +84,7 @@ func (i *adsrImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 	dur := ctx.Dur
 	o := i.opts
 
-	adsrLen := o.AttackLen + o.DecayLen + o.SusteinLen + o.ReleaseLen
+	adsrLen := o.AttackLen + o.DecayLen + o.SustainLen + o.ReleaseLen
 
 	if attackLen := o.AttackLen * dur / adsrLen; tm >= 0 && tm < attackLen {
 		// attack
@@ -92,8 +92,8 @@ func (i *adsrImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 	} else if tm < (o.AttackLen+o.DecayLen)*dur/adsrLen {
 		// decay
 		amp = o.AttackLevel - (o.AttackLevel-o.DecayLevel)*(tm-(o.AttackLen*dur)/adsrLen)/(o.DecayLen*dur/adsrLen)
-	} else if tm < (o.AttackLen+o.DecayLen+o.SusteinLen)*dur/adsrLen {
-		// sustein
+	} else if tm < (o.AttackLen+o.DecayLen+o.SustainLen)*dur/adsrLen {
+		// sustain
 		amp = o.DecayLevel
 	} else if tm < dur {
 		// release
@@ -130,9 +130,9 @@ func AdsrDecayLen(v float64) func(*AdsrFilter) {
 	}
 }
 
-func AdsrSusteinLen(v float64) func(*AdsrFilter) {
+func AdsrSustainLen(v float64) func(*AdsrFilter) {
 	return func(f *AdsrFilter) {
-		f.SusteinLen = v
+		f.SustainLen = v
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
@@ -125,6 +126,8 @@ func (s *Sequencer) processFuncs(tm time.Time, bit int64, dryRun bool) (bool, er
 
 	// eval variables first
 	ctx := types.NewContext()
+	// set default duration
+	ctx.Put("_dur", common.Const(4))
 	for _, as := range s.currentVars {
 		if err := ctx.Put(as.name, as.valueFn); err != nil {
 			return false, err

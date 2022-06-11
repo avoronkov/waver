@@ -5,7 +5,7 @@ instruments:
       - adsr:
           attackLevel: 1.0
           decayLevel: 1.0
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.01
   2:
     wave: triangle
@@ -13,7 +13,7 @@ instruments:
       - adsr:
           attackLevel: 0.9
           decayLevel: 0.9
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.01
   3:
     wave: semisine
@@ -21,7 +21,7 @@ instruments:
       - adsr:
           attackLevel: 0.4
           decayLevel: 0.4
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.01
   4:
     wave: saw
@@ -29,7 +29,7 @@ instruments:
       - adsr:
           attackLevel: 0.20
           decayLevel: 0.20
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.01
   5:
     wave: square
@@ -37,7 +37,7 @@ instruments:
       - adsr:
           attackLevel: 0.15
           decayLevel: 0.15
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.01
   6:
     wave: sine
@@ -49,7 +49,7 @@ instruments:
       - adsr:
           attackLevel: 1.0
           decayLevel: 1.0
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.1
   7:
     wave: sine
@@ -61,7 +61,7 @@ instruments:
       - adsr:
           attackLevel: 1.0
           decayLevel: 1.0
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.1
   8:
     wave: sine
@@ -73,7 +73,7 @@ instruments:
       - adsr:
           attackLevel: 1.0
           decayLevel: 1.0
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.1
   9:
     wave: sine
@@ -81,7 +81,7 @@ instruments:
       - adsr:
           attackLevel: 1.0
           decayLevel: 1.0
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.1
       - delay:
           interval: 1.0
@@ -95,7 +95,7 @@ instruments:
       - adsr:
           attackLevel: 1.0
           decayLevel: 1.0
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.1
   11:
     wave: sine
@@ -109,7 +109,7 @@ instruments:
       - adsr:
           attackLevel: 1.0
           decayLevel: 1.0
-          susteinLen: 1.0
+          sustainLen: 1.0
           releaseLen: 0.1
 
 samples:

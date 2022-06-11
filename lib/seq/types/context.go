@@ -15,9 +15,11 @@ type contextImpl struct {
 }
 
 func (c *contextImpl) Put(name string, fn ValueFn) error {
-	if _, exists := c.data[name]; exists {
-		return fmt.Errorf("Cannot re-assign variable: %v", name)
-	}
+	/*
+		if _, exists := c.data[name]; exists {
+			return fmt.Errorf("Cannot re-assign variable: %v", name)
+		}
+	*/
 	c.data[name] = fn
 	return nil
 }
