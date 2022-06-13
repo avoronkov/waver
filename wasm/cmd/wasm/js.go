@@ -11,9 +11,9 @@ func jsPlay(this js.Value, inputs []js.Value) any {
 	code := inputs[0].String()
 	if err := updateCode(code); err != nil {
 		log.Printf("Updating code failed: %v", err)
-		return js.ValueOf(1)
+		return js.ValueOf(err.Error())
 	}
-	return js.ValueOf(0)
+	return js.ValueOf("OK")
 }
 
 func updateCode(input string) error {

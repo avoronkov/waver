@@ -1,6 +1,6 @@
 function initPage() {
     loadDefaultCode();
-    loadDefaultInstruments();
+    // loadDefaultInstruments();
 }
 
 const initGo = async () => {
@@ -16,7 +16,8 @@ const initGo = async () => {
 const updateCode = () => {
     goPause(false);
     const input = document.getElementById("code-story").value;
-    goPlay(input);
+    const message = goPlay(input);
+    document.getElementById("inst-story").value = message;
 };
 
 const loadDefaultCode = () => {
@@ -24,7 +25,7 @@ const loadDefaultCode = () => {
     document.getElementById("code-story").value = code;
     document.getElementById("update-code").disabled = false;
 };
-
+/*
 const updateInstruments = () => {
     goPause(false);
     const input = document.getElementById("inst-story").value;
@@ -35,3 +36,4 @@ const loadDefaultInstruments = () => {
     const inst = goGetDefaultInstruments();
     document.getElementById("inst-story").value = inst;
 };
+*/

@@ -4,19 +4,22 @@
 # `->` sends message on the right hand when condition on the left hand is true
 # `"zk21" is a kick ('k') sample ('z') from second ('2') samples set with volume '1'
 
-< 320 : 8 -> "z2k1"
+% sample kick "2/kick"
+< 320 : 8 -> { kick _ 1 }
 
 
 # Hi-hat
 # `> 16` sends signals after 16th bit
 # `: [ 2 1 ]` sends signals on each 1st and 2nd bits of 3 (`**.`)
 
-> 16 < 128 : [ 2 1 ] -> "z2h1"
+% sample hat "2/hat"
+> 16 < 128 : [ 2 1 ] -> { hat _ 1 }
 
 
 # Snare drum
 # `+ 4` shifts bits count by 4
 
+% sample snare "2/snare"
 > 32 < 256 : 8 + 4 -> "z2s1"
 
 # Variable `ch1` contains C minor chord (4th octave)
@@ -43,22 +46,31 @@ chords = seq [ ch1 ch2 ]
 # - `Vol` - volume (1..16)
 # - `Dur` - duration
 
-> 64 < 354 : 32 -> { 1 chords 1 32 }
+% inst sine 'sine'
+> 64 < 354 : 32 -> { sine chords 1 32 }
 
 
 # Bass
 
-bass = seq [ C2 G2 Eb2 Bb1 ]
+bassline = seq [ C2 G2 Eb2 Bb1 ]
 
 
 # `_dur` is a special variable containing duration of current note
 # set by operator `:`.
 
-> 96 < 354 : 16 -> { 3 bass 2 _dur }
+% inst bass 'triangle'
+> 96 < 354 : 16 -> { 3 bassline 2 _dur }
 
 
 # Melody
 # `rand` chooses random item from the list
+%% inst string 'sine'
+- adsr:
+- delay:
+    interval: 1.0
+    fade: 0.5
+    times: 2
+%%
 
 melody = rand [ C4 Eb4 F4 G4 Bb4 C5 Eb5 ]
-> 128 < 256 : [ 6 ] -> { 6 melody 3 1 }
+> 128 < 256 : [ 6 ] -> { string melody 3 1 }
