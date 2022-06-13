@@ -15,7 +15,6 @@ import (
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
 	"github.com/avoronkov/waver/lib/midisynth/midi"
 	"github.com/avoronkov/waver/lib/midisynth/udp"
-	"github.com/avoronkov/waver/lib/midisynth/unisynth"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/project"
 	"github.com/avoronkov/waver/lib/seq"
@@ -59,17 +58,6 @@ func main() {
 	// Instruments
 	instSet := instruments.NewSet()
 
-	// Audio output
-	audioOpts := []func(*unisynth.Output){
-		unisynth.WithInstruments(instSet),
-		unisynth.WithScale(scale),
-		unisynth.WithTempo(tempo),
-	}
-	audioOutput, err := unisynth.New(audioOpts...)
-	check("Syntheziser output", err)
-	opts = append(opts, midisynth.WithSignalOutput(audioOutput))
-	// .
-
 	// File sequencer
 	var sequencer *seq.Sequencer
 	if fileInput != "" {
@@ -83,7 +71,7 @@ func main() {
 			scale,
 			parser.WithFileInput(fileInput),
 			parser.WithTempoSetter(sequencer),
-			parser.WithTempoSetter(audioOutput),
+			// pragma.WithTempoSetter(audioOutput),
 			parser.WithInstrumentSet(instSet),
 		)
 		check("Parser start", ps.Start(true))
@@ -103,13 +91,26 @@ func main() {
 	}
 	// .
 
+	// Audio output
+	/*
+		audioOpts := []func(*unisynth.Output){
+			unisynth.WithInstruments(instSet),
+			unisynth.WithScale(scale),
+			unisynth.WithTempo(tempo),
+		}
+		audioOutput, err := unisynth.New(audioOpts...)
+		check("Syntheziser output", err)
+		opts = append(opts, midisynth.WithSignalOutput(audioOutput))
+	*/
+	// .
+
 	// Pragma parser
 	/*
 		if fileInput != "" {
 			pragmaParser := pragma.New(
 				fileInput,
 				pragma.WithTempoSetter(sequencer),
-				pragma.WithTempoSetter(audioOutput),
+				// pragma.WithTempoSetter(audioOutput),
 				pragma.WithInstrumentSet(instSet),
 			)
 			check("Pragma parser start", pragmaParser.Start(true))
