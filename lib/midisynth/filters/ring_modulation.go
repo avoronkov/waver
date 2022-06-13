@@ -15,7 +15,7 @@ type Ring struct {
 func NewRing(carrier waves.Wave, freq, amp float64) Filter {
 	return &Ring{
 		Carrier:    carrier,
-		CarrierCtx: waves.NewNoteCtx(freq, amp, -1.0),
+		CarrierCtx: waves.NewNoteCtx(freq, amp, -1.0, 0.0),
 	}
 }
 

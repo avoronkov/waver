@@ -96,6 +96,8 @@ func (s *Sequencer) run() error {
 	start := time.Now()
 	frameTime := start
 
+	s.ch <- &signals.StartTime{Start: start}
+
 	// Main loop
 	for {
 		var ok bool

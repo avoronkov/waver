@@ -30,6 +30,8 @@ type Output struct {
 
 	// Octave -> Note -> Release fn()
 	notesReleases map[notes.Note]func()
+
+	startTime time.Time
 }
 
 var _ signals.Output = (*Output)(nil)
@@ -81,6 +83,8 @@ func (o *Output) ProcessAsync(tm float64, s signals.Interface) {
 		o.processSignal(tm, a)
 	case *signals.Tempo:
 		o.tempo = a.Tempo
+	case *signals.StartTime:
+		o.startTime = a.Start
 	default:
 		panic(fmt.Errorf("Unknown signal type: %v (%T)", s, s))
 	}
@@ -93,10 +97,12 @@ func (o *Output) processSignal(tm float64, s *signals.Signal) {
 	}
 
 	at := s.Time.Add(1 * time.Second)
+
+	absTime := float64(s.Time.Sub(o.startTime)) / float64(time.Second)
 	var err error
 	if !s.Manual {
 		// Play note
-		err = o.PlayNoteAt(at, s.Instrument, s.Note, s.DurationBits, s.Amp)
+		err = o.PlayNoteAt(at, s.Instrument, s.Note, s.DurationBits, s.Amp, absTime)
 	} else if s.Stop {
 		// Stop manual note
 		o.releaseNote(s.Note)
@@ -123,31 +129,31 @@ func (o *Output) Close() error {
 	return nil
 }
 
-func (o *Output) PlaySampleAt(at time.Time, name string, duration float64, amp float64) error {
+func (o *Output) PlaySampleAt(at time.Time, name string, duration, amp, absTime float64) error {
 	in, ok := o.instruments.Wave(name)
 	if !ok {
 		return fmt.Errorf("Unknown sample: %q", name)
 	}
-	o.play.AddWaveAt(at, in, waves.NewNoteCtx(0, amp, duration))
+	o.play.AddWaveAt(at, in, waves.NewNoteCtx(0, amp, duration, absTime))
 
 	return nil
 }
 
-func (o *Output) PlayNoteAt(at time.Time, instr string, note notes.Note, durationBits int, amp float64) error {
+func (o *Output) PlayNoteAt(at time.Time, instr string, note notes.Note, durationBits int, amp, absTime float64) error {
 	freq := note.Freq
 	dur := 15.0 * float64(durationBits) / float64(o.tempo)
-	o.playNoteAt(at, instr, freq, dur, amp)
+	o.playNoteAt(at, instr, freq, dur, amp, absTime)
 	return nil
 }
 
-func (o *Output) playNoteAt(at time.Time, inst string, hz float64, dur float64, amp float64) {
+func (o *Output) playNoteAt(at time.Time, inst string, hz, dur, amp, absTime float64) {
 	in, ok := o.instruments.Wave(inst)
 	if !ok {
 		log.Printf("Unknown instrument: %v", inst)
 		return
 	}
 
-	o.play.AddWaveAt(at, in, waves.NewNoteCtx(hz, amp, dur))
+	o.play.AddWaveAt(at, in, waves.NewNoteCtx(hz, amp, dur, absTime))
 }
 
 func (o *Output) storeNoteReleaseFn(note notes.Note, release func()) {

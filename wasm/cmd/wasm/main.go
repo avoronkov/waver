@@ -8,6 +8,7 @@ import (
 	"github.com/avoronkov/waver/lib/midisynth"
 	"github.com/avoronkov/waver/lib/midisynth/config"
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
 	synth "github.com/avoronkov/waver/lib/midisynth/unisynth"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq"
@@ -37,7 +38,11 @@ func doMain() {
 	tempo := 120
 	var startBit int64 = 0
 
-	opts := []func(*midisynth.MidiSynth){}
+	channel := make(chan signals.Interface, 128)
+
+	opts := []func(*midisynth.MidiSynth){
+		midisynth.WithChannel(channel),
+	}
 
 	scale := notes.NewStandard()
 	common.Scale = scale
@@ -45,6 +50,7 @@ func doMain() {
 	goSequencer = seq.NewSequencer(
 		seq.WithTempo(tempo),
 		seq.WithStart(startBit),
+		seq.WithChannel(channel),
 	)
 
 	// Instruments
@@ -66,7 +72,6 @@ func doMain() {
 		goSequencer,
 		scale,
 		parser.WithTempoSetter(goSequencer),
-		parser.WithTempoSetter(audioOutput),
 		parser.WithInstrumentSet(instSet),
 	)
 

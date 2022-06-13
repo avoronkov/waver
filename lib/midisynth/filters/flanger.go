@@ -13,6 +13,8 @@ type Flanger struct {
 
 	freq     float64
 	maxShift float64
+
+	absTime bool
 }
 
 func NewFlanger(opts ...func(*Flanger)) Filter {
@@ -26,7 +28,7 @@ func NewFlanger(opts ...func(*Flanger)) Filter {
 	for _, opt := range opts {
 		opt(f)
 	}
-	f.shifterCtx = waves.NewNoteCtx(f.freq, 1.0, math.Inf(1))
+	f.shifterCtx = waves.NewNoteCtx(f.freq, 1.0, math.Inf(1), 0.0)
 	return f
 }
 
@@ -48,6 +50,9 @@ func (Flanger) Create(options any) (fx Filter, err error) {
 			case "shift":
 				v := float64Of(value)
 				o = append(o, FlangerShift(v))
+			case "abs":
+				v := value.(bool)
+				o = append(o, FlangerAbsTime(v))
 			default:
 				return nil, fmt.Errorf("Unknown Flanger parameter: %v", param)
 			}
@@ -58,9 +63,16 @@ func (Flanger) Create(options any) (fx Filter, err error) {
 }
 
 func (f *Flanger) Apply(wave waves.Wave) waves.Wave {
-	return &flangerImpl{
-		wave: wave,
-		opts: f,
+	if f.absTime {
+		return &flangerAbsImpl{
+			wave: wave,
+			opts: f,
+		}
+	} else {
+		return &flangerImpl{
+			wave: wave,
+			opts: f,
+		}
 	}
 }
 
@@ -77,6 +89,19 @@ func (i *flangerImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
 	return 0.5*v + 0.5*v1
 }
 
+type flangerAbsImpl struct {
+	wave waves.Wave
+	opts *Flanger
+}
+
+func (i *flangerAbsImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
+	v := i.wave.Value(t, ctx)
+	shift := i.opts.shifter.Value(ctx.AbsTime, i.opts.shifterCtx) * i.opts.maxShift
+	t1 := t - 0.5*shift + 0.5*i.opts.maxShift
+	v1 := i.wave.Value(t1, ctx)
+	return 0.5*v + 0.5*v1
+}
+
 // Options
 func FlangerFreq(freq float64) func(f *Flanger) {
 	return func(f *Flanger) {
@@ -88,5 +113,11 @@ func FlangerFreq(freq float64) func(f *Flanger) {
 func FlangerShift(shift float64) func(f *Flanger) {
 	return func(f *Flanger) {
 		f.maxShift = shift
+	}
+}
+
+func FlangerAbsTime(v bool) func(*Flanger) {
+	return func(f *Flanger) {
+		f.absTime = v
 	}
 }

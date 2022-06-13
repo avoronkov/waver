@@ -24,7 +24,7 @@ func NewVibrato(opts ...func(*VibratoFilter)) Filter {
 		o(f)
 	}
 
-	f.shifterCtx = waves.NewNoteCtx(f.freq, f.amp, math.Inf(1))
+	f.shifterCtx = waves.NewNoteCtx(f.freq, f.amp, math.Inf(1), 0.0)
 
 	return f
 }

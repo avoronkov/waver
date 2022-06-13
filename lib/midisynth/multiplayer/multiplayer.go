@@ -108,6 +108,7 @@ func (m *MultiPlayer) readStereo(data []byte) (n int, err error) {
 				}
 			}
 			m.playingWaves[i].time += m.dt
+			m.playingWaves[i].noteCtx.AbsTime += m.dt
 		}
 		for _, value := range values {
 			intValue := int16(maxInt16Amp * value)

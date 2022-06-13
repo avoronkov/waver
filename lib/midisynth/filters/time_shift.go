@@ -24,7 +24,7 @@ func NewTimeShift(opts ...func(*TimeShift)) Filter {
 		o(f)
 	}
 
-	f.shifterCtx = waves.NewNoteCtx(f.freq, f.amp, math.Inf(1))
+	f.shifterCtx = waves.NewNoteCtx(f.freq, f.amp, math.Inf(1), 0.0)
 
 	return f
 }
@@ -70,7 +70,7 @@ type timeShiftImpl struct {
 
 func (i *timeShiftImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
 	newFreq := (i.opts.shifter.Value(t, i.opts.shifterCtx)*i.opts.shifterCtx.Amp + 1.0) * ctx.Freq
-	newCtx := waves.NewNoteCtx(newFreq, ctx.Amp, ctx.Dur)
+	newCtx := waves.NewNoteCtx(newFreq, ctx.Amp, ctx.Dur, ctx.AbsTime)
 	return i.input.Value(t, newCtx)
 }
 
