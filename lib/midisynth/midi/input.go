@@ -32,7 +32,7 @@ func NewInput(midiPort int, scale notes.Scale) *Input {
 	}
 }
 
-func (i *Input) Start(ch chan<- *signals.Signal) (err error) {
+func (i *Input) Run(ch chan<- *signals.Signal) (err error) {
 	log.Printf("Starting aseqdump process (-p %v)", i.midiPort)
 	dumpProcess, reader, err := aseqdump(i.midiPort)
 	if err != nil {
@@ -43,25 +43,23 @@ func (i *Input) Start(ch chan<- *signals.Signal) (err error) {
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)
 
-	go func() {
-		log.Printf("Scanning aseqdump outpupt")
-		for scanner.Scan() {
-			text := scanner.Text()
-			log.Printf("[MIDI] Got event: %v", text)
-			sig, err := parseLine(i.keyMap, i.scale, text)
-			if err != nil {
-				log.Printf("[ERROR] parseLine failed: %v", text)
-				continue
-			}
-			if sig != nil {
-				ch <- sig
-			}
+	log.Printf("Scanning aseqdump output")
+	for scanner.Scan() {
+		text := scanner.Text()
+		log.Printf("[MIDI] Got event: %v", text)
+		sig, err := parseLine(i.keyMap, i.scale, text)
+		if err != nil {
+			log.Printf("[ERROR] parseLine failed: %v", text)
+			continue
 		}
-		if err := scanner.Err(); err != nil {
-			log.Printf("[ERROR] %v", err)
+		if sig != nil {
+			ch <- sig
 		}
-	}()
-	return nil
+	}
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+	return fmt.Errorf("aseqdump unexpectedly closed")
 }
 
 func (i *Input) Close() error {

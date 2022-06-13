@@ -1,6 +1,6 @@
 package signals
 
 type Input interface {
-	Start(chan<- *Signal) error
+	Run(chan<- *Signal) error
 	Close() error
 }

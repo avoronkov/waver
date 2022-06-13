@@ -27,37 +27,32 @@ func New(port int, scale notes.Scale) *UdpInput {
 	}
 }
 
-func (u *UdpInput) Start(ch chan<- *signals.Signal) (err error) {
+func (u *UdpInput) Run(ch chan<- *signals.Signal) (err error) {
 	log.Printf("Starting UDP listener on port %v...", u.port)
 	u.listener, err = net.ListenPacket("udp", fmt.Sprintf(":%v", u.port))
 	if err != nil {
 		return fmt.Errorf("Starting UDP server failed: %w", err)
 	}
 	log.Printf("Listening to UDP on localhost:%v", u.port)
-	go func(pc net.PacketConn) {
-	L:
-		for {
-			buff := make([]byte, 64)
-			n, _, err := pc.ReadFrom(buff)
-			if errors.Is(err, net.ErrClosed) {
-				log.Printf("[ERROR] ErrClosed")
-				break L
-			}
-			if err != nil {
-				log.Printf("[ERROR] %v (%T, %v)", err, err, err.(*net.OpError).Unwrap())
-				continue
-			}
-			sig, err := ParseMessage(buff[:n], u.scale)
-			if err != nil {
-				log.Printf("[ERROR] %v", err)
-				continue
-			}
-			if sig != nil {
-				ch <- sig
-			}
+	for {
+		buff := make([]byte, 64)
+		n, _, err := u.listener.ReadFrom(buff)
+		if errors.Is(err, net.ErrClosed) {
+			return fmt.Errorf("UDP socked unexpectedly closed: %w", err)
 		}
-	}(u.listener)
-	return nil
+		if err != nil {
+			log.Printf("[ERROR] %v (%T, %v)", err, err, err.(*net.OpError).Unwrap())
+			continue
+		}
+		sig, err := ParseMessage(buff[:n], u.scale)
+		if err != nil {
+			log.Printf("[ERROR] %v", err)
+			continue
+		}
+		if sig != nil {
+			ch <- sig
+		}
+	}
 }
 
 func (u *UdpInput) Close() error {

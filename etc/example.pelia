@@ -59,7 +59,7 @@ bassline = seq [ C2 G2 Eb2 Bb1 ]
 # set by operator `:`.
 
 % inst bass 'triangle'
-> 96 < 354 : 16 -> { 3 bassline 2 _dur }
+> 96 < 354 : 16 -> { bass bassline 2 _dur }
 
 
 # Melody

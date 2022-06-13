@@ -15,3 +15,9 @@ func WithSignalOutput(output signals.Output) func(m *MidiSynth) {
 		m.outputs = append(m.outputs, output)
 	}
 }
+
+func WithLoggingFunction(logf func(format string, v ...any)) func(m *MidiSynth) {
+	return func(m *MidiSynth) {
+		m.logf = logf
+	}
+}

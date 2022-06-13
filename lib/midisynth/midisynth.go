@@ -14,12 +14,14 @@ type MidiSynth struct {
 	ch        chan *signals.Signal
 	inputs    []signals.Input
 	outputs   []signals.Output
+	logf      func(format string, v ...any)
 }
 
 func NewMidiSynth(opts ...func(*MidiSynth)) (*MidiSynth, error) {
 	m := &MidiSynth{
 		osSignals: make(chan os.Signal),
 		ch:        make(chan *signals.Signal, 128),
+		logf:      log.Printf,
 	}
 	for _, opt := range opts {
 		opt(m)
@@ -36,9 +38,16 @@ func (m *MidiSynth) Start() error {
 	}
 
 	for _, input := range m.inputs {
-		if err := input.Start(m.ch); err != nil {
-			return err
-		}
+		go func(in signals.Input) {
+			defer func() {
+				if r := recover(); r != nil {
+					m.logf("Input recovered: %v", r)
+				}
+			}()
+			if err := in.Run(m.ch); err != nil {
+				m.logf("Input run failed: %v", err)
+			}
+		}(input)
 	}
 
 	start := time.Now()

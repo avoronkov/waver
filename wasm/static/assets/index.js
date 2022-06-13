@@ -5,7 +5,8 @@ function initPage() {
 
 function logMessage(msg) {
     const msgArea = document.getElementById("inst-story");
-    msgArea.value = msgArea.value + "\n" + `${msg}`;
+    const value = msgArea.value.trim();
+    msgArea.value = (value ? value + "\n" : value) + `${msg}`;
 }
 
 const initGo = async () => {

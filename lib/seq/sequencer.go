@@ -39,15 +39,10 @@ func NewSequencer(opts ...func(*Sequencer)) *Sequencer {
 	return s
 }
 
-func (s *Sequencer) Start(ch chan<- *signals.Signal) error {
+func (s *Sequencer) Run(ch chan<- *signals.Signal) error {
 	log.Printf("Starting file sequencer...")
 	s.ch = ch
-	go func() {
-		if err := s.run(); err != nil {
-			log.Printf("[ERROR] Sequencer failed: %v", err)
-		}
-	}()
-	return nil
+	return s.run()
 }
 
 func (s *Sequencer) Pause(v bool) {

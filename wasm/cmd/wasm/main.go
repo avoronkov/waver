@@ -70,7 +70,10 @@ func doMain() {
 		parser.WithInstrumentSet(instSet),
 	)
 
-	opts = append(opts, midisynth.WithSignalInput(goSequencer))
+	opts = append(opts,
+		midisynth.WithSignalInput(goSequencer),
+		midisynth.WithLoggingFunction(doLog),
+	)
 
 	m, err := midisynth.NewMidiSynth(opts...)
 	check(err)
@@ -90,9 +93,13 @@ func main() {
 	doMain()
 }
 
+func doLog(format string, v ...any) {
+	js.Global().Call("logMessage", fmt.Sprintf(format, v...))
+}
+
 func doRecover() {
 	if r := recover(); r != nil {
-		js.Global().Call("logMessage", fmt.Sprintf("RECOVERED: %v\n%s", r, debug.Stack()))
+		doLog("RECOVERED: %v\n%s", r, debug.Stack())
 	}
 }
 
