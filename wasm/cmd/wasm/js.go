@@ -8,6 +8,8 @@ import (
 )
 
 func jsPlay(this js.Value, inputs []js.Value) any {
+	defer doRecover()
+
 	code := inputs[0].String()
 	if err := updateCode(code); err != nil {
 		log.Printf("Updating code failed: %v", err)

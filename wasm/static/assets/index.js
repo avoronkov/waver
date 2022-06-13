@@ -3,21 +3,35 @@ function initPage() {
     // loadDefaultInstruments();
 }
 
+function logMessage(msg) {
+    const msgArea = document.getElementById("inst-story");
+    msgArea.value = msgArea.value + "\n" + `${msg}`;
+}
+
 const initGo = async () => {
-    const buffer = pako.ungzip(
-        await (await fetch("demo.wasm.gz")).arrayBuffer()
-    );
-    const go = new Go();
-    const result = await WebAssembly.instantiate(buffer, go.importObject);
-    go.run(result.instance);
+    try {
+        const buffer = pako.ungzip(
+            await (await fetch("demo.wasm.gz")).arrayBuffer()
+        );
+        const go = new Go();
+        const result = await WebAssembly.instantiate(buffer, go.importObject);
+        await go.run(result.instance);
+    } catch (e) {
+        logMessage(`FAILED running Go: ${e}`);
+    }
 };
 // initGo();
 
 const updateCode = () => {
-    goPause(false);
-    const input = document.getElementById("code-story").value;
-    const message = goPlay(input);
-    document.getElementById("inst-story").value = message;
+    try {
+        logMessage('Updating code...');
+        goPause(false);
+        const input = document.getElementById("code-story").value;
+        const message = goPlay(input);
+        logMessage(message);
+    } catch (e) {
+        logMessage(`FAILED: ${e}`);
+    }
 };
 
 const loadDefaultCode = () => {

@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"runtime/debug"
 	"syscall/js"
 
-	"github.com/avoronkov/waver/etc"
 	"github.com/avoronkov/waver/lib/midisynth"
 	"github.com/avoronkov/waver/lib/midisynth/config"
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
@@ -21,7 +21,7 @@ var (
 	goCfg       *config.Config
 )
 
-func main() {
+func doMain() {
 	// Export JS functions
 	fmt.Println("Go Web Assembly: goPlay, goGetDefaultCode")
 
@@ -47,15 +47,8 @@ func main() {
 		seq.WithStart(startBit),
 	)
 
-	goParser = parser.New(goSequencer, scale)
-	// TODO method to send data to parser
-
-	opts = append(opts, midisynth.WithSignalInput(goSequencer))
-
 	// Instruments
 	instSet := instruments.NewSet()
-	goCfg = config.New("", instSet)
-	check(goCfg.UpdateData(etc.DefaultConfig))
 
 	// Audio output
 	audioOpts := []func(*synth.Output){
@@ -68,6 +61,17 @@ func main() {
 
 	opts = append(opts, midisynth.WithSignalOutput(audioOutput))
 
+	// Parser
+	goParser = parser.New(
+		goSequencer,
+		scale,
+		parser.WithTempoSetter(goSequencer),
+		parser.WithTempoSetter(audioOutput),
+		parser.WithInstrumentSet(instSet),
+	)
+
+	opts = append(opts, midisynth.WithSignalInput(goSequencer))
+
 	m, err := midisynth.NewMidiSynth(opts...)
 	check(err)
 
@@ -79,6 +83,17 @@ func main() {
 	check(m.Close())
 
 	<-c
+}
+
+func main() {
+	defer doRecover()
+	doMain()
+}
+
+func doRecover() {
+	if r := recover(); r != nil {
+		js.Global().Call("logMessage", fmt.Sprintf("RECOVERED: %v\n%s", r, debug.Stack()))
+	}
 }
 
 func check(err error) {
