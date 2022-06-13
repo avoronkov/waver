@@ -26,10 +26,10 @@ func NewJson(filename string) (*Json, error) {
 	}, nil
 }
 
-func (j *Json) ProcessAsync(tm float64, sig *signals.Signal) {
+func (j *Json) ProcessAsync(tm float64, sig signals.Interface) {
 	sjson := &SignalJson{
-		T:      tm,
-		Signal: *sig,
+		T:   tm,
+		Sig: sig,
 	}
 	if err := j.encoder.Encode(sjson); err != nil {
 		log.Printf("[JSON] Cannot dump %v: %v", sjson, err)
@@ -44,6 +44,6 @@ func (j *Json) Close() error {
 }
 
 type SignalJson struct {
-	T float64 `json:"T"`
-	signals.Signal
+	T   float64 `json:"T"`
+	Sig signals.Interface
 }

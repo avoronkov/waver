@@ -14,6 +14,7 @@ import (
 	"github.com/avoronkov/waver/lib/midisynth/dumper"
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
 	"github.com/avoronkov/waver/lib/midisynth/midi"
+	"github.com/avoronkov/waver/lib/midisynth/signals"
 	"github.com/avoronkov/waver/lib/midisynth/udp"
 	"github.com/avoronkov/waver/lib/midisynth/unisynth"
 	"github.com/avoronkov/waver/lib/notes"
@@ -47,8 +48,11 @@ func main() {
 
 	udpInput := udp.New(udpPort, scale)
 
+	channel := make(chan signals.Interface, 128)
+
 	opts := []func(*midisynth.MidiSynth){
 		midisynth.WithSignalInput(udpInput),
+		midisynth.WithChannel(channel),
 	}
 
 	if midiPort > 0 {
@@ -77,13 +81,14 @@ func main() {
 			seq.WithTempo(tempo),
 			seq.WithStart(startBit),
 			seq.WithShowingBits(showBits),
+			seq.WithChannel(channel),
 		)
 		ps := parser.New(
 			sequencer,
 			scale,
 			parser.WithFileInput(fileInput),
 			parser.WithTempoSetter(sequencer),
-			parser.WithTempoSetter(audioOutput),
+			// parser.WithTempoSetter(audioOutput),
 			parser.WithInstrumentSet(instSet),
 		)
 		check("Parser start", ps.Start(true))

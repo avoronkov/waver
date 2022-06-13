@@ -6,4 +6,5 @@ var Waves = map[string]Wave{
 	"triangle": Triangle,
 	"saw":      Saw,
 	"semisine": SemiSine,
+	"noise":    WhiteNoise,
 }

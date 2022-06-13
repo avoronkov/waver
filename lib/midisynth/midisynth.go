@@ -11,7 +11,7 @@ import (
 
 type MidiSynth struct {
 	osSignals chan os.Signal
-	ch        chan *signals.Signal
+	ch        chan signals.Interface
 	inputs    []signals.Input
 	outputs   []signals.Output
 	logf      func(format string, v ...any)
@@ -20,8 +20,8 @@ type MidiSynth struct {
 func NewMidiSynth(opts ...func(*MidiSynth)) (*MidiSynth, error) {
 	m := &MidiSynth{
 		osSignals: make(chan os.Signal),
-		ch:        make(chan *signals.Signal, 128),
-		logf:      log.Printf,
+		// ch:        make(chan signals.Interface, 128),
+		logf: log.Printf,
 	}
 	for _, opt := range opts {
 		opt(m)

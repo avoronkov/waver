@@ -75,7 +75,18 @@ func New(opts ...func(*Output)) (*Output, error) {
 	return output, nil
 }
 
-func (o *Output) ProcessAsync(tm float64, s *signals.Signal) {
+func (o *Output) ProcessAsync(tm float64, s signals.Interface) {
+	switch a := s.(type) {
+	case *signals.Signal:
+		o.processSignal(tm, a)
+	case *signals.Tempo:
+		o.tempo = a.Tempo
+	default:
+		panic(fmt.Errorf("Unknown signal type: %v (%T)", s, s))
+	}
+}
+
+func (o *Output) processSignal(tm float64, s *signals.Signal) {
 	if !o.playerStarted {
 		o.playerStarted = true
 		o.player.Play()
@@ -83,11 +94,7 @@ func (o *Output) ProcessAsync(tm float64, s *signals.Signal) {
 
 	at := s.Time.Add(1 * time.Second)
 	var err error
-	if s.Sample != "" {
-		// Play sample
-		dur := 15.0 * float64(s.DurationBits) / float64(o.tempo)
-		err = o.PlaySampleAt(at, s.Sample, dur, s.Amp)
-	} else if !s.Manual {
+	if !s.Manual {
 		// Play note
 		err = o.PlayNoteAt(at, s.Instrument, s.Note, s.DurationBits, s.Amp)
 	} else if s.Stop {
@@ -178,6 +185,8 @@ func (o *Output) PlayNoteControlled(inst string, note notes.Note, amp float64) (
 	*/
 }
 
+/*
 func (o *Output) SetTempo(tempo int) {
 	o.tempo = tempo
 }
+*/

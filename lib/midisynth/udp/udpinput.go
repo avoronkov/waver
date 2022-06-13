@@ -27,7 +27,7 @@ func New(port int, scale notes.Scale) *UdpInput {
 	}
 }
 
-func (u *UdpInput) Run(ch chan<- *signals.Signal) (err error) {
+func (u *UdpInput) Run(ch chan<- signals.Interface) (err error) {
 	log.Printf("Starting UDP listener on port %v...", u.port)
 	u.listener, err = net.ListenPacket("udp", fmt.Sprintf(":%v", u.port))
 	if err != nil {
@@ -80,7 +80,7 @@ func ParseMessage(msg []byte, scale notes.Scale) (*signals.Signal, error) {
 	if inst == 'z' { // 'z'
 		// handle samples
 		return &signals.Signal{
-			Sample:       string(msg[1:3]),
+			Instrument:   string(msg[1:3]),
 			DurationBits: dur,
 			Amp:          amp,
 		}, nil

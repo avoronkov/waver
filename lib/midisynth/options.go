@@ -21,3 +21,9 @@ func WithLoggingFunction(logf func(format string, v ...any)) func(m *MidiSynth) 
 		m.logf = logf
 	}
 }
+
+func WithChannel(ch chan signals.Interface) func(m *MidiSynth) {
+	return func(m *MidiSynth) {
+		m.ch = ch
+	}
+}

@@ -1,6 +1,7 @@
 package seq
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -21,7 +22,7 @@ type Sequencer struct {
 
 	pause bool
 
-	ch chan<- *signals.Signal
+	ch chan<- signals.Interface
 
 	startingBit int64
 	showBits    int64
@@ -39,9 +40,14 @@ func NewSequencer(opts ...func(*Sequencer)) *Sequencer {
 	return s
 }
 
-func (s *Sequencer) Run(ch chan<- *signals.Signal) error {
+func (s *Sequencer) Run(ch chan<- signals.Interface) error {
+	if s.ch == nil {
+		panic("Channel should be set before Running sequencer")
+	}
 	log.Printf("Starting file sequencer...")
-	s.ch = ch
+	if s.ch != ch {
+		panic(fmt.Errorf("Cannels are differ: %v != %v", s.ch, ch))
+	}
 	return s.run()
 }
 
@@ -67,6 +73,10 @@ func (s *Sequencer) Assign(name string, value types.ValueFn) {
 
 func (s *Sequencer) SetTempo(tempo int) {
 	s.tempo = tempo
+	// Send to channel
+	s.ch <- &signals.Tempo{
+		Tempo: tempo,
+	}
 }
 
 func (s *Sequencer) delay() time.Duration {

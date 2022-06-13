@@ -32,7 +32,7 @@ func NewInput(midiPort int, scale notes.Scale) *Input {
 	}
 }
 
-func (i *Input) Run(ch chan<- *signals.Signal) (err error) {
+func (i *Input) Run(ch chan<- signals.Interface) (err error) {
 	log.Printf("Starting aseqdump process (-p %v)", i.midiPort)
 	dumpProcess, reader, err := aseqdump(i.midiPort)
 	if err != nil {
