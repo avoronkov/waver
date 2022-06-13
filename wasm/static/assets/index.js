@@ -37,18 +37,10 @@ const updateCode = () => {
 
 const loadDefaultCode = () => {
     const code = goGetDefaultCode();
-    document.getElementById("code-story").value = code;
-    document.getElementById("update-code").disabled = false;
-};
-/*
-const updateInstruments = () => {
-    goPause(false);
-    const input = document.getElementById("inst-story").value;
-    goUpdateInstruments(input);
+    document.getElementById('code-story').value = code;
+    document.getElementById('update-code').disabled = false;
 };
 
-const loadDefaultInstruments = () => {
-    const inst = goGetDefaultInstruments();
-    document.getElementById("inst-story").value = inst;
+const clearCode = () => {
+    document.getElementById("code-story").value = '';
 };
-*/
