@@ -29,8 +29,8 @@ func doMain() {
 	js.Global().Set("goPlay", js.FuncOf(jsPlay))
 	js.Global().Set("goGetDefaultCode", js.FuncOf(jsGetDefaultCode))
 	js.Global().Set("goPause", js.FuncOf(jsPause))
-	js.Global().Set("goUpdateInstruments", js.FuncOf(jsUpdateInstruments))
-	js.Global().Set("goGetDefaultInstruments", js.FuncOf(jsGetDefaultInstruments))
+	js.Global().Set("goEncode", js.FuncOf(jsEncode))
+	js.Global().Set("goDecode", js.FuncOf(jsDecode))
 
 	js.Global().Call("initPage")
 

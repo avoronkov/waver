@@ -5,6 +5,7 @@ import (
 	"syscall/js"
 
 	"github.com/avoronkov/waver/etc"
+	"github.com/avoronkov/waver/lib/share"
 )
 
 func jsPlay(this js.Value, inputs []js.Value) any {
@@ -32,12 +33,26 @@ func jsPause(this js.Value, inputs []js.Value) any {
 	return js.ValueOf(0)
 }
 
-func jsUpdateInstruments(this js.Value, inputs []js.Value) any {
-	data := inputs[0].String()
-	goCfg.UpdateData([]byte(data))
-	return js.ValueOf(0)
+func jsEncode(this js.Value, inputs []js.Value) any {
+	arg := inputs[0].String()
+	encoded, err := share.Encode(arg)
+	res := map[string]any{}
+	if err != nil {
+		res["error"] = err.Error()
+	} else {
+		res["data"] = encoded
+	}
+	return js.ValueOf(res)
 }
 
-func jsGetDefaultInstruments(this js.Value, inputs []js.Value) any {
-	return js.ValueOf(string(etc.DefaultConfig))
+func jsDecode(this js.Value, inputs []js.Value) any {
+	arg := inputs[0].String()
+	decoded, err := share.Decode(arg)
+	res := map[string]any{}
+	if err != nil {
+		res["error"] = err.Error()
+	} else {
+		res["data"] = decoded
+	}
+	return js.ValueOf(res)
 }
