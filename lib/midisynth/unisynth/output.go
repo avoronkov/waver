@@ -98,7 +98,7 @@ func (o *Output) processSignal(tm float64, s *signals.Signal) {
 
 	at := s.Time.Add(1 * time.Second)
 
-	absTime := float64(s.Time.Sub(o.startTime)) / float64(time.Second)
+	absTime := float64(s.Time.Sub(o.startTime))/float64(time.Second) - 1.0
 	var err error
 	if !s.Manual {
 		// Play note

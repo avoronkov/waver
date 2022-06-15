@@ -20,4 +20,5 @@ var Filters = map[string]FilterCreator{
 	"ratio":      Ratio{},
 	"pan":        Pan{},
 	"movpan":     MovingPan{},
+	"swingexp":   SwingExp{},
 }
