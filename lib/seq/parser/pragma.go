@@ -85,7 +85,7 @@ func (p *Parser) parseSample(fields []string, body string) error {
 		return fmt.Errorf("Incorrect number of arguments for 'sample' pragma: %v", fields)
 	}
 	smp := fields[2]
-	filename := strings.Trim(fields[3], "\"")
+	filename := strings.Trim(fields[3], "\"'")
 
 	var options []map[string]any
 	if body != "" {
@@ -109,7 +109,7 @@ func (p *Parser) parseInstrument(fields []string, body string) (err error) {
 		return fmt.Errorf("Incorrect number of arguments for 'inst' pragma: %v", fields)
 	}
 	inst := fields[2]
-	waveName := strings.Trim(fields[3], "'")
+	waveName := strings.Trim(fields[3], "\"'")
 	var options []map[string]any
 	if body != "" {
 		options, err = p.parsePragmaOptions(body)

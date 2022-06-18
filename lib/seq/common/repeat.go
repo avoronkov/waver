@@ -2,16 +2,20 @@ package common
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
-func Repeat(idx *Index, times, fn types.ValueFn) types.ValueFn {
+type ValueHolder struct {
+	Value types.Value
+}
+
+func Repeat(idx *Index, h *ValueHolder, times, fn types.ValueFn) types.ValueFn {
 	return &repeatImpl{
 		times: times,
 		fn:    fn,
 		idx:   idx,
+		value: h,
 	}
 }
 
@@ -20,7 +24,7 @@ type repeatImpl struct {
 	fn    types.ValueFn
 
 	idx   *Index
-	value types.Value
+	value *ValueHolder
 }
 
 func (s *repeatImpl) Val(bit int64, ctx types.Context) types.Value {
@@ -29,14 +33,13 @@ func (s *repeatImpl) Val(bit int64, ctx types.Context) types.Value {
 	if !ok {
 		panic(fmt.Errorf("repeat expects integer as first argument, found: %v (%T)", nTimes, nTimes))
 	}
-	log.Printf("Repeat idx: %v, times: %v", s.idx.N, intTimes)
 	if s.idx.N >= int(intTimes) {
 		s.idx.N = 0
 	}
 	if s.idx.N == 0 {
-		s.value = s.fn.Val(bit, ctx)
+		s.value.Value = s.fn.Val(bit, ctx)
 	}
 	s.idx.N++
 
-	return s.value
+	return s.value.Value
 }

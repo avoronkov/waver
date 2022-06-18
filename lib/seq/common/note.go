@@ -16,8 +16,6 @@ type note struct {
 	dur   types.ValueFn
 }
 
-const defaultDurationBits = 4
-
 func Note(scale notes.Scale, instr, nt types.ValueFn, opts ...func(*note)) types.Signaler {
 	n := &note{
 		scale: scale,
@@ -64,7 +62,7 @@ func (n *note) evalInstr(bit int64, ctx types.Context, in string) (res []signals
 		if string(s) == "_" {
 			return n.evalInstrNote(bit, ctx, in, notes.Note{})
 		}
-		panic(fmt.Errorf("Don't know how to use for note: %v", s))
+		panic(fmt.Errorf("Don't know how to use for note: %v (%T)", s, s))
 	} else if l, ok := nt.(List); ok {
 		llen := l.Len()
 		for i := 0; i < llen; i++ {

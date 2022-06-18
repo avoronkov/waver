@@ -21,7 +21,8 @@ func parseRepeat(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
 	if err != nil {
 		return nil, 0, err
 	}
-	key := fmt.Sprintf("repeat:%v", line.Num)
+
+	key := fmt.Sprintf("repeat-idx:%v", line.Num)
 	var idx *common.Index
 	if i, ok := line.GlobalCtx[key].(*common.Index); ok {
 		idx = i
@@ -29,5 +30,14 @@ func parseRepeat(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
 		idx = new(common.Index)
 		line.GlobalCtx[key] = idx
 	}
-	return common.Repeat(idx, times, fn), shift + shift2 + 1, nil
+
+	key = fmt.Sprintf("repeat-value:%v", line.Num)
+	var holder *common.ValueHolder
+	if i, ok := line.GlobalCtx[key].(*common.ValueHolder); ok {
+		holder = i
+	} else {
+		holder = new(common.ValueHolder)
+		line.GlobalCtx[key] = holder
+	}
+	return common.Repeat(idx, holder, times, fn), shift + shift2 + 1, nil
 }

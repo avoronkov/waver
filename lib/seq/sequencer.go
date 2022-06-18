@@ -134,7 +134,7 @@ func (s *Sequencer) processFuncs(tm time.Time, bit int64, dryRun bool) (bool, er
 	// eval variables first
 	ctx := types.NewContext()
 	// set default duration
-	ctx.Put("_dur", common.Const(4))
+	_ = ctx.Put("_dur", common.Const(4))
 	for _, as := range s.currentVars {
 		if err := ctx.Put(as.name, as.valueFn); err != nil {
 			return false, err
