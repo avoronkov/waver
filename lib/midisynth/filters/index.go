@@ -4,7 +4,7 @@ type FilterCreator interface {
 	Create(options any) (Filter, error)
 }
 
-var Filters = map[string]FilterCreator{
+var FilterCreators = map[string]FilterCreator{
 	"adsr":       AdsrFilter{},
 	"delay":      DelayFilter{},
 	"distortion": DistortionFilter{},
@@ -17,8 +17,15 @@ var Filters = map[string]FilterCreator{
 	"flanger":    Flanger{},
 	"exp":        Exponent{},
 	"movexp":     MovingExponent{},
-	"ratio":      Ratio{},
 	"pan":        Pan{},
 	"movpan":     MovingPan{},
 	"swingexp":   SwingExp{},
+}
+
+type NewFilter interface {
+	New() Filter
+}
+
+var Filters = map[string]NewFilter{
+	"ratio": Ratio{},
 }

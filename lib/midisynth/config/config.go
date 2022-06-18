@@ -21,7 +21,6 @@ import (
 
 type InstrumentSet interface {
 	AddInstrument(n string, in *instruments.Instrument)
-	// AddSampledInstrument(name string, in *instruments.Instrument)
 }
 
 type Config struct {
@@ -209,11 +208,20 @@ func handleFilter(f map[string]any) (filters.Filter, error) {
 		return nil, fmt.Errorf("Filter description should contain exactly 1 element: %+v", f)
 	}
 	for name, opts := range f {
-		fc, ok := filters.Filters[name]
-		if !ok {
-			return nil, fmt.Errorf("Unknown filter: %v", name)
+		if fn, ok := filters.Filters[name]; ok {
+			filt := fn.New()
+			log.Printf("DEBUG created filter: %v (%T)", filt, filt)
+			if err := SetOptions(filt, opts); err != nil {
+				return nil, err
+			}
+			log.Printf("DEBUG created filter: %#v", filt)
+			return filt, nil
 		}
-		return fc.Create(opts)
+
+		if fc, ok := filters.FilterCreators[name]; ok {
+			return fc.Create(opts)
+		}
+		return nil, fmt.Errorf("Unknown filter: %v", name)
 	}
 	panic("unreachable")
 }
