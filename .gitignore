@@ -4,3 +4,6 @@
 /wasm/server
 /public
 *.wasm.gz
+node_modules
+/wasm/static/assets/addon/
+/wasm/static/assets/lib/

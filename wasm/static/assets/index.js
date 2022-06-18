@@ -1,6 +1,5 @@
 function initPage() {
     loadDefaultCode();
-    // loadDefaultInstruments();
 }
 
 function logMessage(msg) {
@@ -8,6 +7,11 @@ function logMessage(msg) {
     const value = msgArea.value.trim();
     msgArea.value = (value ? value + "\n" : value) + `${msg}`;
 }
+
+const init = () => {
+    initCodeMirror();
+    initGo();
+};
 
 const initGo = async () => {
     try {
@@ -23,11 +27,45 @@ const initGo = async () => {
 };
 // initGo();
 
+const initCodeMirror = () => {
+    CodeMirror.defineSimpleMode('waver', {
+        start: [
+            { regex: /(?:tempo|sample|inst)\b/, token: 'comment' }, // keyword
+            { regex: /(?:min|maj|min7|maj7|min9|maj9)\b/, token: 'variable-2' },
+            { regex: /(?:seq|rand|repeat|_dur|_)\b/, token: 'variable-2' },
+            { regex: /".*"/, token: 'string' },
+            { regex: /'.*'/, token: 'string' },
+            { regex: /#.*/, sol: true, token: 'meta' },
+            { regex: /\b(?:[\d]+(\.[\d]*)?)\b/, token: 'number' },
+            { regex: /->/, token: 'comment' },
+            { regex: /(% |%%)/, sol: true, token: 'comment' },
+            { regex: /[+=\-:<>]/, token: 'atom' },
+            // notes
+            { regex: /\b[ABCDEFG][sb]?\d\b/, token: 'keyword' },
+            // filters tokens (variable-3)
+            { regex: /(?:adsr|delay|dist|distortion|vibrato|am|timeshift|harmonizer|harm|flanger|exp|movexp|ration|swingexp)\b/, token: 'variable-3' },
+            { regex: /(?:attackLevel|decayLevel|attackLen|decayLen|sustainLen|releaseLen)\b/, token: 'variable-3' },
+            { regex: /(?:int|interval|times|fade|value)\b/, token: 'variable-3'},
+            { regex: /(?:freq|frequency|shift|amp|amplitude|wave)\b/, token: 'variable-3'},
+        ],
+    });
+
+    const ta = document.getElementById('code-story')
+    const codeMirror = CodeMirror.fromTextArea(ta, {
+                    mode:  "waver",
+                    lineNumbers: true,
+    });
+    
+    window.codeMirror = codeMirror;
+    return codeMirror;
+};
+
 const updateCode = () => {
     try {
         logMessage('Updating code...');
         goPause(false);
-        const input = document.getElementById("code-story").value;
+        const doc = window.codeMirror.getDoc();
+        const input = doc.getValue();
         const message = goPlay(input);
         logMessage(message);
     } catch (e) {
@@ -49,16 +87,19 @@ const loadDefaultCode = () => {
     } else {
         code = goGetDefaultCode();
     }
-    document.getElementById('code-story').value = code;
+    const doc = window.codeMirror.getDoc();
+    doc.setValue(code);
     document.getElementById('update-code').disabled = false;
 };
 
 const clearCode = () => {
-    document.getElementById("code-story").value = '';
+    const doc = window.codeMirror.getDoc();
+    doc.setValue('');
 };
 
 const makeSharedLink = () => {
-    const code = document.getElementById('code-story').value;
+    const doc = window.codeMirror.getDoc();
+    const code = doc.getValue();
     const { data, error } = goEncode(code);
     if (error) {
         logMessage(`FAILED: ${error}`);
