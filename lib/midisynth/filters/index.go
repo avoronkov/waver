@@ -5,8 +5,6 @@ type FilterCreator interface {
 }
 
 var FilterCreators = map[string]FilterCreator{
-	"adsr":       AdsrFilter{},
-	"delay":      DelayFilter{},
 	"distortion": DistortionFilter{},
 	"dist":       DistortionFilter{},
 	"vibrato":    VibratoFilter{},
@@ -15,7 +13,6 @@ var FilterCreators = map[string]FilterCreator{
 	"harmonizer": Harmonizer{},
 	"harm":       Harmonizer{},
 	"flanger":    Flanger{},
-	"exp":        Exponent{},
 	"movexp":     MovingExponent{},
 	"pan":        Pan{},
 	"movpan":     MovingPan{},
@@ -27,5 +24,8 @@ type NewFilter interface {
 }
 
 var Filters = map[string]NewFilter{
+	"adsr":  AdsrFilter{},
+	"delay": DelayFilter{},
+	"exp":   Exponent{},
 	"ratio": Ratio{},
 }

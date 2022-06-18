@@ -1,7 +1,6 @@
 package filters
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
@@ -9,49 +8,20 @@ import (
 
 type DelayFilter struct {
 	// In seconds
-	Interval float64
+	Interval float64 `option:"interval,int"`
 
-	Times int
+	Times int `option:"times"`
 
 	// [0.0..1.0]
-	FadeOut float64
+	FadeOut float64 `option:"fade,feedback"`
 }
 
-func NewDelayFilter(opts ...func(*DelayFilter)) Filter {
-	f := &DelayFilter{}
-	for _, o := range opts {
-		o(f)
+func (DelayFilter) New() Filter {
+	return &DelayFilter{
+		Interval: 1.0,
+		Times:    1,
+		FadeOut:  0.5,
 	}
-	return f
-}
-
-func (f DelayFilter) Create(options any) (fx Filter, err error) {
-	defer func() {
-		if e := recover(); e != nil {
-			err = e.(error)
-		}
-	}()
-
-	var o []func(*DelayFilter)
-	if options != nil {
-		opts := options.(map[string]any)
-		for param, value := range opts {
-			switch param {
-			case "int", "interval":
-				v := float64Of(value)
-				o = append(o, DelayInterval(v))
-			case "times":
-				v := value.(int)
-				o = append(o, DelayTimes(v))
-			case "fade":
-				v := float64Of(value)
-				o = append(o, DelayFadeOut(v))
-			default:
-				return nil, fmt.Errorf("Unknown Delay parameter: %v", param)
-			}
-		}
-	}
-	return NewDelayFilter(o...), nil
 }
 
 func (df *DelayFilter) Apply(w waves.Wave) waves.Wave {
@@ -101,24 +71,4 @@ func (d *delayImpl) Value(tm float64, ctx *waves.NoteCtx) (res float64) {
 	}
 
 	return value
-}
-
-// Options
-
-func DelayInterval(d float64) func(*DelayFilter) {
-	return func(f *DelayFilter) {
-		f.Interval = d
-	}
-}
-
-func DelayTimes(n int) func(*DelayFilter) {
-	return func(f *DelayFilter) {
-		f.Times = n
-	}
-}
-
-func DelayFadeOut(out float64) func(*DelayFilter) {
-	return func(f *DelayFilter) {
-		f.FadeOut = out
-	}
 }

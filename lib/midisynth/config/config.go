@@ -210,7 +210,6 @@ func handleFilter(f map[string]any) (filters.Filter, error) {
 	for name, opts := range f {
 		if fn, ok := filters.Filters[name]; ok {
 			filt := fn.New()
-			log.Printf("DEBUG created filter: %v (%T)", filt, filt)
 			if err := SetOptions(filt, opts); err != nil {
 				return nil, err
 			}

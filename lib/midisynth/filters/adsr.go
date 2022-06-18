@@ -1,68 +1,29 @@
 package filters
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 type AdsrFilter struct {
-	AttackLevel float64
-	DecayLevel  float64
+	AttackLevel float64 `option:"attackLevel"`
+	DecayLevel  float64 `option:"decayLevel"`
 
-	AttackLen  float64
-	DecayLen   float64
-	SustainLen float64
-	ReleaseLen float64
+	AttackLen  float64 `option:"attackLen"`
+	DecayLen   float64 `option:"decayLen"`
+	SustainLen float64 `option:"sustainLen"`
+	ReleaseLen float64 `option:"releaseLen"`
 }
 
 var _ FilterAdsr = (*AdsrFilter)(nil)
 
-func NewAdsrFilter(opts ...func(*AdsrFilter)) Filter {
-	f := &AdsrFilter{
+func (AdsrFilter) New() Filter {
+	return &AdsrFilter{
 		AttackLevel: 1.0,
 		DecayLevel:  1.0,
 		ReleaseLen:  1.0,
 	}
-
-	for _, opt := range opts {
-		opt(f)
-	}
-
-	return f
-}
-
-func (AdsrFilter) Create(options any) (fx Filter, err error) {
-	defer func() {
-		if e := recover(); e != nil {
-			err = e.(error)
-		}
-	}()
-
-	var o []func(*AdsrFilter)
-	if options != nil {
-		opts := options.(map[string]any)
-		for param, value := range opts {
-			switch param {
-			case "attackLevel":
-				o = append(o, AdsrAttackLevel(float64Of(value)))
-			case "decayLevel":
-				o = append(o, AdsrDecayLevel(float64Of(value)))
-			case "attackLen":
-				o = append(o, AdsrAttackLen(float64Of(value)))
-			case "decayLen":
-				o = append(o, AdsrDecayLen(float64Of(value)))
-			case "sustainLen":
-				o = append(o, AdsrSustainLen(float64Of(value)))
-			case "releaseLen":
-				o = append(o, AdsrReleaseLen(float64Of(value)))
-			default:
-				return nil, fmt.Errorf("Unknown ADSR parameter: %v", param)
-			}
-		}
-	}
-	return NewAdsrFilter(o...), nil
 }
 
 func (af *AdsrFilter) Apply(w waves.Wave) waves.Wave {
@@ -103,41 +64,4 @@ func (i *adsrImpl) Value(tm float64, ctx *waves.NoteCtx) float64 {
 	}
 
 	return i.wave.Value(tm, ctx) * amp
-}
-
-// Options
-func AdsrAttackLevel(v float64) func(*AdsrFilter) {
-	return func(f *AdsrFilter) {
-		f.AttackLevel = v
-	}
-}
-
-func AdsrDecayLevel(v float64) func(*AdsrFilter) {
-	return func(f *AdsrFilter) {
-		f.DecayLevel = v
-	}
-}
-
-func AdsrAttackLen(v float64) func(*AdsrFilter) {
-	return func(f *AdsrFilter) {
-		f.AttackLen = v
-	}
-}
-
-func AdsrDecayLen(v float64) func(*AdsrFilter) {
-	return func(f *AdsrFilter) {
-		f.DecayLen = v
-	}
-}
-
-func AdsrSustainLen(v float64) func(*AdsrFilter) {
-	return func(f *AdsrFilter) {
-		f.SustainLen = v
-	}
-}
-
-func AdsrReleaseLen(v float64) func(*AdsrFilter) {
-	return func(f *AdsrFilter) {
-		f.ReleaseLen = v
-	}
 }

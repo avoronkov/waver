@@ -8,12 +8,6 @@ type Ratio struct {
 	Value float64
 }
 
-func NewRatio(value float64) Filter {
-	return &Ratio{
-		Value: value,
-	}
-}
-
 func (Ratio) New() Filter {
 	return &Ratio{
 		Value: 1.0,

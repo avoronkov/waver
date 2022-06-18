@@ -19,7 +19,7 @@ type Instrument struct {
 
 var _ Interface = (*Instrument)(nil)
 
-var defaultAdsr = filters.NewAdsrFilter()
+var defaultAdsr = filters.AdsrFilter{}.New()
 var defaultManual = filters.NewManualControlFilter(0.125)
 
 type TimeLimitedWave interface {
