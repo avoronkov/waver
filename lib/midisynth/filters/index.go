@@ -7,7 +7,6 @@ type FilterCreator interface {
 var FilterCreators = map[string]FilterCreator{
 	"harmonizer": Harmonizer{},
 	"harm":       Harmonizer{},
-	"movexp":     MovingExponent{},
 }
 
 type NewFilter interface {
@@ -22,6 +21,7 @@ var Filters = map[string]NewFilter{
 	"dist":       Distortion{},
 	"exp":        Exponent{},
 	"flanger":    Flanger{},
+	"movexp":     MovingExponent{},
 	"pan":        Pan{},
 	"ratio":      Ratio{},
 	"swingexp":   SwingExp{},
