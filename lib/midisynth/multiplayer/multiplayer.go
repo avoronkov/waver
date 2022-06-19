@@ -82,7 +82,7 @@ func (m *MultiPlayer) readStereo(data []byte) (n int, err error) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	l := 640
+	l := 1024 // 640
 	num := l / m.settings.BitDepthInBytes / m.settings.ChannelNum
 
 	buff := new(bytes.Buffer)
