@@ -1,45 +1,21 @@
 package filters
 
 import (
-	"fmt"
-
 	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 // Amplitude distortion filter
-type DistortionFilter struct {
-	Multiplier float64
+type Distortion struct {
+	Value float64
 }
 
-func NewDistortionFilter(m float64) *DistortionFilter {
-	return &DistortionFilter{
-		Multiplier: m,
+func (Distortion) New() Filter {
+	return &Distortion{
+		Value: 1.0,
 	}
 }
 
-func (f DistortionFilter) Create(options any) (fx Filter, err error) {
-	defer func() {
-		if e := recover(); e != nil {
-			err = e.(error)
-		}
-	}()
-
-	value := 1.0
-	if options != nil {
-		opts := options.(map[string]any)
-		for param, v := range opts {
-			switch param {
-			case "value":
-				value = float64Of(v)
-			default:
-				return nil, fmt.Errorf("Unknown Distortion parameter: %v", param)
-			}
-		}
-	}
-	return NewDistortionFilter(value), nil
-}
-
-func (df *DistortionFilter) Apply(w waves.Wave) waves.Wave {
+func (df *Distortion) Apply(w waves.Wave) waves.Wave {
 	return &distortionImpl{
 		wave: w,
 		opts: df,
@@ -48,11 +24,11 @@ func (df *DistortionFilter) Apply(w waves.Wave) waves.Wave {
 
 type distortionImpl struct {
 	wave waves.Wave
-	opts *DistortionFilter
+	opts *Distortion
 }
 
 func (i *distortionImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
-	val := i.wave.Value(t, ctx) * i.opts.Multiplier
+	val := i.wave.Value(t, ctx) * i.opts.Value
 	if val > 1.0 {
 		val = 1.0
 	} else if val < -1.0 {
