@@ -17,21 +17,13 @@ func (Exponent) New() Filter {
 }
 
 func (ef *Exponent) Apply(input waves.Wave) waves.Wave {
-	return &expImpl{
-		input: input,
-		opts:  ef,
-	}
+	return MakeFilterImpl(ef, input, expImplFn)
 }
 
-type expImpl struct {
-	input waves.Wave
-	opts  *Exponent
-}
-
-func (i *expImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
-	v := i.input.Value(t, ctx)
+func expImplFn(fx *Exponent, input waves.Wave, t float64, ctx *waves.NoteCtx) float64 {
+	v := input.Value(t, ctx)
 	if v < 0.0 {
-		return -math.Pow(-v, i.opts.Value)
+		return -math.Pow(-v, fx.Value)
 	}
-	return math.Pow(v, i.opts.Value)
+	return math.Pow(v, fx.Value)
 }

@@ -17,3 +17,14 @@ type FilterManualControl interface {
 
 	IsManualControl()
 }
+
+func MakeFilterImpl[F any](
+	filter F,
+	input waves.Wave,
+	impl func(filter F, input waves.Wave, t float64, ctx *waves.NoteCtx) float64,
+) waves.Wave {
+	waveFn := func(t float64, ctx *waves.NoteCtx) float64 {
+		return impl(filter, input, t, ctx)
+	}
+	return waves.WaveFn(waveFn)
+}

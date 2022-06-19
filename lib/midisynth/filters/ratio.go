@@ -14,18 +14,10 @@ func (Ratio) New() Filter {
 	}
 }
 
+func ratioImpl(fx *Ratio, input waves.Wave, t float64, ctx *waves.NoteCtx) float64 {
+	return input.Value(t*fx.Value, ctx)
+}
+
 func (r *Ratio) Apply(wave waves.Wave) waves.Wave {
-	return &ratioImpl{
-		input: wave,
-		opts:  r,
-	}
-}
-
-type ratioImpl struct {
-	input waves.Wave
-	opts  *Ratio
-}
-
-func (i *ratioImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
-	return i.input.Value(t*i.opts.Value, ctx)
+	return MakeFilterImpl(r, wave, ratioImpl)
 }

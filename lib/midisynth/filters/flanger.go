@@ -12,6 +12,8 @@ type Flanger struct {
 	Frequency float64 `option:"freq,frequency"`
 	MaxShift  float64 `option:"maxShift"`
 	AbsTime   bool    `option:"abs"`
+
+	shifterCtx *waves.NoteCtx
 }
 
 func (Flanger) New() Filter {
@@ -27,46 +29,26 @@ func (Flanger) New() Filter {
 }
 
 func (f *Flanger) Apply(wave waves.Wave) waves.Wave {
-	shifterCtx := waves.NewNoteCtx(f.Frequency, 1.0, math.Inf(1), 0.0)
+	f.shifterCtx = waves.NewNoteCtx(f.Frequency, 1.0, math.Inf(1), 0.0)
 	if f.AbsTime {
-		return &flangerAbsImpl{
-			wave:       wave,
-			opts:       f,
-			shifterCtx: shifterCtx,
-		}
+		return MakeFilterImpl(f, wave, flangerAbsImplValue)
 	} else {
-		return &flangerImpl{
-			wave:       wave,
-			opts:       f,
-			shifterCtx: shifterCtx,
-		}
+		return MakeFilterImpl(f, wave, flangerImplValue)
 	}
 }
 
-type flangerImpl struct {
-	wave       waves.Wave
-	opts       *Flanger
-	shifterCtx *waves.NoteCtx
-}
-
-func (i *flangerImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
-	v := i.wave.Value(t, ctx)
-	shift := i.opts.shifter.Value(t, i.shifterCtx) * i.opts.MaxShift
-	t1 := t - 0.5*shift + 0.5*i.opts.MaxShift
-	v1 := i.wave.Value(t1, ctx)
+func flangerImplValue(fx *Flanger, input waves.Wave, t float64, ctx *waves.NoteCtx) float64 {
+	v := input.Value(t, ctx)
+	shift := fx.shifter.Value(t, fx.shifterCtx) * fx.MaxShift
+	t1 := t - 0.5*shift + 0.5*fx.MaxShift
+	v1 := input.Value(t1, ctx)
 	return 0.5*v + 0.5*v1
 }
 
-type flangerAbsImpl struct {
-	wave       waves.Wave
-	opts       *Flanger
-	shifterCtx *waves.NoteCtx
-}
-
-func (i *flangerAbsImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
-	v := i.wave.Value(t, ctx)
-	shift := i.opts.shifter.Value(ctx.AbsTime, i.shifterCtx) * i.opts.MaxShift
-	t1 := t - 0.5*shift + 0.5*i.opts.MaxShift
-	v1 := i.wave.Value(t1, ctx)
+func flangerAbsImplValue(fx *Flanger, input waves.Wave, t float64, ctx *waves.NoteCtx) float64 {
+	v := input.Value(t, ctx)
+	shift := fx.shifter.Value(ctx.AbsTime, fx.shifterCtx) * fx.MaxShift
+	t1 := t - 0.5*shift + 0.5*fx.MaxShift
+	v1 := input.Value(t1, ctx)
 	return 0.5*v + 0.5*v1
 }
