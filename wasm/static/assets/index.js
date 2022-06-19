@@ -55,6 +55,7 @@ const initCodeMirror = () => {
                     mode:  "waver",
                     lineNumbers: true,
     });
+    codeMirror.setSize(null, 590);
     
     window.codeMirror = codeMirror;
     return codeMirror;
