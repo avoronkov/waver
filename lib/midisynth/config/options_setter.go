@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"runtime/debug"
 	"strings"
+
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 func SetOptions(obj, options any) (err error) {
@@ -38,7 +40,9 @@ func setSingleOption(obj any, f any) error {
 }
 
 func assignToField(fld reflect.Value, f any) {
-	if fld.Type().Name() == "float64" {
+	fldType := fld.Type().String()
+	switch fldType {
+	case "float64":
 		switch x := f.(type) {
 		case int:
 			fld.SetFloat(float64(x))
@@ -47,7 +51,16 @@ func assignToField(fld reflect.Value, f any) {
 			fld.SetFloat(float64(x))
 			return
 		}
+	case "waves.Wave":
+		if name, ok := f.(string); ok {
+			if wave, ok := waves.Waves[name]; ok {
+				fld.Set(reflect.ValueOf(wave))
+				return
+			}
+			panic(fmt.Errorf("Unknown wave: %v", name))
+		}
 	}
+
 	fld.Set(reflect.ValueOf(f))
 
 }

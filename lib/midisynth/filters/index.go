@@ -12,7 +12,6 @@ var FilterCreators = map[string]FilterCreator{
 	"harm":       Harmonizer{},
 	"movexp":     MovingExponent{},
 	"pan":        Pan{},
-	"movpan":     MovingPan{},
 	"swingexp":   SwingExp{},
 }
 
@@ -28,4 +27,5 @@ var Filters = map[string]NewFilter{
 	"exp":        Exponent{},
 	"flanger":    Flanger{},
 	"ratio":      Ratio{},
+	"swingpan":   SwingPan{},
 }
