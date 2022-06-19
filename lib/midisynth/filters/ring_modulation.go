@@ -1,66 +1,39 @@
 package filters
 
 import (
-	"fmt"
-
 	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 // Ring (amplitude) modulation.
 type Ring struct {
-	Carrier    waves.Wave
-	CarrierCtx *waves.NoteCtx
+	Carrier   waves.Wave `option:"carrier"`
+	Frequency float64    `option:"freq,frequency"`
+	Amplitude float64    `option:"amp,amplitude"`
 }
 
-func NewRing(carrier waves.Wave, freq, amp float64) Filter {
+func (Ring) New() Filter {
 	return &Ring{
-		Carrier:    carrier,
-		CarrierCtx: waves.NewNoteCtx(freq, amp, -1.0, 0.0),
+		Carrier:   waves.Sine,
+		Frequency: 4.0,
+		Amplitude: 1.0,
 	}
-}
-
-func (Ring) Create(options any) (fx Filter, err error) {
-	defer func() {
-		if e := recover(); e != nil {
-			err = e.(error)
-		}
-	}()
-
-	var carrier waves.Wave = waves.Sine
-	var freq float64
-	amp := 1.0
-
-	if options != nil {
-		opts := options.(map[string]any)
-		for param, value := range opts {
-			switch param {
-			case "wave":
-				return nil, fmt.Errorf("Parameter 'wave' is not supported yet")
-			case "freq", "frequency":
-				freq = float64Of(value)
-			case "amp", "amplitude":
-				amp = float64Of(value)
-			default:
-				return nil, fmt.Errorf("Unknown AM parameter: %v", param)
-			}
-		}
-	}
-	return NewRing(carrier, freq, amp), nil
 }
 
 func (rf *Ring) Apply(input waves.Wave) waves.Wave {
 	return &ringImpl{
-		input: input,
-		opts:  rf,
+		input:      input,
+		opts:       rf,
+		carrierCtx: waves.NewNoteCtx(rf.Frequency, rf.Amplitude, -1.0, 0.0),
 	}
 }
 
 type ringImpl struct {
-	input waves.Wave
-	opts  *Ring
+	input      waves.Wave
+	opts       *Ring
+	carrierCtx *waves.NoteCtx
 }
 
 func (i *ringImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
-	mp := (2.0 - i.opts.CarrierCtx.Amp + i.opts.CarrierCtx.Amp*i.opts.Carrier.Value(t, i.opts.CarrierCtx)) / 2.0
+	mp := (2.0 - i.carrierCtx.Amp + i.carrierCtx.Amp*i.opts.Carrier.Value(t, i.carrierCtx)) / 2.0
 	return i.input.Value(t, ctx) * mp
 }
