@@ -24,6 +24,8 @@ var (
 	showBits int64
 
 	dumpWav bool
+
+	shareFile string
 )
 
 func init() {
@@ -58,4 +60,6 @@ func init() {
 	flag.Int64Var(&showBits, "show-bits", 0, "Log bit number every n bits")
 
 	flag.BoolVar(&dumpWav, "dump-wav", false, "dump audio output into wav file")
+
+	flag.StringVar(&shareFile, "share", "", "Create sharable link with file content")
 }

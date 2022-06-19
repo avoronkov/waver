@@ -22,6 +22,7 @@ import (
 	"github.com/avoronkov/waver/lib/seq"
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/parser"
+	"github.com/avoronkov/waver/lib/share"
 )
 
 func main() {
@@ -31,6 +32,15 @@ func main() {
 		if err := project.New(newProject, etc.DefaultConfig); err != nil {
 			log.Fatal(err)
 		}
+		return
+	}
+
+	if shareFile != "" {
+		link, err := share.MakeLinkFromFile(shareFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(link)
 		return
 	}
 
