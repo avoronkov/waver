@@ -1,11 +1,14 @@
 package parser
 
+import "github.com/avoronkov/waver/lib/seq/common"
+
 var modParsers = map[string]ModParser{
-	":": parseEvery,
-	"+": parseShift,
-	"-": parseShift,
-	"<": parseBefore,
-	">": parseAfter,
+	":":    makeSingleArgModParser("Every", common.Every),
+	"+":    parseShift,
+	"-":    parseShift,
+	"<":    makeSingleArgModParser("Before", common.Before),
+	">":    makeSingleArgModParser("After", common.After),
+	"bits": makeSingleArgModParser("Bits", common.Bits),
 }
 
 var sigParsers = map[string]SigParser{
