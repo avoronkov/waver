@@ -21,7 +21,8 @@ func Up(shift, value types.ValueFn, invert bool) types.ValueFn {
 		case Num:
 			return Num(v + shInt)
 		case EvaluatedList:
-			res := EvaluatedList{
+			// TODO use GreedyEvaluatedList
+			res := &LazyEvaluatedList{
 				bit: bit,
 				ctx: ctx,
 			}

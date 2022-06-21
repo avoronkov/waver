@@ -13,10 +13,7 @@ func Concat(values types.ValueFn) types.ValueFn {
 		if !ok {
 			panic(fmt.Errorf("Concat expects list, found: %v", vals))
 		}
-		res := EvaluatedList{
-			bit: bit,
-			ctx: ctx,
-		}
+		res := &GreedyEvaluatedList{}
 		l := list.Len()
 		for i := 0; i < l; i++ {
 			item := list.Get(i)
@@ -24,7 +21,11 @@ func Concat(values types.ValueFn) types.ValueFn {
 			if !ok {
 				panic(fmt.Errorf("Concat: element of list is not a list: %v (%T)", item, item))
 			}
-			res.values = append(res.values, itemList.values...)
+			ilen := itemList.Len()
+			for j := 0; j < ilen; j++ {
+				x := itemList.Get(j)
+				res.values = append(res.values, x)
+			}
 		}
 		return res
 	}
