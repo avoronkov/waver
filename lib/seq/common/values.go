@@ -26,14 +26,29 @@ func (Str) IsValue() {}
 // List of values
 type List []types.ValueFn
 
-var _ types.Value = List(nil)
+var _ types.ValueFn = List(nil)
 
-func (l List) IsValue() {}
-
-func (l List) Len() int {
-	return len(l)
+func (l List) Val(bit int64, ctx types.Context) types.Value {
+	return EvaluatedList{
+		values: []types.ValueFn(l),
+		bit:    bit,
+		ctx:    ctx,
+	}
 }
 
-func (l List) Get(i int, bit int64, ctx types.Context) types.Value {
-	return l[i].Val(bit, ctx)
+// Evaluated list of values
+type EvaluatedList struct {
+	values []types.ValueFn
+	bit    int64
+	ctx    types.Context
+}
+
+func (l EvaluatedList) IsValue() {}
+
+func (l EvaluatedList) Len() int {
+	return len(l.values)
+}
+
+func (l EvaluatedList) Get(i int) types.Value {
+	return l.values[i].Val(l.bit, l.ctx)
 }

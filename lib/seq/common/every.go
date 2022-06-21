@@ -16,11 +16,11 @@ func Every(n types.ValueFn) types.Modifier {
 					_ = ctx.Put("_dur", Const(int64(nVal)))
 					return fn.Eval(bit, ctx)
 				}
-			} else if nList, ok := val.(List); ok {
+			} else if nList, ok := val.(EvaluatedList); ok {
 				var loop int64
 				l := nList.Len()
 				for i := 0; i < l; i++ {
-					item := nList.Get(i, bit, ctx)
+					item := nList.Get(i)
 					if it, ok := item.(Num); ok {
 						loop += int64(it)
 					} else {
@@ -30,7 +30,7 @@ func Every(n types.ValueFn) types.Modifier {
 				x := bit % loop
 				var s int64
 				for i := 0; i < l; i++ {
-					item := nList.Get(i, bit, ctx)
+					item := nList.Get(i)
 					cur := int64(item.(Num))
 					if x == s {
 						_ = ctx.Put("_dur", Const(cur))

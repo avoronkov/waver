@@ -27,15 +27,18 @@ type Parser struct {
 	scale notes.Scale
 
 	globalCtx map[string]interface{}
+
+	userFunctions map[string]UserFunction
 }
 
 func New(seq Seq, scale notes.Scale, opts ...func(*Parser)) *Parser {
 	p := &Parser{
-		seq:        seq,
-		scale:      scale,
-		modParsers: modParsers,
-		sigParsers: sigParsers,
-		globalCtx:  map[string]interface{}{},
+		seq:           seq,
+		scale:         scale,
+		modParsers:    modParsers,
+		sigParsers:    sigParsers,
+		globalCtx:     map[string]interface{}{},
+		userFunctions: map[string]UserFunction{},
 	}
 
 	for _, opt := range opts {
@@ -89,9 +92,10 @@ func (p *Parser) parse() error {
 func (p *Parser) parseLine(num int, line string) error {
 	fields := strings.Fields(line)
 	lineCtx := &LineCtx{
-		Num:       num,
-		Fields:    fields,
-		GlobalCtx: p.globalCtx,
+		Num:           num,
+		Fields:        fields,
+		GlobalCtx:     p.globalCtx,
+		UserFunctions: p.userFunctions,
 	}
 	if idx := stringsFind(fields, "->"); idx >= 0 {
 		// modifiers -> signals
@@ -120,6 +124,18 @@ func (p *Parser) parseLine(num int, line string) error {
 			return err
 		}
 		p.seq.Assign(fields[0], vfn)
+	} else if len(fields) >= 3 && fields[2] == "=" {
+		// func arg = atom
+		// TODO check shift
+		vfn, _, err := parseAtom(p.scale, lineCtx.Shift(3))
+		if err != nil {
+			return err
+		}
+		p.userFunctions[fields[0]] = UserFunction{
+			name: fields[0],
+			arg:  fields[1],
+			fn:   vfn,
+		}
 	} else {
 		log.Printf("[WARNING] Skipping line: %q", line)
 	}

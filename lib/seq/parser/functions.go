@@ -31,6 +31,13 @@ func parseAtom(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
 		}
 		return common.Lst(fn...), shift, nil
 	}
+	if userFunc, ok := line.UserFunctions[token]; ok {
+		fn, shift, err := parseUserFunction(scale, line, userFunc.name, userFunc.arg, userFunc.fn)
+		if err != nil {
+			return nil, 0, err
+		}
+		return fn, shift, err
+	}
 	if parser, ok := valueFnParser[token]; ok {
 		fn, shift, err := parser(scale, line)
 		if err != nil {

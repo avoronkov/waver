@@ -38,10 +38,10 @@ func (n *note) Eval(bit int64, ctx types.Context) (res []signals.Signal) {
 	instr := n.instr.Val(bit, ctx)
 	if s, ok := instr.(Str); ok {
 		return n.evalInstr(bit, ctx, string(s))
-	} else if l, ok := instr.(List); ok {
+	} else if l, ok := instr.(EvaluatedList); ok {
 		llen := l.Len()
 		for i := 0; i < llen; i++ {
-			item := l.Get(i, bit, ctx)
+			item := l.Get(i)
 			s := item.(Str)
 			res = append(res, n.evalInstr(bit, ctx, string(s))...)
 		}
@@ -63,10 +63,10 @@ func (n *note) evalInstr(bit int64, ctx types.Context, in string) (res []signals
 			return n.evalInstrNote(bit, ctx, in, notes.Note{})
 		}
 		panic(fmt.Errorf("Don't know how to use for note: %v (%T)", s, s))
-	} else if l, ok := nt.(List); ok {
+	} else if l, ok := nt.(EvaluatedList); ok {
 		llen := l.Len()
 		for i := 0; i < llen; i++ {
-			item := l.Get(i, bit, ctx)
+			item := l.Get(i)
 			if i, ok := item.(Num); ok {
 				nt := n.seqNoteNumberToNote(int64(i))
 				res = append(res, n.evalInstrNote(bit, ctx, in, nt)...)
@@ -88,10 +88,10 @@ func (n *note) evalInstrNote(bit int64, ctx types.Context, in string, nt notes.N
 		return n.evalIntrNoteAmp(bit, ctx, in, nt, a)
 	} else if f, ok := amp.(Float); ok {
 		return n.evalIntrNoteAmp(bit, ctx, in, nt, float64(f))
-	} else if l, ok := amp.(List); ok {
+	} else if l, ok := amp.(EvaluatedList); ok {
 		llen := l.Len()
 		for i := 0; i < llen; i++ {
-			item := l.Get(i, bit, ctx)
+			item := l.Get(i)
 			if x, ok := item.(Num); ok {
 				a := float64(x) / 16.0
 				res = append(res, n.evalIntrNoteAmp(bit, ctx, in, nt, a)...)
@@ -161,11 +161,11 @@ func toInt64List(v types.Value, bit int64, ctx types.Context) []int64 {
 	if n, ok := v.(Num); ok {
 		return []int64{int64(n)}
 	}
-	if l, ok := v.(List); ok {
+	if l, ok := v.(EvaluatedList); ok {
 		var res []int64
 		llen := l.Len()
 		for i := 0; i < llen; i++ {
-			item := l.Get(i, bit, ctx)
+			item := l.Get(i)
 			i := item.(Num)
 			res = append(res, int64(i))
 		}

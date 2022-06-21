@@ -123,14 +123,6 @@ func ParseSample(file string, filtersData []map[string]any) (*instruments.Instru
 	return instruments.NewInstrument(sample, fs...), nil
 }
 
-func handleSample(sample string) (waves.Wave, error) {
-	data, err := static.Files.ReadFile(sample)
-	if err != nil {
-		return nil, err
-	}
-	return waves.ParseSample(data)
-}
-
 func handleSample2(sample string) (waves.Wave, error) {
 	data, err := findFile(static.Files, sample)
 	if err != nil {

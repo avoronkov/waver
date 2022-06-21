@@ -6,9 +6,12 @@ func ChordFn(keyNote types.ValueFn, steps ...int64) types.ValueFn {
 	f := func(bit int64, ctx types.Context) types.Value {
 		kn := keyNote.Val(bit, ctx)
 		k := int64(kn.(Num))
-		res := List{}
+		res := EvaluatedList{
+			bit: bit,
+			ctx: ctx,
+		}
 		for _, step := range steps {
-			res = append(res, Const(k+step))
+			res.values = append(res.values, Const(k+step))
 		}
 		return res
 	}
