@@ -21,7 +21,7 @@ var valueFnParser map[string]ValueFnParser
 func init() {
 	valueFnParser = map[string]ValueFnParser{
 		"seq":    parseSequence,
-		"rand":   parseRandom,
+		"rand":   MakeSingleArgValueFnParser("rand", common.Random),
 		"maj":    makeMusParser("maj", 0, 4, 7),
 		"maj7":   makeMusParser("maj", 0, 4, 7, 11),
 		"maj9":   makeMusParser("maj", 0, 4, 7, 11, 14),
@@ -31,5 +31,6 @@ func init() {
 		"up":     parseUpDown,
 		"down":   parseUpDown,
 		"repeat": parseRepeat,
+		"concat": MakeSingleArgValueFnParser("concat", common.Concat),
 	}
 }

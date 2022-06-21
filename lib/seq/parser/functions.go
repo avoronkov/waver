@@ -66,3 +66,18 @@ func parseList(scale notes.Scale, line *LineCtx) ([]types.ValueFn, int, error) {
 	}
 	return nil, 0, fmt.Errorf("Closing ']' not found.")
 }
+
+type singleArgFuncion = func(types.ValueFn) types.ValueFn
+
+func MakeSingleArgValueFnParser(name string, fn singleArgFuncion) ValueFnParser {
+	return func(scale notes.Scale, line *LineCtx) (types.ValueFn, int, error) {
+		if line.Len() < 2 {
+			return nil, 0, fmt.Errorf("Not enough arguments for '%v': %v", name, line)
+		}
+		values, shift, err := parseAtom(scale, line.Shift(1))
+		if err != nil {
+			return nil, 0, err
+		}
+		return fn(values), shift + 1, nil
+	}
+}
