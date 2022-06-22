@@ -29,6 +29,8 @@ type Parser struct {
 	globalCtx map[string]interface{}
 
 	userFunctions map[string]UserFunction
+
+	tempo int
 }
 
 func New(seq Seq, scale notes.Scale, opts ...func(*Parser)) *Parser {
@@ -39,6 +41,7 @@ func New(seq Seq, scale notes.Scale, opts ...func(*Parser)) *Parser {
 		sigParsers:    sigParsers,
 		globalCtx:     map[string]interface{}{},
 		userFunctions: map[string]UserFunction{},
+		tempo:         120,
 	}
 
 	for _, opt := range opts {

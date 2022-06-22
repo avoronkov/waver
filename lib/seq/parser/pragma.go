@@ -71,6 +71,7 @@ func (p *Parser) parseTempo(fields []string) error {
 	if err != nil {
 		return fmt.Errorf("Cannot parse tempo: %v", err)
 	}
+	p.tempo = n
 	for _, ts := range p.tempoSetters {
 		ts.SetTempo(n)
 	}
@@ -93,7 +94,7 @@ func (p *Parser) parseSample(fields []string, body string) error {
 			return err
 		}
 	}
-	in, err := config.ParseSample(filename, options)
+	in, err := config.ParseSample(filename, options, config.Param("tempo", p.tempo))
 	if err != nil {
 		return err
 	}
@@ -115,7 +116,7 @@ func (p *Parser) parseInstrument(fields []string, body string) (err error) {
 			return err
 		}
 	}
-	in, err := config.ParseInstrument(waveName, options)
+	in, err := config.ParseInstrument(waveName, options, config.Param("tempo", p.tempo))
 	if err != nil {
 		return err
 	}
