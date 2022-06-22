@@ -92,17 +92,14 @@ func (p *Parser) parse() error {
 func (p *Parser) parseLine(num int, line string) error {
 	fields := strings.Fields(line)
 	lineCtx := &LineCtx{
-		Num:           num,
-		Fields:        fields,
-		GlobalCtx:     p.globalCtx,
-		UserFunctions: p.userFunctions,
+		Num:    num,
+		Fields: fields,
 	}
 	if idx := stringsFind(fields, "->"); idx >= 0 {
 		// modifiers -> signals
 		modCtx := &LineCtx{
-			Num:       num,
-			Fields:    fields[:idx],
-			GlobalCtx: p.globalCtx,
+			Num:    num,
+			Fields: fields[:idx],
 		}
 		mods, err := p.parseModifiers(modCtx)
 		if err != nil {
@@ -119,7 +116,7 @@ func (p *Parser) parseLine(num int, line string) error {
 	} else if len(fields) >= 2 && fields[1] == "=" {
 		// var = atom
 		// TODO check shift
-		vfn, _, err := parseAtom(p.scale, lineCtx.Shift(2))
+		vfn, _, err := p.parseAtom(lineCtx.Shift(2))
 		if err != nil {
 			return err
 		}
@@ -127,7 +124,7 @@ func (p *Parser) parseLine(num int, line string) error {
 	} else if len(fields) >= 3 && fields[2] == "=" {
 		// func arg = atom
 		// TODO check shift
-		vfn, _, err := parseAtom(p.scale, lineCtx.Shift(3))
+		vfn, _, err := p.parseAtom(lineCtx.Shift(3))
 		if err != nil {
 			return err
 		}
@@ -146,7 +143,7 @@ func (p *Parser) parseModifiers(line *LineCtx) (result []types.Modifier, err err
 	l := line.Len()
 	for i := 0; i < l; {
 		if parser, ok := p.modParsers[line.Fields[i]]; ok {
-			mod, shift, err := parser(p.scale, line.Shift(i))
+			mod, shift, err := parser(p, line.Shift(i))
 			if err != nil {
 				return nil, err
 			}
@@ -170,7 +167,7 @@ func (p *Parser) parseSignal(line *LineCtx) (result []types.Signaler, err error)
 				return nil, fmt.Errorf("Don't know how to parse signal: %q", line.Fields[i])
 			}
 		}
-		sig, shift, err := parser(p.scale, line.Shift(i))
+		sig, shift, err := parser(p, line.Shift(i))
 		if err != nil {
 			return nil, err
 		}
