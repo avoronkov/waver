@@ -28,3 +28,9 @@ func WithTempo(n int) func(*Output) {
 		o.tempo = n
 	}
 }
+
+func WithWavFileDump(file string) func(*Output) {
+	return func(o *Output) {
+		o.wavFilename = file
+	}
+}

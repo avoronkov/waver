@@ -69,6 +69,10 @@ func main() {
 		unisynth.WithScale(scale),
 		unisynth.WithTempo(tempo),
 	}
+	if fileInput != "" && dumpWav {
+		fileOutput := strings.TrimSuffix(fileInput, filepath.Ext(fileInput)) + ".wav"
+		audioOpts = append(audioOpts, unisynth.WithWavFileDump(fileOutput))
+	}
 	audioOutput, err := unisynth.New(audioOpts...)
 	check("Syntheziser output", err)
 	opts = append(opts, midisynth.WithSignalOutput(audioOutput))
@@ -106,20 +110,6 @@ func main() {
 		check("MidiSynth initialization", cfg.InitMidiSynth())
 		check("Config StartUpdateLoop", cfg.StartUpdateLoop())
 	}
-	// .
-
-	// Pragma parser
-	/*
-		if fileInput != "" {
-			pragmaParser := pragma.New(
-				fileInput,
-				pragma.WithTempoSetter(sequencer),
-				pragma.WithTempoSetter(audioOutput),
-				pragma.WithInstrumentSet(instSet),
-			)
-			check("Pragma parser start", pragmaParser.Start(true))
-		}
-	*/
 	// .
 
 	m, err := midisynth.NewMidiSynth(opts...)

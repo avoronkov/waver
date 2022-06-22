@@ -22,6 +22,8 @@ var (
 	startBit int64
 
 	showBits int64
+
+	dumpWav bool
 )
 
 func init() {
@@ -54,4 +56,6 @@ func init() {
 	flag.Int64Var(&startBit, "start", 0, "starting bit")
 
 	flag.Int64Var(&showBits, "show-bits", 0, "Log bit number every n bits")
+
+	flag.BoolVar(&dumpWav, "dump-wav", false, "dump audio output into wav file")
 }

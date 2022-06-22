@@ -32,6 +32,9 @@ type Output struct {
 	notesReleases map[notes.Note]func()
 
 	startTime time.Time
+
+	wavFilename string
+	saver       *WavDataSaver
 }
 
 var _ signals.Output = (*Output)(nil)
@@ -72,7 +75,14 @@ func New(opts ...func(*Output)) (*Output, error) {
 	output.play = multiplayer.New(output.settings)
 
 	output.context = c
-	output.player = output.context.NewPlayer(output.play)
+
+	if output.wavFilename != "" {
+		log.Printf("Unisynth: using WavDataSaver")
+		output.saver = NewWavDataSaver(output.play, output.wavFilename)
+		output.player = output.context.NewPlayer(output.saver)
+	} else {
+		output.player = output.context.NewPlayer(output.play)
+	}
 
 	return output, nil
 }
@@ -126,6 +136,10 @@ func (o *Output) processSignal(tm float64, s *signals.Signal) {
 
 func (o *Output) Close() error {
 	// oto.Context does not support method Close()
+	if o.saver != nil {
+		log.Printf("Unisynth: closing WavDataSaver")
+		return o.saver.Close()
+	}
 	return nil
 }
 

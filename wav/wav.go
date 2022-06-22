@@ -11,6 +11,11 @@ import (
 	"github.com/go-errors/errors"
 )
 
+type DataInterface interface {
+	Write(io.Writer) error
+	FullSize() uint32
+}
+
 type Wav struct {
 	Riff          []byte
 	RiffChunkSize uint32
@@ -19,7 +24,7 @@ type Wav struct {
 	Fmt *WavFmt
 
 	DataId []byte
-	Data   *Data
+	Data   DataInterface
 }
 
 func (w *Wav) String() string {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/avoronkov/waver/lib/midisynth/signals"
@@ -20,9 +21,9 @@ type MidiSynth struct {
 func NewMidiSynth(opts ...func(*MidiSynth)) (*MidiSynth, error) {
 	m := &MidiSynth{
 		osSignals: make(chan os.Signal),
-		// ch:        make(chan signals.Interface, 128),
-		logf: log.Printf,
+		logf:      log.Printf,
 	}
+	signal.Notify(m.osSignals, os.Interrupt)
 	for _, opt := range opts {
 		opt(m)
 	}
@@ -66,6 +67,7 @@ L:
 			}
 		case <-m.osSignals:
 			log.Printf("Interupting...")
+			m.Close()
 			break L
 		}
 	}

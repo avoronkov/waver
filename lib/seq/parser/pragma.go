@@ -3,7 +3,6 @@ package parser
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -29,7 +28,6 @@ func (p *Parser) parsePragma(text string, sc *bufio.Scanner) error {
 		}
 		body = b
 	}
-	log.Printf("[PRAGMA] parsing: %v", text)
 	switch pragma := fields[1]; pragma {
 	case "tempo":
 		if err := p.parseTempo(fields); err != nil {
