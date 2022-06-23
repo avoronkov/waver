@@ -1,0 +1,7 @@
+maj maj_argument = [ maj_argument up 4 maj_argument up 7 maj_argument ]
+maj7 maj7_argument = [ maj7_argument up 4 maj7_argument up 7 maj7_argument up 11 maj7_argument ]
+maj9 maj9_argument = [ maj9_argument up 4 maj9_argument up 7 maj9_argument up 11 maj9_argument up 14 maj9_argument ]
+
+min min_argument = [ min_argument up 3 min_argument up 7 min_argument ]
+min7 min7_argument = [ min7_argument up 3 min7_argument up 7 min7_argument up 10 min7_argument ]
+min9 min9_argument = [ min9_argument up 3 min9_argument up 7 min9_argument up 10 min9_argument up 14 min9_argument ]

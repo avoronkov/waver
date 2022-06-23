@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/avoronkov/waver/etc/std"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/types"
@@ -52,6 +53,11 @@ func New(seq Seq, scale notes.Scale, opts ...func(*Parser)) *Parser {
 }
 
 func (p *Parser) ParseData(data []byte) error {
+	// WIP parse std lib
+	reader := bytes.NewReader(std.StdEdo12)
+	if err := p.parseReader(reader); err != nil {
+		return err
+	}
 	return p.parseReader(bytes.NewReader(data))
 }
 
@@ -82,6 +88,13 @@ func (p *Parser) parseReader(reader io.Reader) error {
 }
 
 func (p *Parser) parse() error {
+	// WIP parse std lib
+	reader := bytes.NewReader(std.StdEdo12)
+	if err := p.parseReader(reader); err != nil {
+		return err
+	}
+
+	// Parse the file itself
 	f, err := os.Open(p.file)
 	if err != nil {
 		return err
