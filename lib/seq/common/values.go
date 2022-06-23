@@ -1,6 +1,8 @@
 package common
 
-import "github.com/avoronkov/waver/lib/seq/types"
+import (
+	"github.com/avoronkov/waver/lib/seq/types"
+)
 
 // Number
 type Num int64
@@ -26,14 +28,54 @@ func (Str) IsValue() {}
 // List of values
 type List []types.ValueFn
 
-var _ types.Value = List(nil)
+var _ types.ValueFn = List(nil)
 
-func (l List) IsValue() {}
-
-func (l List) Len() int {
-	return len(l)
+func (l List) Val(bit int64, ctx types.Context) types.Value {
+	return &LazyEvaluatedList{
+		values: []types.ValueFn(l),
+		bit:    bit,
+		ctx:    ctx,
+	}
 }
 
-func (l List) Get(i int, bit int64, ctx types.Context) types.Value {
-	return l[i].Val(bit, ctx)
+// Evaluated list of values
+
+type EvaluatedList interface {
+	IsValue()
+	Len() int
+	Get(i int) types.Value
+}
+
+var _ EvaluatedList = (*LazyEvaluatedList)(nil)
+
+type LazyEvaluatedList struct {
+	values []types.ValueFn
+	bit    int64
+	ctx    types.Context
+}
+
+func (l *LazyEvaluatedList) IsValue() {}
+
+func (l *LazyEvaluatedList) Len() int {
+	return len(l.values)
+}
+
+func (l *LazyEvaluatedList) Get(i int) types.Value {
+	return l.values[i].Val(l.bit, l.ctx)
+}
+
+var _ EvaluatedList = (*GreedyEvaluatedList)(nil)
+
+type GreedyEvaluatedList struct {
+	values []types.Value
+}
+
+func (l *GreedyEvaluatedList) IsValue() {}
+
+func (l *GreedyEvaluatedList) Len() int {
+	return len(l.values)
+}
+
+func (l *GreedyEvaluatedList) Get(i int) types.Value {
+	return l.values[i]
 }

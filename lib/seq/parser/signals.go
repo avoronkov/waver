@@ -3,15 +3,14 @@ package parser
 import (
 	"fmt"
 
-	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
-type SigParser = func(scale notes.Scale, line *LineCtx) (types.Signaler, int, error)
+type SigParser = func(p *Parser, line *LineCtx) (types.Signaler, int, error)
 
 // { 2 A4 }
-func parseSignal(scale notes.Scale, line *LineCtx) (types.Signaler, int, error) {
+func parseSignal(p *Parser, line *LineCtx) (types.Signaler, int, error) {
 	l := line.Len()
 	if l < 3 {
 		return nil, 0, fmt.Errorf("Not enough arguments for signal: %v", line)
@@ -20,49 +19,49 @@ func parseSignal(scale notes.Scale, line *LineCtx) (types.Signaler, int, error) 
 	// skip '{'
 	shift := 1
 	// parse instrument
-	in, sh, err := parseAtom(scale, line.Shift(shift))
+	in, sh, err := p.parseAtom(line.Shift(shift))
 	if err != nil {
 		return nil, 0, err
 	}
 	shift += sh
 
 	if line.Fields[shift] == "}" {
-		return common.Note(scale, in, common.StrConst("_")), shift + 1, nil
+		return common.Note(p.scale, in, common.StrConst("_")), shift + 1, nil
 	}
 
 	// parse note
-	nt, sh, err := parseAtom(scale, line.Shift(shift))
+	nt, sh, err := p.parseAtom(line.Shift(shift))
 	if err != nil {
 		return nil, 0, err
 	}
 	shift += sh
 
 	if line.Fields[shift] == "}" {
-		return common.Note(scale, in, nt), shift + 1, nil
+		return common.Note(p.scale, in, nt), shift + 1, nil
 	}
 
 	// parse amplitude
-	amp, sh, err := parseAtom(scale, line.Shift(shift))
+	amp, sh, err := p.parseAtom(line.Shift(shift))
 	if err != nil {
 		return nil, 0, err
 	}
 	shift += sh
 
 	if line.Fields[shift] == "}" {
-		return common.Note(scale, in, nt, common.NoteAmp(amp)), shift + 1, nil
+		return common.Note(p.scale, in, nt, common.NoteAmp(amp)), shift + 1, nil
 	}
 
 	// parse duration
-	dur, sh, err := parseAtom(scale, line.Shift(shift))
+	dur, sh, err := p.parseAtom(line.Shift(shift))
 	if err != nil {
 		return nil, 0, err
 	}
 	shift += sh
 
-	return common.Note(scale, in, nt, common.NoteAmp(amp), common.NoteDur(dur)), shift + 1, nil
+	return common.Note(p.scale, in, nt, common.NoteAmp(amp), common.NoteDur(dur)), shift + 1, nil
 }
 
-func parseRawSignal(scale notes.Scale, line *LineCtx) (types.Signaler, int, error) {
+func parseRawSignal(p *Parser, line *LineCtx) (types.Signaler, int, error) {
 	if line.Len() < 1 {
 		return nil, 0, fmt.Errorf("No arguments for raw signal")
 	}

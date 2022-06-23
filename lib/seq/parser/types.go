@@ -18,3 +18,9 @@ type TempoSetter interface {
 type InstrumentSet interface {
 	AddInstrument(n string, in *instruments.Instrument)
 }
+
+type UserFunction struct {
+	name string
+	arg  string
+	fn   types.ValueFn
+}

@@ -9,9 +9,7 @@ func Const(n int64) types.ValueFn {
 }
 
 func Lst(values ...types.ValueFn) types.ValueFn {
-	return types.ValueFunc(func(bit int64, ctx types.Context) types.Value {
-		return List(values)
-	})
+	return List(values)
 }
 
 func FloatConst(f float64) types.ValueFn {

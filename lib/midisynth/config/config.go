@@ -107,28 +107,20 @@ func (c *Config) handleData(data *Data, m InstrumentSet) error {
 	return nil
 }
 
-func ParseSample(file string, filtersData []map[string]any) (*instruments.Instrument, error) {
+func ParseSample(file string, filtersData []map[string]any, params ...*param) (*instruments.Instrument, error) {
 	sample, err := handleSample2(file)
 	if err != nil {
 		return nil, err
 	}
 	var fs []filters.Filter
 	for _, f := range filtersData {
-		fx, err := handleFilter(f)
+		fx, err := handleFilter(f, params...)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to handle filter: %w", err)
 		}
 		fs = append(fs, fx)
 	}
 	return instruments.NewInstrument(sample, fs...), nil
-}
-
-func handleSample(sample string) (waves.Wave, error) {
-	data, err := static.Files.ReadFile(sample)
-	if err != nil {
-		return nil, err
-	}
-	return waves.ParseSample(data)
 }
 
 func handleSample2(sample string) (waves.Wave, error) {
@@ -187,14 +179,14 @@ func findFile(dir fs.FS, filename string) ([]byte, error) {
 	return nil, fmt.Errorf("Cannot find matching file: %v", file)
 }
 
-func ParseInstrument(waveName string, filtersData []map[string]any) (*instruments.Instrument, error) {
+func ParseInstrument(waveName string, filtersData []map[string]any, params ...*param) (*instruments.Instrument, error) {
 	w, ok := waves.Waves[waveName]
 	if !ok {
 		return nil, fmt.Errorf("Unknown wave: %v", waveName)
 	}
 	var fs []filters.Filter
 	for _, f := range filtersData {
-		fx, err := handleFilter(f)
+		fx, err := handleFilter(f, params...)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to handle filter: %w", err)
 		}
@@ -203,14 +195,14 @@ func ParseInstrument(waveName string, filtersData []map[string]any) (*instrument
 	return instruments.NewInstrument(w, fs...), nil
 }
 
-func handleFilter(f map[string]any) (filters.Filter, error) {
+func handleFilter(f map[string]any, params ...*param) (filters.Filter, error) {
 	if len(f) != 1 {
 		return nil, fmt.Errorf("Filter description should contain exactly 1 element: %+v", f)
 	}
 	for name, opts := range f {
 		if fn, ok := filters.Filters[name]; ok {
 			filt := fn.New()
-			if err := SetOptions(filt, opts); err != nil {
+			if err := SetOptions(filt, opts, params...); err != nil {
 				return nil, err
 			}
 			log.Printf("DEBUG created filter: %#v", filt)

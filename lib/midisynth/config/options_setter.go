@@ -9,24 +9,46 @@ import (
 	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
-func SetOptions(obj, options any) (err error) {
+type param struct {
+	name string
+	value any
+}
+
+func Param(name string, value any) *param {
+	return &param{
+		name: name,
+		value: value,
+	}
+}
+
+func SetOptions(obj, options any, params ...*param) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("SetOptions failed: %v\n%s", r, debug.Stack())
 		}
 	}()
 
+	// Set filter options
 	switch opts := options.(type) {
 	case float64, int:
-		return setSingleOption(obj, opts)
+		if err := setSingleOption(obj, opts); err != nil {
+			return err
+		}
 	case map[string]any:
-		return setMapOptions(obj, opts)
+		if err := setMapOptions(obj, opts); err != nil {
+			return err
+		}
 	case nil:
 		// Do nothing
-		return
 	default:
 		return fmt.Errorf("Unsupported options type: %v (%T)", options, options)
 	}
+
+	// Set global params
+	for _, p := range params {
+		setParamByTagName(obj, p.name, p.value)
+	}
+	return
 }
 
 func setSingleOption(obj any, f any) error {
@@ -92,6 +114,24 @@ func setOptionByName(obj any, name string, f any) error {
 		}
 	}
 	return fmt.Errorf("Cannot save option '%v' (%v) into %+v", name, f, obj)
+}
+
+func setParamByTagName(obj any, name string, f any) {
+	typ := reflect.TypeOf(obj).Elem()
+	n := typ.NumField()
+	for i := 0; i < n; i++ {
+		fld := typ.Field(i)
+		tag := fld.Tag.Get("param")
+
+		// Search by tags
+		if name == tag {
+			v := reflect.ValueOf(obj).Elem()
+			assignToField(v.Field(i), f)
+			return
+		}
+	}
+	// Do nothing
+	return
 }
 
 func contains[T comparable](item T, list []T) bool {

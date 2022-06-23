@@ -24,18 +24,18 @@ type sequenceImpl struct {
 
 func (s *sequenceImpl) Val(bit int64, ctx types.Context) types.Value {
 	values := s.fn.Val(bit, ctx)
-	list, ok := values.(List)
+	list, ok := values.(EvaluatedList)
 	if !ok {
 		panic(fmt.Errorf("seq expects list, found: %v", values))
 	}
-	l := len(list)
+	l := list.Len()
 	if l == 0 {
 		panic(fmt.Errorf("seq expects non-empty list"))
 	}
 	if s.idx.N >= l {
 		s.idx.N = 0
 	}
-	res := list[s.idx.N]
+	res := list.Get(s.idx.N)
 	s.idx.N = (s.idx.N + 1) % l
-	return res.Val(bit, ctx)
+	return res
 }

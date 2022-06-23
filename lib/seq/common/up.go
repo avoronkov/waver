@@ -20,12 +20,18 @@ func Up(shift, value types.ValueFn, invert bool) types.ValueFn {
 		switch v := val.(type) {
 		case Num:
 			return Num(v + shInt)
-		case List:
-			res := []types.ValueFn{}
-			for _, item := range v {
-				res = append(res, Const(int64(item.Val(bit, ctx).(Num)+shInt)))
+		case EvaluatedList:
+			// TODO use GreedyEvaluatedList
+			res := &LazyEvaluatedList{
+				bit: bit,
+				ctx: ctx,
 			}
-			return List(res)
+			l := v.Len()
+			for i := 0; i < l; i++ {
+				item := v.Get(i).(Num)
+				res.values = append(res.values, Const(int64(item+shInt)))
+			}
+			return res
 		default:
 			panic(fmt.Errorf("up expects second argument to be number of list of numbers, found: %v (%T)", val, val))
 		}
