@@ -10,13 +10,13 @@ import (
 )
 
 type param struct {
-	name string
+	name  string
 	value any
 }
 
 func Param(name string, value any) *param {
 	return &param{
-		name: name,
+		name:  name,
 		value: value,
 	}
 }
@@ -131,7 +131,6 @@ func setParamByTagName(obj any, name string, f any) {
 		}
 	}
 	// Do nothing
-	return
 }
 
 func contains[T comparable](item T, list []T) bool {
