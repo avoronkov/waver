@@ -17,7 +17,7 @@ import (
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
-func (m *Main) OnNav(ctx app.Context) {
+func (ap *App) OnNav(ctx app.Context) {
 	log.Printf("[JS] initMain()...")
 
 	tempo := 120
@@ -72,13 +72,13 @@ func (m *Main) OnNav(ctx app.Context) {
 	// j.check(m.Start())
 	// j.check(m.Close())
 
-	m.mParser = goParser
-	m.mSequencer = goSequencer
-	m.mMidiSynth = midiSynth
+	ap.mParser = goParser
+	ap.mSequencer = goSequencer
+	ap.mMidiSynth = midiSynth
 
 	go func() {
 		log.Printf("mMidiSynth.Start()...")
-		check(m.mMidiSynth.Start())
+		check(ap.mMidiSynth.Start())
 		log.Printf("mMidiSynth.Finished()")
 	}()
 }
