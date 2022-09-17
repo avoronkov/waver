@@ -4,8 +4,18 @@ import (
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
+const (
+	ShowCode     = "code"
+	ShowMessages = "messages"
+)
+
 type Main struct {
 	app.Compo
+
+	show string
+
+	codeCompo     *Code
+	messagesCompo *Messages
 }
 
 func (m *Main) Render() app.UI {
@@ -15,7 +25,28 @@ func (m *Main) Render() app.UI {
 			app.P().Body(
 				app.A().Href("https://github.com/avoronkov/waver").Text("Source code"),
 			),
-			&Code{},
+			app.P().Body(
+				app.Div().Class("card").Body(
+					app.Select().Class("form-select").Body(
+						app.Option().Value(ShowCode).Text("Code").Selected(m.show == "" || m.show == ShowCode),
+						app.Option().Value(ShowMessages).Text("Messages").Selected(m.show == ShowMessages),
+					).OnChange(m.onChangeView),
+				),
+			),
+			app.
+				If(m.show == "" || m.show == ShowCode, m.codeCompo).
+				Else(m.messagesCompo),
 		),
 	)
+}
+
+func (m *Main) OnNav(ctx app.Context) {
+	m.codeCompo = &Code{}
+	m.messagesCompo = &Messages{}
+}
+
+func (m *Main) onChangeView(ctx app.Context, e app.Event) {
+	m.codeCompo.Sync()
+	m.show = ctx.JSSrc().Get("value").String()
+	m.Update()
 }

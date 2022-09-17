@@ -7,19 +7,16 @@ import (
 type Code struct {
 	app.Compo
 
-	code string
+	text string
 }
 
 func (c *Code) Render() app.UI {
 	return app.Div().Class("card arert alert-success").Body(
-		app.H3().Text("Code"),
 		app.P().Body(
 			app.Textarea().
 				ID("code-story").
 				Class("form-control").
-				Name("code-story").
-				Text(c.code).
-				OnInput(c.onInput),
+				Name("code-story"),
 		),
 		app.P().Body(
 			app.Button().
@@ -46,12 +43,14 @@ func (c *Code) Render() app.UI {
 	)
 }
 
-func (c *Code) onInput(ctx app.Context, e app.Event) {
-	c.code = ctx.JSSrc().Get("value").String()
+func (c *Code) OnMount(ctx app.Context) {
+	app.Window().Call("initCodeMirror")
+	app.Window().Call("setCodeMirrorCode", c.text)
 }
 
 func (c *Code) onPlay(ctx app.Context, e app.Event) {
-	ctx.NewActionWithValue("play", c.code)
+	c.Sync()
+	ctx.NewActionWithValue("play", c.text)
 }
 
 func (c *Code) onPause(ctx app.Context, e app.Event) {
@@ -59,6 +58,9 @@ func (c *Code) onPause(ctx app.Context, e app.Event) {
 }
 
 func (c *Code) onClear(ctx app.Context, e app.Event) {
-	c.code = ""
-	c.Update()
+	app.Window().Call("setCodeMirrorCode", "")
+}
+
+func (c *Code) Sync() {
+	c.text = app.Window().Call("getCodeMirrorCode").String()
 }

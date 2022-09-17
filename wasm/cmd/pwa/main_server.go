@@ -17,6 +17,12 @@ func main() {
 		Description: "Waver playground application",
 		Styles: []string{
 			"https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css",
+			"/web/lib/codemirror.css",
+		},
+		Scripts: []string{
+			"/web/lib/codemirror.js",
+			"/web/addon/mode/simple.js",
+			"/web/init-codemirror.js",
 		},
 	})
 
