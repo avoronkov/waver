@@ -1,6 +1,6 @@
-.PHONY: all clean server static
+.PHONY: all clean server pwa static
 
-TARGETS= static server
+TARGETS= static server pwa
 
 all: $(TARGETS)
 
@@ -12,6 +12,10 @@ static:
 
 server:
 	go build -o $@ ./cmd/server
+
+pwa:
+	go build -o $@ ./cmd/pwa
+	GOARCH=wasm GOOS=js go build -o web/app.wasm ./cmd/pwa
 
 clean:
 	rm -f server

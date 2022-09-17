@@ -7,3 +7,5 @@
 node_modules
 /wasm/static/assets/addon/
 /wasm/static/assets/lib/
+/wasm/web/app.wasm
+/wasm/pwa
