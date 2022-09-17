@@ -18,6 +18,7 @@ func (c *Code) Render() app.UI {
 				ID("code-story").
 				Class("form-control").
 				Name("code-story").
+				Text(c.code).
 				OnInput(c.onInput),
 		),
 		app.P().Body(
@@ -27,6 +28,20 @@ func (c *Code) Render() app.UI {
 				Class("btn badge badge-success").
 				OnClick(c.onPlay).
 				Text("Play"),
+			app.Text(" "),
+			app.Button().
+				ID("stop-code").
+				Type("button").
+				Class("btn badge badge-danger").
+				OnClick(c.onPause).
+				Text("Stop"),
+			app.Text(" "),
+			app.Button().
+				ID("clear-code").
+				Type("button").
+				Class("btn badge badge-danger").
+				OnClick(c.onClear).
+				Text("Clear"),
 		),
 	)
 }
@@ -37,4 +52,13 @@ func (c *Code) onInput(ctx app.Context, e app.Event) {
 
 func (c *Code) onPlay(ctx app.Context, e app.Event) {
 	ctx.NewActionWithValue("play", c.code)
+}
+
+func (c *Code) onPause(ctx app.Context, e app.Event) {
+	ctx.NewAction("pause")
+}
+
+func (c *Code) onClear(ctx app.Context, e app.Event) {
+	c.code = ""
+	c.Update()
 }

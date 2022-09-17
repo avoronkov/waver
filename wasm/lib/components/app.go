@@ -1,8 +1,6 @@
 package components
 
 import (
-	"log"
-
 	"github.com/avoronkov/waver/lib/midisynth"
 	"github.com/avoronkov/waver/lib/seq"
 	"github.com/avoronkov/waver/lib/seq/parser"
@@ -23,11 +21,14 @@ func (a *App) Render() app.UI {
 
 func (a *App) OnMount(ctx app.Context) {
 	ctx.Handle("play", a.handlePlay)
+	ctx.Handle("pause", a.handlePause)
 }
 
 func (ap *App) handlePlay(ctx app.Context, a app.Action) {
-	log.Printf("handlePlay: %v", a.Value)
 	ap.mSequencer.Pause(false)
 	ap.mParser.ParseData([]byte(a.Value.(string)))
-	log.Printf("handlePlay: OK")
+}
+
+func (ap *App) handlePause(ctx app.Context, a app.Action) {
+	ap.mSequencer.Pause(true)
 }
