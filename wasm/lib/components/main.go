@@ -1,6 +1,8 @@
 package components
 
 import (
+	"fmt"
+
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
@@ -11,6 +13,8 @@ const (
 
 type Main struct {
 	app.Compo
+
+	Log fmt.Stringer
 
 	show string
 
@@ -42,7 +46,7 @@ func (m *Main) Render() app.UI {
 
 func (m *Main) OnNav(ctx app.Context) {
 	m.codeCompo = &Code{}
-	m.messagesCompo = &Messages{}
+	m.messagesCompo = &Messages{Log: m.Log}
 }
 
 func (m *Main) onChangeView(ctx app.Context, e app.Event) {
