@@ -9,6 +9,7 @@ import (
 const (
 	ShowCode     = "code"
 	ShowMessages = "messages"
+	ShowExamples = "examples"
 )
 
 type Main struct {
@@ -20,6 +21,7 @@ type Main struct {
 
 	codeCompo     *Code
 	messagesCompo *Messages
+	examplesCompo *Examples
 }
 
 func (m *Main) Render() app.UI {
@@ -34,11 +36,13 @@ func (m *Main) Render() app.UI {
 					app.Select().Class("form-select").Body(
 						app.Option().Value(ShowCode).Text("Code").Selected(m.show == "" || m.show == ShowCode),
 						app.Option().Value(ShowMessages).Text("Messages").Selected(m.show == ShowMessages),
+						app.Option().Value(ShowExamples).Text("Examples").Selected(m.show == ShowExamples),
 					).OnChange(m.onChangeView),
 				),
 			),
 			app.
 				If(m.show == "" || m.show == ShowCode, m.codeCompo).
+				ElseIf(m.show == ShowExamples, m.examplesCompo).
 				Else(m.messagesCompo),
 		),
 	)
@@ -47,6 +51,7 @@ func (m *Main) Render() app.UI {
 func (m *Main) OnNav(ctx app.Context) {
 	m.codeCompo = &Code{}
 	m.messagesCompo = &Messages{Log: m.Log}
+	m.examplesCompo = &Examples{}
 }
 
 func (m *Main) onChangeView(ctx app.Context, e app.Event) {
