@@ -27,7 +27,7 @@ func (a *App) Render() app.UI {
 	}
 }
 
-func (a *App) OnMount1(ctx app.Context) {
+func (a *App) OnMount(ctx app.Context) {
 	ctx.Handle("play", a.handlePlay)
 	ctx.Handle("pause", a.handlePause)
 }
