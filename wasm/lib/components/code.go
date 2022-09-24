@@ -13,9 +13,6 @@ type Code struct {
 	app.Compo
 
 	text string
-
-	saving   bool
-	saveName string
 }
 
 func (c *Code) Render() app.UI {
@@ -37,7 +34,7 @@ func (c *Code) Render() app.UI {
 			app.Button().
 				ID("stop-code").
 				Type("button").
-				Class("btn badge badge-danger").
+				Class("btn badge badge-warning").
 				OnClick(c.onPause).
 				Text("Stop"),
 			app.Text(" "),
@@ -51,27 +48,15 @@ func (c *Code) Render() app.UI {
 			app.Button().
 				ID("save").
 				Type("button").
-				Class("btn badge badge-primary").
+				Class("btn badge badge-secondary").
 				OnClick(c.onSave).
 				Text("Save..."),
-
-			app.If(c.saving, app.P().Body(
-				app.Input().
-					ID("save-input").
-					Placeholder("Example name...").
-					OnChange(c.onSaveInputChange),
-				app.Text(" "),
-				app.Button().
-					ID("save-submit").
-					Class("btn badge badge-primary").
-					OnClick(c.onSaveSubmit).
-					Text("Save"),
-			)),
 		),
 	)
 }
 
 func (c *Code) OnMount(ctx app.Context) {
+	log.Printf("OnMount")
 	queryCode, ok := ctx.Page().URL().Query()["code"]
 	if ok {
 		var err error
@@ -79,13 +64,24 @@ func (c *Code) OnMount(ctx app.Context) {
 		if err != nil {
 			log.Printf("Failed to decode query code: %v", err)
 		}
+	} else {
+		var err error
+		c.text, err = storage.From(ctx.LocalStorage()).GetCode()
+		if err != nil {
+			log.Printf("Failed to get code from local storage: %v", err)
+		}
+		log.Printf("Got code from localstorage: %v", c.text)
 	}
 	app.Window().Call("initCodeMirror")
 	app.Window().Call("setCodeMirrorCode", c.text)
 }
 
+func (c *Code) OnNav(ctx app.Context) {
+	log.Printf("OnNav")
+}
+
 func (c *Code) onPlay(ctx app.Context, e app.Event) {
-	c.Sync()
+	c.Sync(ctx.LocalStorage())
 	ctx.NewActionWithValue("play", c.text)
 }
 
@@ -94,36 +90,39 @@ func (c *Code) onPause(ctx app.Context, e app.Event) {
 }
 
 func (c *Code) onClear(ctx app.Context, e app.Event) {
+	ok := app.Window().Call("confirm", "Clear code?").Bool()
+	if !ok {
+		return
+	}
 	app.Window().Call("setCodeMirrorCode", "")
+	c.text = ""
 }
 
-func (c *Code) Sync() {
+func (c *Code) Sync(st app.BrowserStorage) {
 	c.text = app.Window().Call("getCodeMirrorCode").String()
+	log.Printf("Saving code into localstorage: %v", c.text)
+	if err := storage.From(st).SaveCode(c.text); err != nil {
+		log.Printf("Failed to save code into local storage: %v", err)
+	}
 }
 
 func (c *Code) onSave(ctx app.Context, e app.Event) {
-	c.saving = true
-	c.Update()
-}
+	name := app.Window().Call("prompt", "Saving example...", "Example name...")
+	if name.IsNull() {
+		return
+	}
 
-func (c *Code) onSaveInputChange(ctx app.Context, e app.Event) {
-	c.saveName = ctx.JSSrc().Get("value").String()
-}
-
-func (c *Code) onSaveSubmit(ctx app.Context, e app.Event) {
 	defer func() {
-		c.saveName = ""
-		c.saving = false
 		c.Update()
 	}()
 
-	c.Sync()
+	c.Sync(ctx.LocalStorage())
 	encoded, err := share.Encode(c.text)
 	if err != nil {
 		log.Printf("Failed to encode example: %v", err)
 		return
 	}
-	example := storage.Example{First: c.saveName, Second: encoded}
+	example := storage.Example{First: name.String(), Second: encoded}
 	err = storage.From(ctx.LocalStorage()).AddExample(example)
 	if err != nil {
 		log.Printf("Failed to save example: %v", err)

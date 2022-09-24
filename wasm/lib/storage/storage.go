@@ -34,6 +34,19 @@ func (s *Storage) DelExample(index int) error {
 	return s.storage.Set("examples", examples)
 }
 
+func (s *Storage) SaveCode(code string) error {
+	return s.storage.Set("code", code)
+}
+
+func (s *Storage) GetCode() (string, error) {
+	code := ""
+	err := s.storage.Get("code", &code)
+	if err != nil {
+		return "", err
+	}
+	return code, nil
+}
+
 type Pair[T any, U any] struct {
 	First  T
 	Second U

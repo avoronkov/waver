@@ -55,7 +55,7 @@ func (m *Main) OnNav(ctx app.Context) {
 }
 
 func (m *Main) onChangeView(ctx app.Context, e app.Event) {
-	m.codeCompo.Sync()
+	m.codeCompo.Sync(ctx.LocalStorage())
 	m.show = ctx.JSSrc().Get("value").String()
 	m.Update()
 }
