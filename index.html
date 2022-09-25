@@ -1,172 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-		<title>Waver playground</title>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content>
+<meta name="description" content="Waver playground application">
+<meta name="keywords" content>
+<meta name="theme-color" content="#2d2c2c">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
+<meta content="http://127.0.0.1:45695/" property="og:url">
+<meta property="og:title" content>
+<meta property="og:description" content="Waver playground application">
+<meta content="website" property="og:type">
+<meta property="og:image" content>
+<title>
 
-		<link
-			rel="stylesheet"
-			href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-		/>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-
-		<!-- CodeMirror -->
-		<script src="lib/codemirror.js"></script>
-		<link rel="stylesheet" href="lib/codemirror.css">
-		<script src="addon/mode/simple.js"></script>
-
-		<script src="pako.min.js"></script>
-
-		<script src="wasm_exec.js"></script>
-		<script src="index.js"></script>
-	</head>
-	<body onload="init()">
-		&nbsp;
-		<main role="main">
-			<section class="container">
-				<h3 class="display-6">Waver playground (v2)</h3>
-				<p>
-					<a href="https://github.com/avoronkov/waver" target="_blank"
-						>Source code</a
-					>
-				</p>
-				<ul class="nav nav-tabs" id="myTab" role="tablist">
-					<li class="nav-item" title="Code">
-						<a
-							class="nav-link"
-							id="code-tab"
-							data-toggle="tab"
-							href="#code"
-							role="tab"
-							aria-controls="code"
-							aria-selected=""
-						>
-							<span class="badge badge-primary">Code</span>
-						</a>
-					</li>
-					<li class="nav-item" title="Messages">
-						<a
-							class="nav-link"
-							id="inst-tab"
-							data-toggle="tab"
-							href="#inst"
-							role="tab"
-							aria-controls="inst"
-							aria-selected=""
-						>
-							<span class="badge badge-primary">Messages</span>
-						</a>
-					</li>
-					<li class="nav-item" title="Examples">
-						<a
-							class="nav-link"
-							id="examples-tab"
-							data-toggle="tab"
-							href="#examples"
-							role="tab"
-							aria-controls="examples"
-							aria-selected=""
-						>
-							<span class="badge badge-primary">Examples</span>
-						</a>
-					</li>
-				</ul>
-				<div class="tab-content" id="myTabContent">
-					<div
-						class="tab-pane active"
-						id="code"
-						role="tabpanel"
-						aria-labeledby="code-tab"
-					>
-						<div class="card alert alert-success" role="alert">
-							<h3>Code</h3>
-							<p>
-								<textarea
-									id="code-story"
-									class="form-control"
-									name="code-story"
-								>
-								</textarea>
-							</p>
-							<p>
-								<button
-									id="update-code"
-									disabled
-									type="button"
-									class="btn badge badge-success"
-									onclick="updateCode()"
-								>
-									Play
-								</button>
-								<button
-									id="stop-code-1"
-									type="button"
-									class="btn badge badge-danger"
-									onclick="goPause(true)"
-								>
-									Stop
-								</button>
-								<button
-									id="clear-code"
-									type="button"
-									class="btn badge badge-danger"
-									onclick="clearCode()"
-								>
-									Clear
-								</button>
-								<button
-									id="share-code"
-									type="button"
-									class="btn badge badge-primary"
-									onclick="makeSharedLink()"
-								>
-									Share
-								</button>
-							</p>
-						</div>
-					</div>
-
-					<div
-						class="tab-pane"
-						id="inst"
-						role="tabpanel"
-						aria-labeledby="inst-tab"
-					>
-						<div class="card alert alert-success" role="alert">
-							<h3>Messages</h3>
-							<p>
-								<textarea
-									id="inst-story"
-									class="form-control"
-									name="inst-story"
-									rows="24"
-									cols="40"
-								>
-								</textarea>
-							</p>
-						</div>
-					</div>
-
-					<div
-						class="tab-pane"
-						id="examples"
-						role="tabpanel"
-						aria-labeledby="examples-tab"
-					>
-						<div class="card alert alert-success" role="alert">
-							<h3>Examples</h3>
-							<p>
-								<a href="https://avoronkov.github.io/waver?code=AEuAoFOmDZw3IHDAUKBA4JwwBtmUAbEmzZg1IETceFHxogiGOkBsATGDJAgbILqAaOEDxB6KFjH2YegQIhyJIMagybgxRo2PCkKiXGGSpcucO7-AkAFiZsOaESfOcRNGzkSNL6ZWLfOxBQg4YdzoUACiLAg2IWG4wEHWrJy0LmQ8fQriYdS6VK0yxapVb9evYceaPQtX7uC3INSyLVECpMilkEuqNPqy70SlTGeGHMmUaYyUIIgypYx3K1PMTWlCvTlRThoyZdhklPHCNey_YMW2LYs2sYsbu0EgVjtjLuO6NnHaLiNndu3XXBV4zS3YbG_iwYf_nhv0cUnPJpmqJPqZ9JwycR4vl728uUqnx9O4mUOnrvyJJ-bcPyEdhBk2YZ3BXHVlmWFVHHDFwF1889WnnxtlyAdCfvv1R112IbUQgwsLefVfgAMGZyB6cMGQQw7BhSHGHCHRIUcdZXAXkgw4rNRSZfdJ2IZ8OYAwBA0gfObUZkF6xhSQk91oH4QSnpfejm74WFJJ8AkkH30giBHGHHNM6GIaAUrEH2MMiQFCD3Wh99gQTBUhBlNHtPkmCELMGWdK3Y2EEpBI2niUllxmCQKQfQQE" target="_blank">07. Samples</a>
-							</p>
-						</div>
-					</div>
-
-				</div>
-			</section>
-		</main>
-	</body>
+</title>
+<link rel="icon" type="image/png" href="https://storage.googleapis.com/murlok-github/icon-192.png">
+<link href="https://storage.googleapis.com/murlok-github/icon-192.png" rel="apple-touch-icon">
+<link rel="manifest" href="/waver/manifest.webmanifest">
+<link type="text/css" rel="stylesheet" href="/waver/app.css">
+<script defer="true" src="/waver/wasm_exec.js"></script>
+<script defer="true" src="/waver/app.js"></script>
+<link type="text/css" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+<link type="text/css" rel="stylesheet" href="/waver/web/lib/codemirror.css">
+<script defer="true" src="/waver/web/lib/codemirror.js"></script>
+<script defer="true" src="/waver/web/addon/mode/simple.js"></script>
+<script defer="true" src="/waver/web/init-codemirror.js"></script>
+</head>
+<body>
+<div>
+<aside id="app-wasm-loader" class="goapp-app-info">
+<img src="https://storage.googleapis.com/murlok-github/icon-192.png" id="app-wasm-loader-icon" class="goapp-logo goapp-spin">
+<p class="goapp-label" id="app-wasm-loader-label">
+0%
+</p>
+</aside>
+<div id="app-pre-render">
+<main role="main">
+<section class="container">
+<h3 class="display-6">
+Waver Playground (v2.5)
+</h3>
+<p>
+<a href="https://github.com/avoronkov/waver">
+Source code
+</a>
+</p>
+<p>
+<div class="card">
+<select class="form-select">
+<option value="code" selected="true">
+Code
+</option>
+<option value="messages" selected="false">
+Messages
+</option>
+<option value="examples" selected="false">
+Examples
+</option>
+</select>
+</div>
+</p>
+</section>
+</main>
+</div>
+</div>
+</body>
 </html>
