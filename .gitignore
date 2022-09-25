@@ -9,3 +9,4 @@ node_modules
 /wasm/static/assets/lib/
 /wasm/web/app.wasm
 /wasm/pwa
+/wasm/waver
