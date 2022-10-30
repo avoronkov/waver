@@ -28,27 +28,24 @@ func (p *Parser) parsePragma(text string, sc *bufio.Scanner) error {
 		}
 		body = b
 	}
+	var parserFn func(*Parser, []string, []map[string]any) error
 	switch pragma := fields[1]; pragma {
 	case "tempo":
-		if err := p.parseTempo(fields); err != nil {
-			return err
-		}
+		parserFn = parseTempo
 	case "sample":
-		if err := p.parseSample(fields, body); err != nil {
-			return err
-		}
+		parserFn = parseSample
 	case "inst", "wave":
-		if err := p.parseInstrument(fields, body); err != nil {
-			return err
-		}
+		parserFn = parseWave
 	case "filter":
-		if err := p.parseFilter(fields, body); err != nil {
-			return err
-		}
+		parserFn = parseFilter
 	default:
 		return fmt.Errorf("Unknown pragma ('%%'): %v", pragma)
 	}
-	return nil
+	options := []map[string]any{}
+	if err := p.parsePragmaOptions(body, &options); err != nil {
+		return err
+	}
+	return parserFn(p, fields, options)
 }
 
 func (p *Parser) parseMultilinePragma(sc *bufio.Scanner) (string, error) {
@@ -67,7 +64,56 @@ func (p *Parser) parseMultilinePragma(sc *bufio.Scanner) (string, error) {
 	return "", err
 }
 
-func (p *Parser) parseTempo(fields []string) error {
+func (p *Parser) parsePragmaOptions(body string, opts *[]map[string]any) error {
+	if body == "" {
+		return nil
+	}
+	r := strings.NewReader(body)
+	err := yaml.NewDecoder(r).Decode(opts)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// % sample kick "7/kick"
+func parseSample(p *Parser, fields []string, options []map[string]any) error {
+	if len(fields) != 4 {
+		return fmt.Errorf("Incorrect number of arguments for 'sample' pragma: %v", fields)
+	}
+	smp := fields[2]
+	filename := strings.Trim(fields[3], "\"'")
+	in, err := config.ParseSample(
+		filename,
+		append(options, p.globalFilters...),
+		config.Param("tempo", p.tempo),
+	)
+	if err != nil {
+		return err
+	}
+	p.instSet.AddInstrument(smp, in)
+	return nil
+}
+
+func parseWave(p *Parser, fields []string, options []map[string]any) error {
+	if len(fields) != 4 {
+		return fmt.Errorf("Incorrect number of arguments for 'inst' pragma: %v", fields)
+	}
+	inst := fields[2]
+	waveName := strings.Trim(fields[3], "\"'")
+	in, err := config.ParseInstrument(
+		waveName,
+		append(options, p.globalFilters...),
+		config.Param("tempo", p.tempo),
+	)
+	if err != nil {
+		return err
+	}
+	p.instSet.AddInstrument(inst, in)
+	return nil
+}
+
+func parseTempo(p *Parser, fields []string, options []map[string]any) error {
 	if len(fields) != 3 {
 		return fmt.Errorf("Incorrect number of arguments for 'tempo' pragma: %v", fields)
 	}
@@ -82,77 +128,7 @@ func (p *Parser) parseTempo(fields []string) error {
 	return nil
 }
 
-// % sample 2k "2-2-kick.wav"
-func (p *Parser) parseSample(fields []string, body string) error {
-	if len(fields) != 4 {
-		return fmt.Errorf("Incorrect number of arguments for 'sample' pragma: %v", fields)
-	}
-	smp := fields[2]
-	filename := strings.Trim(fields[3], "\"'")
-
-	var options []map[string]any
-	if body != "" {
-		var err error
-		options, err = p.parsePragmaOptions(body)
-		if err != nil {
-			return err
-		}
-	}
-	in, err := config.ParseSample(
-		filename,
-		append(options, p.globalFilters...),
-		config.Param("tempo", p.tempo),
-	)
-	if err != nil {
-		return err
-	}
-	p.instSet.AddInstrument(smp, in)
-	return nil
-}
-
-// % inst 1 'sine'
-func (p *Parser) parseInstrument(fields []string, body string) (err error) {
-	if len(fields) != 4 {
-		return fmt.Errorf("Incorrect number of arguments for 'inst' pragma: %v", fields)
-	}
-	inst := fields[2]
-	waveName := strings.Trim(fields[3], "\"'")
-	var options []map[string]any
-	if body != "" {
-		options, err = p.parsePragmaOptions(body)
-		if err != nil {
-			return err
-		}
-	}
-	in, err := config.ParseInstrument(
-		waveName,
-		append(options, p.globalFilters...),
-		config.Param("tempo", p.tempo),
-	)
-	if err != nil {
-		return err
-	}
-	p.instSet.AddInstrument(inst, in)
-	return nil
-}
-func (p *Parser) parsePragmaOptions(body string) ([]map[string]any, error) {
-	options := []map[string]any{}
-	r := strings.NewReader(body)
-	err := yaml.NewDecoder(r).Decode(&options)
-	if err != nil {
-		return nil, err
-	}
-	return options, nil
-}
-
-func (p *Parser) parseFilter(fields []string, body string) (err error) {
-	var options []map[string]any
-	if body != "" {
-		options, err = p.parsePragmaOptions(body)
-		if err != nil {
-			return err
-		}
-	}
+func parseFilter(p *Parser, fields []string, options []map[string]any) error {
 	p.globalFilters = options
 	return nil
 }
