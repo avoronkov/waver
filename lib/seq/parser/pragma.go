@@ -41,6 +41,10 @@ func (p *Parser) parsePragma(text string, sc *bufio.Scanner) error {
 		if err := p.parseInstrument(fields, body); err != nil {
 			return err
 		}
+	case "filter":
+		if err := p.parseFilter(fields, body); err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("Unknown pragma ('%%'): %v", pragma)
 	}
@@ -94,7 +98,11 @@ func (p *Parser) parseSample(fields []string, body string) error {
 			return err
 		}
 	}
-	in, err := config.ParseSample(filename, options, config.Param("tempo", p.tempo))
+	in, err := config.ParseSample(
+		filename,
+		append(options, p.globalFilters...),
+		config.Param("tempo", p.tempo),
+	)
 	if err != nil {
 		return err
 	}
@@ -116,7 +124,11 @@ func (p *Parser) parseInstrument(fields []string, body string) (err error) {
 			return err
 		}
 	}
-	in, err := config.ParseInstrument(waveName, options, config.Param("tempo", p.tempo))
+	in, err := config.ParseInstrument(
+		waveName,
+		append(options, p.globalFilters...),
+		config.Param("tempo", p.tempo),
+	)
 	if err != nil {
 		return err
 	}
@@ -131,4 +143,16 @@ func (p *Parser) parsePragmaOptions(body string) ([]map[string]any, error) {
 		return nil, err
 	}
 	return options, nil
+}
+
+func (p *Parser) parseFilter(fields []string, body string) (err error) {
+	var options []map[string]any
+	if body != "" {
+		options, err = p.parsePragmaOptions(body)
+		if err != nil {
+			return err
+		}
+	}
+	p.globalFilters = options
+	return nil
 }

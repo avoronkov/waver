@@ -31,6 +31,8 @@ type Parser struct {
 
 	userFunctions map[string]UserFunction
 
+	globalFilters []map[string]any
+
 	tempo int
 }
 
