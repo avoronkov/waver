@@ -1,8 +1,8 @@
-const cacheName = "app-" + "afb318c6f3059e98ff43ba9cdc66bd3480c06287";
+const cacheName = "app-" + "0aca53252fc3b7e01e339805016267bd177157d7";
 const resourcesToCache = ["/waver","/waver/app.css","/waver/app.js","/waver/manifest.webmanifest","/waver/wasm_exec.js","/waver/web/addon/mode/simple.js","/waver/web/app.wasm","/waver/web/init-codemirror.js","/waver/web/lib/codemirror.css","/waver/web/lib/codemirror.js","https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css","https://storage.googleapis.com/murlok-github/icon-192.png","https://storage.googleapis.com/murlok-github/icon-512.png"];
 
 self.addEventListener("install", (event) => {
-  console.log("installing app worker afb318c6f3059e98ff43ba9cdc66bd3480c06287");
+  console.log("installing app worker 0aca53252fc3b7e01e339805016267bd177157d7");
 
   event.waitUntil(
     caches
@@ -28,7 +28,7 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
-  console.log("app worker afb318c6f3059e98ff43ba9cdc66bd3480c06287 is activated");
+  console.log("app worker 0aca53252fc3b7e01e339805016267bd177157d7 is activated");
 });
 
 self.addEventListener("fetch", (event) => {
