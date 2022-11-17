@@ -27,28 +27,29 @@ func (c *Code) Render() app.UI {
 			app.Button().
 				ID("update-code").
 				Type("button").
-				Class("btn badge badge-success").
+				Role("button").
 				OnClick(c.onPlay).
 				Text("Play"),
 			app.Text(" "),
 			app.Button().
 				ID("stop-code").
 				Type("button").
-				Class("btn badge badge-warning").
+				Role("button").
 				OnClick(c.onPause).
 				Text("Stop"),
 			app.Text(" "),
 			app.Button().
 				ID("clear-code").
 				Type("button").
-				Class("btn badge badge-danger").
+				Role("button").
 				OnClick(c.onClear).
 				Text("Clear"),
 			app.Text(" "),
 			app.Button().
 				ID("save").
 				Type("button").
-				Class("btn badge badge-secondary").
+				Class("secondary").
+				Role("button").
 				OnClick(c.onSave).
 				Text("Save..."),
 		),
