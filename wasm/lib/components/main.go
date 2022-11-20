@@ -48,6 +48,10 @@ func (m *Main) Render() app.UI {
 	)
 }
 
+func (m *Main) OnMount(ctx app.Context) {
+	ctx.Handle("onChangeView", m.handleChangeView)
+}
+
 func (m *Main) OnNav(ctx app.Context) {
 	m.codeCompo = &Code{}
 	m.messagesCompo = &Messages{Log: m.Log}
@@ -57,5 +61,10 @@ func (m *Main) OnNav(ctx app.Context) {
 func (m *Main) onChangeView(ctx app.Context, e app.Event) {
 	m.codeCompo.Sync(ctx.LocalStorage())
 	m.show = ctx.JSSrc().Get("value").String()
+	m.Update()
+}
+
+func (m *Main) handleChangeView(ctx app.Context, a app.Action) {
+	m.show = a.Value.(string)
 	m.Update()
 }

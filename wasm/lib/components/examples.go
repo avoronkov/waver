@@ -18,7 +18,10 @@ func (e *Examples) Render() app.UI {
 	return app.Div().Class("card arert alert-success").Body(
 		app.Range(e.list).Slice(func(i int) app.UI {
 			return app.P().Body(
-				app.A().Href("/?code="+e.list[i].Second).Text(e.list[i].First),
+				app.A().
+					Href("/?code="+e.list[i].Second).
+					OnClick(e.onClickExample).
+					Text(e.list[i].First),
 				app.Text(" "),
 				app.A().OnClick(e.onDelete(i), i).Text("[del]"),
 			)
@@ -56,4 +59,8 @@ func (ex *Examples) onDelete(index int) app.EventHandler {
 		}
 		ex.Update()
 	}
+}
+
+func (e *Examples) onClickExample(ctx app.Context, event app.Event) {
+	ctx.NewActionWithValue("onChangeView", "")
 }
