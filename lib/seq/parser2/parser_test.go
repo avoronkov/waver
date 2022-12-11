@@ -109,6 +109,18 @@ func TestUserDefinedFunction(t *testing.T) {
 	is.Equal(val, common.Num(23))
 }
 
+func TestTempoPragma(t *testing.T) {
+	is := is.New(t)
+
+	input := `%tempo 135`
+
+	p := New()
+	err := p.parseReader(strings.NewReader(input))
+	is.NoErr(err)
+
+	is.Equal(p.tempo, 135)
+}
+
 func testSignaler(t *testing.T, signaler types.Signaler, signals [][]signals.Signal) {
 	ctx := types.NewContext()
 	for i, exp := range signals {

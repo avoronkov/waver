@@ -10,8 +10,10 @@ import (
 )
 
 var (
-	numberRe = regexp.MustCompile(`^(0x)?[0-9]+`)
-	identRe  = regexp.MustCompile(`^[a-zA-Z]+`)
+	numberRe      = regexp.MustCompile(`^(0x)?[0-9]+`)
+	identRe       = regexp.MustCompile(`^[_a-zA-Z][_a-zA-Z0-9]*`)
+	stringRe      = regexp.MustCompile(`^".*"`)
+	singleQuoteRe = regexp.MustCompile(`^'.*'`)
 )
 
 type Lexer struct {
@@ -116,6 +118,16 @@ func (l *Lexer) nextToken() (token Token, err error) {
 	if ident := identRe.FindString(line); ident != "" {
 		l.index += len(ident)
 		return IdentToken{Value: ident}, nil
+	}
+
+	if str := stringRe.FindString(line); str != "" {
+		l.index += len(str)
+		return StringLiteral(strings.Trim(str, `"`)), nil
+	}
+
+	if str := singleQuoteRe.FindString(line); str != "" {
+		l.index += len(str)
+		return StringLiteral(strings.Trim(str, `'`)), nil
 	}
 
 	return nil, fmt.Errorf("Unexpected token near: '%v'", line)

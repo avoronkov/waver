@@ -106,3 +106,8 @@ func (DoublePercent) String() string { return "%%" }
 type BodyToken string
 
 func (b BodyToken) String() string { return string(b) }
+
+// String literal
+type StringLiteral string
+
+func (t StringLiteral) String() string { return string(t) }

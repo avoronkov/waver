@@ -59,7 +59,8 @@ c->d
 
 func TestPragma(t *testing.T) {
 	is := is.New(t)
-	input := `%tempo 120`
+	input := `%tempo 120
+y = 1`
 
 	lx := NewLexer(strings.NewReader(input))
 	act, err := lx.AllTokens()
@@ -69,6 +70,27 @@ func TestPragma(t *testing.T) {
 		Percent{},
 		IdentToken{"tempo"},
 		NumberToken{120},
+		EolToken{},
+		IdentToken{"y"},
+		AssignToken{},
+		NumberToken{1},
+	}
+	compareTokenSlices(t, act, exp)
+}
+
+func TestStringLiteral(t *testing.T) {
+	is := is.New(t)
+	input := `%sample kick "2/kick"`
+
+	lx := NewLexer(strings.NewReader(input))
+	act, err := lx.AllTokens()
+	is.NoErr(err) // Lexer.AllTokens() failed
+
+	exp := []Token{
+		Percent{},
+		IdentToken{"sample"},
+		IdentToken{"kick"},
+		StringLiteral("2/kick"),
 	}
 	compareTokenSlices(t, act, exp)
 }
