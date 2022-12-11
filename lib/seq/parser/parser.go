@@ -147,9 +147,9 @@ func (p *Parser) parseLine(num int, line string) error {
 			return err
 		}
 		p.userFunctions[fields[0]] = UserFunction{
-			name: fields[0],
-			arg:  fields[1],
-			fn:   vfn,
+			Name: fields[0],
+			Arg:  fields[1],
+			Fn:   vfn,
 		}
 	} else {
 		log.Printf("[WARNING] Skipping line: %q", line)

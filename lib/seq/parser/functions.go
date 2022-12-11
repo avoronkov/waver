@@ -31,7 +31,7 @@ func (p *Parser) parseAtom(line *LineCtx) (types.ValueFn, int, error) {
 		return common.Lst(fn...), shift, nil
 	}
 	if userFunc, ok := p.userFunctions[token]; ok {
-		fn, shift, err := p.parseUserFunction(line, userFunc.name, userFunc.arg, userFunc.fn)
+		fn, shift, err := p.parseUserFunction(line, userFunc.Name, userFunc.Arg, userFunc.Fn)
 		if err != nil {
 			return nil, 0, err
 		}

@@ -20,7 +20,7 @@ type InstrumentSet interface {
 }
 
 type UserFunction struct {
-	name string
-	arg  string
-	fn   types.ValueFn
+	Name string
+	Arg  string
+	Fn   types.ValueFn
 }
