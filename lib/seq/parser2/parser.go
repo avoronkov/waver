@@ -21,10 +21,13 @@ type Parser struct {
 	instSet      parser.InstrumentSet
 
 	modParsers    map[lexer.Token]ModParser
+	funcParsers   map[string]FunctionParser
 	userFunctions map[string]parser.UserFunction
 	pragmaParsers map[string]pragmaParser
 
 	scale notes.Scale
+
+	globalCtx map[string]interface{}
 
 	globalFilters []map[string]any
 

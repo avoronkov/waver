@@ -28,6 +28,8 @@ type Lexer struct {
 	literalTokens []literalToken
 
 	bodyNextLine bool
+
+	lineNum int
 }
 
 func NewLexer(in io.Reader) *Lexer {
@@ -134,6 +136,7 @@ func (l *Lexer) nextToken() (token Token, err error) {
 }
 
 func (l *Lexer) scanNextLine() (Token, error) {
+	l.lineNum++
 	if !l.in.Scan() {
 		if err := l.in.Err(); err != nil {
 			return nil, err
@@ -154,6 +157,7 @@ func (l *Lexer) scanNextLine() (Token, error) {
 func (l *Lexer) scanBody() (Token, error) {
 	lines := []string{}
 	for l.in.Scan() {
+		l.lineNum++
 		line := l.in.Text()
 		if strings.TrimSpace(line) == "%%" {
 			l.current = DoublePercent{}
@@ -181,6 +185,10 @@ func (l *Lexer) AllTokens() (tokens []Token, err error) {
 		tokens = append(tokens, t)
 	}
 	return
+}
+
+func (l *Lexer) LineNum() int {
+	return l.lineNum
 }
 
 func SplitLine(line string) (tokens []Token, err error) {

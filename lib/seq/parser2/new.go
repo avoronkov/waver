@@ -9,8 +9,8 @@ import (
 
 func New(opts ...func(*Parser)) *Parser {
 	p := &Parser{
-		modParsers:    make(map[lexer.Token]ModParser),
 		userFunctions: make(map[string]parser.UserFunction),
+		globalCtx:     make(map[string]interface{}),
 	}
 
 	for _, o := range opts {
@@ -33,6 +33,15 @@ func New(opts ...func(*Parser)) *Parser {
 		"wave":   parseWave,
 		"inst":   parseWave,
 		"filter": parseFilter,
+	}
+
+	p.funcParsers = map[string]FunctionParser{
+		"seq":    parseSequence,
+		"rand":   makeSingleArgValueFnParser("rand", common.Random),
+		"up":     parseUpDown,
+		"down":   parseUpDown,
+		"repeat": parseRepeat,
+		"concat": makeSingleArgValueFnParser("concat", common.Concat),
 	}
 
 	return p
