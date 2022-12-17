@@ -1,0 +1,5 @@
+%sample kick "2/kick"
+%sample snare "2/snare"
+
+:4 -> { kick }
+:8 +4 -> { snare }

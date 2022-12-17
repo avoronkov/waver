@@ -1,0 +1,5 @@
+%wave sine "sine"
+
+note = repeat 4 rand [A3 C4 E4]
+
+:4 -> { sine note }

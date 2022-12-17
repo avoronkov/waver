@@ -1,0 +1,3 @@
+% wave sine "sine"
+
+:4 -> { sine seq [A3 C4 E4 G4] }

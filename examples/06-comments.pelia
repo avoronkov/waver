@@ -1,0 +1,5 @@
+# here is a kick
+%sample kick "2/kick"
+
+# here is how it sounds
+:4 -> { kick }

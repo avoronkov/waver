@@ -111,3 +111,8 @@ func (b BodyToken) String() string { return string(b) }
 type StringLiteral string
 
 func (t StringLiteral) String() string { return string(t) }
+
+// Comment
+type CommentToken string
+
+func (t CommentToken) String() string { return fmt.Sprintf("/* %v */", string(t)) }

@@ -66,6 +66,10 @@ func (p *Parser) parseReader(reader io.Reader) error {
 			_, _ = lx.Pop()
 			continue
 		}
+		if _, ok := token.(lexer.CommentToken); ok {
+			_, _ = lx.Pop()
+			continue
+		}
 		if _, ok := token.(lexer.EofToken); ok {
 			break
 		}

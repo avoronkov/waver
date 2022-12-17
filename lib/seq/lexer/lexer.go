@@ -108,6 +108,12 @@ func (l *Lexer) nextToken() (token Token, err error) {
 		}
 	}
 
+	if strings.HasPrefix(line, "#") {
+		tok := CommentToken(line[1:])
+		l.index += len(line)
+		return tok, nil
+	}
+
 	if num := numberRe.FindString(line); num != "" {
 		l.index += len(num)
 		i, err := strconv.ParseInt(num, 0, 64)

@@ -123,6 +123,54 @@ foo = bar
 	compareTokenSlices(t, act, exp)
 }
 
+func TestComments(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		exp   []Token
+	}{
+		{
+			"Whole line comment",
+			`# here is a comment`,
+			[]Token{CommentToken(" here is a comment")},
+		},
+		{
+			"Part line comment",
+			`x = 11 # assignment`,
+			[]Token{
+				IdentToken{"x"},
+				AssignToken{},
+				NumberToken{11},
+				CommentToken(" assignment"),
+			},
+		},
+		{
+			"Multiple lines with comment",
+			`# this is an assignment
+x = 11`,
+			[]Token{
+				CommentToken(" this is an assignment"),
+				EolToken{},
+				IdentToken{"x"},
+				AssignToken{},
+				NumberToken{11},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			is := is.New(t)
+
+			lx := NewLexer(strings.NewReader(test.input))
+			act, err := lx.AllTokens()
+			is.NoErr(err)
+
+			compareTokenSlices(t, act, test.exp)
+		})
+	}
+}
+
 func compareTokenSlices(t *testing.T, act, exp []Token) {
 	if len(act) != len(exp) {
 		t.Errorf("Token slices lengths differ:\nexpected %v (%v)\nactual   %v (%v)", exp, len(exp), act, len(act))

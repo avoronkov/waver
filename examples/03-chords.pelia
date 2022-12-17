@@ -1,0 +1,4 @@
+%wave str "triangle"
+
+c = [A3 C4 E4]
+:8 -> { str c }
