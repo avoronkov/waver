@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/avoronkov/waver/lib/midisynth/signals"
+	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/types"
 	"github.com/matryer/is"
@@ -34,7 +35,7 @@ func TestSignalStatement(t *testing.T) {
 	input := ": 4 -> { kick }"
 
 	seq := &TestSeq{}
-	p := New(WithSeq(seq))
+	p := New(WithSeq(seq), WithScale(notes.NewStandard()))
 
 	err := p.parseReader(strings.NewReader(input))
 	if err != nil {
@@ -63,7 +64,7 @@ func TestVarAssignment(t *testing.T) {
 	input := "x = 12\n"
 
 	seq := &TestSeq{}
-	p := New(WithSeq(seq))
+	p := New(WithSeq(seq), WithScale(notes.NewStandard()))
 
 	err := p.parseReader(strings.NewReader(input))
 	if err != nil {
@@ -90,7 +91,8 @@ func TestUserDefinedFunction(t *testing.T) {
 
 	input := `foo x = 23`
 
-	p := New()
+	seq := &TestSeq{}
+	p := New(WithSeq(seq), WithScale(notes.NewStandard()))
 
 	err := p.parseReader(strings.NewReader(input))
 	if err != nil {
@@ -114,7 +116,8 @@ func TestTempoPragma(t *testing.T) {
 
 	input := `%tempo 135`
 
-	p := New()
+	seq := &TestSeq{}
+	p := New(WithSeq(seq), WithScale(notes.NewStandard()))
 	err := p.parseReader(strings.NewReader(input))
 	is.NoErr(err)
 
