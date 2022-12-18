@@ -10,7 +10,9 @@ import (
 )
 
 var (
+	floatRe       = regexp.MustCompile(`^[0-9]+\.[0-9]+`)
 	numberRe      = regexp.MustCompile(`^(0x)?[0-9]+`)
+	hexRe         = regexp.MustCompile(`^0[xX][0-9A-Fa-f]+`)
 	identRe       = regexp.MustCompile(`^[_a-zA-Z][_a-zA-Z0-9]*`)
 	stringRe      = regexp.MustCompile(`^".*"`)
 	singleQuoteRe = regexp.MustCompile(`^'.*'`)
@@ -112,6 +114,25 @@ func (l *Lexer) nextToken() (token Token, err error) {
 		tok := CommentToken(line[1:])
 		l.index += len(line)
 		return tok, nil
+	}
+
+	if f := floatRe.FindString(line); f != "" {
+		l.index += len(f)
+		fl, err := strconv.ParseFloat(f, 64)
+		if err != nil {
+			return nil, fmt.Errorf("Cannot convert to float '%v': %w", f, err)
+		}
+		return FloatToken(fl), nil
+	}
+
+	if h := hexRe.FindString(line); h != "" {
+		l.index += len(h)
+		hex, err := strconv.ParseInt(h, 0, 64)
+		if err != nil {
+			return nil, fmt.Errorf("Cannot parse hex '%v': %w", h, err)
+		}
+		return HexToken(hex), nil
+
 	}
 
 	if num := numberRe.FindString(line); num != "" {

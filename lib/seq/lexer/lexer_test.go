@@ -8,134 +8,105 @@ import (
 	"github.com/matryer/is"
 )
 
-func TestAllTokens(t *testing.T) {
-	input := `:4 +2 -> {kick}`
-	lx := NewLexer(strings.NewReader(input))
-
-	act, err := lx.AllTokens()
-	if err != nil {
-		t.Fatalf("Lexer.AllTokens() failed: %v", err)
-	}
-
-	exp := []Token{
-		ColonToken{},
-		NumberToken{4},
-		PlusToken{},
-		NumberToken{2},
-		ArrowRightToken{},
-		LCurlyBracket{},
-		IdentToken{"kick"},
-		RCurlyBracket{},
-	}
-
-	compareTokenSlices(t, act, exp)
-}
-
-func TestMultiline(t *testing.T) {
-	input := `a=4
-
-c->d
-`
-	lx := NewLexer(strings.NewReader(input))
-
-	act, err := lx.AllTokens()
-	if err != nil {
-		t.Fatalf("Lexer.AllTokens() failed: %v", err)
-	}
-
-	exp := []Token{
-		IdentToken{"a"},
-		AssignToken{},
-		NumberToken{4},
-		EolToken{},
-		EolToken{},
-		IdentToken{"c"},
-		ArrowRightToken{},
-		IdentToken{"d"},
-	}
-
-	compareTokenSlices(t, act, exp)
-}
-
-func TestPragma(t *testing.T) {
-	is := is.New(t)
-	input := `%tempo 120
-y = 1`
-
-	lx := NewLexer(strings.NewReader(input))
-	act, err := lx.AllTokens()
-	is.NoErr(err) // Lexer.AllTokens() failed
-
-	exp := []Token{
-		Percent{},
-		IdentToken{"tempo"},
-		NumberToken{120},
-		EolToken{},
-		IdentToken{"y"},
-		AssignToken{},
-		NumberToken{1},
-	}
-	compareTokenSlices(t, act, exp)
-}
-
-func TestStringLiteral(t *testing.T) {
-	is := is.New(t)
-	input := `%sample kick "2/kick"`
-
-	lx := NewLexer(strings.NewReader(input))
-	act, err := lx.AllTokens()
-	is.NoErr(err) // Lexer.AllTokens() failed
-
-	exp := []Token{
-		Percent{},
-		IdentToken{"sample"},
-		IdentToken{"kick"},
-		StringLiteral("2/kick"),
-	}
-	compareTokenSlices(t, act, exp)
-}
-
-func TestMultilinePragma(t *testing.T) {
-	is := is.New(t)
-	input := `%%wave foo bar
-- one:
-    two: three
-%%
-foo = bar
-`
-
-	lx := NewLexer(strings.NewReader(input))
-	act, err := lx.AllTokens()
-	is.NoErr(err) // LexerAllTokens() failed
-
-	exp := []Token{
-		DoublePercent{},
-		IdentToken{"wave"},
-		IdentToken{"foo"},
-		IdentToken{"bar"},
-		BodyToken("- one:\n    two: three\n"),
-		DoublePercent{},
-		EolToken{},
-		IdentToken{"foo"},
-		AssignToken{},
-		IdentToken{"bar"},
-	}
-	compareTokenSlices(t, act, exp)
-}
-
-func TestComments(t *testing.T) {
+func TestLexer(t *testing.T) {
 	tests := []struct {
 		name  string
 		input string
 		exp   []Token
 	}{
 		{
-			"Whole line comment",
+			"Common: all tokens",
+			`:4 +2 -> {kick}`,
+			[]Token{
+				ColonToken{},
+				NumberToken{4},
+				PlusToken{},
+				NumberToken{2},
+				ArrowRightToken{},
+				LCurlyBracket{},
+				IdentToken{"kick"},
+				RCurlyBracket{},
+			},
+		},
+		{
+			"Common: multiline",
+			`a=4
+
+c->d
+`,
+			[]Token{
+				IdentToken{"a"},
+				AssignToken{},
+				NumberToken{4},
+				EolToken{},
+				EolToken{},
+				IdentToken{"c"},
+				ArrowRightToken{},
+				IdentToken{"d"},
+			},
+		},
+		{
+			"Pragma: single line",
+			`%tempo 120
+y = 1`,
+			[]Token{
+				Percent{},
+				IdentToken{"tempo"},
+				NumberToken{120},
+				EolToken{},
+				IdentToken{"y"},
+				AssignToken{},
+				NumberToken{1},
+			},
+		},
+		{
+			"Pragma: multiline",
+			`%%wave foo bar
+- one:
+    two: three
+%%
+foo = bar
+`,
+			[]Token{
+				DoublePercent{},
+				IdentToken{"wave"},
+				IdentToken{"foo"},
+				IdentToken{"bar"},
+				BodyToken("- one:\n    two: three\n"),
+				DoublePercent{},
+				EolToken{},
+				IdentToken{"foo"},
+				AssignToken{},
+				IdentToken{"bar"},
+			},
+		},
+		{
+			"String literal",
+			`%sample kick "2/kick"`,
+			[]Token{
+				Percent{},
+				IdentToken{"sample"},
+				IdentToken{"kick"},
+				StringLiteral("2/kick"),
+			},
+		},
+		{
+			"Numbers",
+			`0 123 23.45 0xF`,
+			[]Token{
+				NumberToken{0},
+				NumberToken{123},
+				FloatToken(23.45),
+				HexToken(15),
+			},
+		},
+		{
+			"Comments: whole line comment",
 			`# here is a comment`,
 			[]Token{CommentToken(" here is a comment")},
 		},
 		{
-			"Part line comment",
+			"Comments: part line comment",
 			`x = 11 # assignment`,
 			[]Token{
 				IdentToken{"x"},
@@ -145,7 +116,7 @@ func TestComments(t *testing.T) {
 			},
 		},
 		{
-			"Multiple lines with comment",
+			"Comments: multiple lines with comment",
 			`# this is an assignment
 x = 11`,
 			[]Token{

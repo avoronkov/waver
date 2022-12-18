@@ -73,6 +73,20 @@ func (n NumberToken) String() string {
 	return fmt.Sprintf("%v", n.Num)
 }
 
+// 0x[0-9A-Fa-f]+
+type HexToken int64
+
+func (t HexToken) String() string {
+	return fmt.Sprintf("%#x", int64(t))
+}
+
+//[0-9]+\.[0-9]+
+type FloatToken float64
+
+func (t FloatToken) String() string {
+	return fmt.Sprintf("%v", float64(t))
+}
+
 // EOL
 type EolToken struct{}
 
