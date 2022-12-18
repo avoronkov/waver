@@ -77,9 +77,9 @@ func (p *Parser) parseReader(reader io.Reader) error {
 			err = p.parseSignalStatement(lx)
 		} else if _, ok := token.(lexer.IdentToken); ok {
 			err = p.parseAssignmentStatement(lx)
-		} else if _, ok := token.(lexer.Percent); ok {
+		} else if _, ok := token.(lexer.PercentToken); ok {
 			err = p.parsePragma(lx)
-		} else if _, ok := token.(lexer.DoublePercent); ok {
+		} else if _, ok := token.(lexer.DoublePercentToken); ok {
 			err = p.parsePragma(lx)
 		} else {
 			err = fmt.Errorf("Cannot detect type of statement: %v", token)

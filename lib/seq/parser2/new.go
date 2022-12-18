@@ -19,11 +19,11 @@ func New(opts ...func(*Parser)) *Parser {
 
 	//  Init mod parsers
 	p.modParsers = map[lexer.Token]ModParser{
-		lexer.ColonToken{}:              makeSingleArgModParser(":", common.Every),
-		lexer.PlusToken{}:               makeSingleArgModParser("+", common.Shift),
-		lexer.IdentToken{Value: "bits"}: makeSingleArgModParser("bits", common.Bits),
-		lexer.IdentToken{Value: "eucl"}: makeTwoArgsModParser("eucl", common.EuclideanFirst),
-		lexer.IdentToken{Value: "eucz"}: makeTwoArgsModParser("eucz", common.EuclideanLast),
+		lexer.ColonToken{}:       makeSingleArgModParser(":", common.Every),
+		lexer.PlusToken{}:        makeSingleArgModParser("+", common.Shift),
+		lexer.IdentToken("bits"): makeSingleArgModParser("bits", common.Bits),
+		lexer.IdentToken("eucl"): makeTwoArgsModParser("eucl", common.EuclideanFirst),
+		lexer.IdentToken("eucz"): makeTwoArgsModParser("eucz", common.EuclideanLast),
 	}
 
 	// Init pragma parsers

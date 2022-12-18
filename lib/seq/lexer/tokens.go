@@ -65,12 +65,10 @@ type RSquareBracket struct{}
 func (RSquareBracket) String() string { return "]" }
 
 // [0-9]+, 0x[0-9]+
-type NumberToken struct {
-	Num int64
-}
+type NumberToken int64
 
 func (n NumberToken) String() string {
-	return fmt.Sprintf("%v", n.Num)
+	return fmt.Sprintf("%v", int64(n))
 }
 
 // 0x[0-9A-Fa-f]+
@@ -98,23 +96,21 @@ type EofToken struct{}
 func (e EofToken) String() string { return "<EOF>" }
 
 // Identifier
-type IdentToken struct {
-	Value string
-}
+type IdentToken string
 
 func (i IdentToken) String() string {
-	return fmt.Sprintf("%v", i.Value)
+	return fmt.Sprintf("%v", string(i))
 }
 
 // %
-type Percent struct{}
+type PercentToken struct{}
 
-func (Percent) String() string { return "%" }
+func (PercentToken) String() string { return "%" }
 
 // %%
-type DoublePercent struct{}
+type DoublePercentToken struct{}
 
-func (DoublePercent) String() string { return "%%" }
+func (DoublePercentToken) String() string { return "%%" }
 
 // Raw pragma body
 type BodyToken string

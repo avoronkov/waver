@@ -49,8 +49,8 @@ func NewLexer(in io.Reader) *Lexer {
 			{"}", RCurlyBracket{}},
 			{"[", LSquareBracket{}},
 			{"]", RSquareBracket{}},
-			{"%%", DoublePercent{}},
-			{"%", Percent{}},
+			{"%%", DoublePercentToken{}},
+			{"%", PercentToken{}},
 		},
 	}
 }
@@ -99,7 +99,7 @@ func (l *Lexer) nextToken() (token Token, err error) {
 
 	line := l.line[l.index:]
 
-	mp := DoublePercent{}
+	mp := DoublePercentToken{}
 	for _, lt := range l.literalTokens {
 		if strings.HasPrefix(line, lt.literal) {
 			l.index += len(lt.literal)
@@ -141,12 +141,12 @@ func (l *Lexer) nextToken() (token Token, err error) {
 		if err != nil {
 			return nil, fmt.Errorf("Cannot convert to integer '%v': %v", num, err)
 		}
-		return NumberToken{Num: i}, nil
+		return NumberToken(i), nil
 	}
 
 	if ident := identRe.FindString(line); ident != "" {
 		l.index += len(ident)
-		return IdentToken{Value: ident}, nil
+		return IdentToken(ident), nil
 	}
 
 	if str := stringRe.FindString(line); str != "" {
@@ -187,7 +187,7 @@ func (l *Lexer) scanBody() (Token, error) {
 		l.lineNum++
 		line := l.in.Text()
 		if strings.TrimSpace(line) == "%%" {
-			l.current = DoublePercent{}
+			l.current = DoublePercentToken{}
 			l.line = ""
 			l.index = 0
 			break

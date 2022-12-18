@@ -17,7 +17,7 @@ func (p *Parser) parsePragma(lx *lexer.Lexer) error {
 		return err
 	}
 	switch percent.(type) {
-	case lexer.Percent, lexer.DoublePercent:
+	case lexer.PercentToken, lexer.DoublePercentToken:
 	default:
 		return fmt.Errorf("Unexpected token at the begining of pragma: %v (%T)", percent, percent)
 	}
@@ -30,9 +30,10 @@ func (p *Parser) parsePragma(lx *lexer.Lexer) error {
 	if !ok {
 		return fmt.Errorf("Expected pragma identifier, found: %v", pr)
 	}
-	parserFn, ok := p.pragmaParsers[pragma.Value]
+	ps := string(pragma)
+	parserFn, ok := p.pragmaParsers[ps]
 	if !ok {
-		return fmt.Errorf("Unknown pragma: %v", pragma.Value)
+		return fmt.Errorf("Unknown pragma: %v", ps)
 	}
 
 	fields := []lexer.Token{}
@@ -53,7 +54,7 @@ L:
 			if err != nil {
 				return err
 			}
-			if _, ok := p.(lexer.DoublePercent); !ok {
+			if _, ok := p.(lexer.DoublePercentToken); !ok {
 				return fmt.Errorf("Expected closing %%, found: %v (%T)", p, p)
 			}
 			end, err := lx.Pop()
@@ -83,7 +84,7 @@ func parseSample(p *Parser, fields []lexer.Token, options []map[string]any) erro
 	if len(fields) != 2 {
 		return fmt.Errorf("Incorrect number of arguments for 'sample' pragma: %v", fields)
 	}
-	smp := fields[0].(lexer.IdentToken).Value
+	smp := string(fields[0].(lexer.IdentToken))
 	filename := fields[1].(lexer.StringLiteral)
 	in, err := config.ParseSample(
 		string(filename),
@@ -102,7 +103,7 @@ func parseWave(p *Parser, fields []lexer.Token, options []map[string]any) error 
 	if len(fields) != 2 {
 		return fmt.Errorf("Incorrect number of arguments for 'inst' pragma: %v", fields)
 	}
-	inst := fields[0].(lexer.IdentToken).Value
+	inst := string(fields[0].(lexer.IdentToken))
 	waveName := fields[1].(lexer.StringLiteral)
 	in, err := config.ParseInstrument(
 		string(waveName),
@@ -125,7 +126,7 @@ func parseTempo(p *Parser, fields []lexer.Token, options []map[string]any) error
 	if !ok {
 		return fmt.Errorf("Cannot parse tempo, unexpected token: %v (%T)", fields[0], fields[0])
 	}
-	p.tempo = int(n.Num)
+	p.tempo = int(n)
 	for _, ts := range p.tempoSetters {
 		ts.SetTempo(p.tempo)
 	}

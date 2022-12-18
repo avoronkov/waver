@@ -23,7 +23,7 @@ func (p *Parser) parseAssignmentStatement(lx *lexer.Lexer) error {
 	}
 
 	if _, ok := second.(lexer.AssignToken); ok {
-		return p.parseAssignVar(lx, name.Value)
+		return p.parseAssignVar(lx, string(name))
 	}
 
 	param, ok := second.(lexer.IdentToken)
@@ -39,7 +39,7 @@ func (p *Parser) parseAssignmentStatement(lx *lexer.Lexer) error {
 		return fmt.Errorf("Unexpected third token in assignment statement: %v (%T)", third, third)
 	}
 
-	return p.parseUdf(lx, name.Value, param.Value)
+	return p.parseUdf(lx, string(name), string(param))
 }
 
 func (p *Parser) parseAssignVar(lx *lexer.Lexer, name string) error {
