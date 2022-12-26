@@ -16,6 +16,8 @@ func (p *Parser) parseAtom(lx *lexer.Lexer) (types.ValueFn, error) {
 	switch a := token.(type) {
 	case lexer.NumberToken:
 		return common.Const(int64(a)), nil
+	case lexer.FloatToken:
+		return common.FloatConst(float64(a)), nil
 	case lexer.IdentToken:
 		sa := string(a)
 		if n, ok := p.scale.Parse(sa); ok {

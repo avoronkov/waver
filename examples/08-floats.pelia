@@ -1,0 +1,7 @@
+% wave sine "sine"
+
+:32 -> { sine 440.0 } { sine 441.0 }
+
+% sample hat "2/hat"
+
+eucl 7 12 -> { hat _ 0.25 }
