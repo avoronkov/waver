@@ -1,0 +1,7 @@
+% wave sine "sine"
+
+pminor t = [ t  up 3 t  up 5 t  up 7 t  up 10 t ]
+
+n = rand pminor A3
+
+:2 -> { sine n }

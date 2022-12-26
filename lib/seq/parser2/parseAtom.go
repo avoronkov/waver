@@ -26,6 +26,9 @@ func (p *Parser) parseAtom(lx *lexer.Lexer) (types.ValueFn, error) {
 		if fnp, ok := p.funcParsers[sa]; ok {
 			return fnp(p, lx, sa)
 		}
+		if udf, ok := p.userFunctions[sa]; ok {
+			return p.parseUserFunction(lx, udf.Name, udf.Arg, udf.Fn)
+		}
 		return common.Var(sa), nil
 	case lexer.LSquareBracket:
 		return p.parseList(lx)
