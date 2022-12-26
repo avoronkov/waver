@@ -21,7 +21,7 @@ import (
 	"github.com/avoronkov/waver/lib/project"
 	"github.com/avoronkov/waver/lib/seq"
 	"github.com/avoronkov/waver/lib/seq/common"
-	"github.com/avoronkov/waver/lib/seq/parser"
+	parser "github.com/avoronkov/waver/lib/seq/parser2"
 	"github.com/avoronkov/waver/lib/share"
 )
 
@@ -98,8 +98,8 @@ func main() {
 			seq.WithChannel(channel),
 		)
 		ps := parser.New(
-			sequencer,
-			scale,
+			parser.WithSeq(sequencer),
+			parser.WithScale(scale),
 			parser.WithFileInput(fileInput),
 			parser.WithTempoSetter(sequencer),
 			// parser.WithTempoSetter(audioOutput),

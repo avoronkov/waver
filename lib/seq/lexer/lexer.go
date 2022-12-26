@@ -44,6 +44,8 @@ func NewLexer(in io.Reader) *Lexer {
 			{"-", MinusToken{}},
 			{"*", MultiplyToken{}},
 			{",", ComaToken{}},
+			{"<", LessToken{}},
+			{">", GreaterToken{}},
 			{"=", AssignToken{}},
 			{"{", LCurlyBracket{}},
 			{"}", RCurlyBracket{}},

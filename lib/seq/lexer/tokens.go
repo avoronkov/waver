@@ -17,6 +17,16 @@ type PlusToken struct{}
 
 func (PlusToken) String() string { return "+" }
 
+// <
+type LessToken struct{}
+
+func (LessToken) String() string { return "<" }
+
+// >
+type GreaterToken struct{}
+
+func (GreaterToken) String() string { return ">" }
+
 // ->
 
 type ArrowRightToken struct{}
