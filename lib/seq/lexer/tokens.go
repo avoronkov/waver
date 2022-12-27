@@ -69,10 +69,14 @@ type LSquareBracket struct{}
 func (LSquareBracket) String() string { return "[" }
 
 // ]
-
 type RSquareBracket struct{}
 
 func (RSquareBracket) String() string { return "]" }
+
+// |
+type VerticalBar struct{}
+
+func (VerticalBar) String() string { return "|" }
 
 // [0-9]+, 0x[0-9]+
 type NumberToken int64

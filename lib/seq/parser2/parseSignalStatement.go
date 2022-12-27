@@ -66,7 +66,11 @@ func (p *Parser) parseSignals(lx *lexer.Lexer) (sigs []types.Signaler, err error
 		case lexer.EolToken, lexer.EofToken:
 			return sigs, nil
 		default:
-			return nil, fmt.Errorf("Unexpected token while parsing signals: %v", token)
+			sig, err := p.parsePlainSignal(lx)
+			if err != nil {
+				return nil, err
+			}
+			sigs = append(sigs, sig)
 		}
 	}
 }
@@ -134,4 +138,80 @@ func (p *Parser) parseSignal(lx *lexer.Lexer) (types.Signaler, error) {
 		return nil, fmt.Errorf("Expected '}', found: %v", end)
 	}
 	return common.Note(p.scale, in, note, common.NoteAmp(amp), common.NoteDur(dur)), nil
+}
+
+func (p *Parser) parsePlainSignal(lx *lexer.Lexer) (types.Signaler, error) {
+	// Parse instrument
+	in, err := p.parseAtom(lx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse note
+	tok, err := lx.Top()
+	if err != nil {
+		return nil, err
+	}
+	switch tok.(type) {
+	case lexer.EolToken, lexer.EofToken:
+		return common.Note(p.scale, in, common.StrConst("_")), nil
+	case lexer.VerticalBar:
+		_, _ = lx.Pop()
+		return common.Note(p.scale, in, common.StrConst("_")), nil
+	}
+
+	note, err := p.parseAtom(lx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse amplitude
+	tok, err = lx.Top()
+	if err != nil {
+		return nil, err
+	}
+	switch tok.(type) {
+	case lexer.EolToken, lexer.EofToken:
+		return common.Note(p.scale, in, note), nil
+	case lexer.VerticalBar:
+		_, _ = lx.Pop()
+		return common.Note(p.scale, in, note), nil
+	}
+
+	amp, err := p.parseAtom(lx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse duration
+	tok, err = lx.Top()
+	if err != nil {
+		return nil, err
+	}
+	switch tok.(type) {
+	case lexer.EolToken, lexer.EofToken:
+		return common.Note(p.scale, in, note, common.NoteAmp(amp)), nil
+	case lexer.VerticalBar:
+		_, _ = lx.Pop()
+		return common.Note(p.scale, in, note, common.NoteAmp(amp)), nil
+	}
+
+	dur, err := p.parseAtom(lx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check closing '|'
+	tok, err = lx.Top()
+	if err != nil {
+		return nil, err
+	}
+	switch tok.(type) {
+	case lexer.EolToken, lexer.EofToken:
+		return common.Note(p.scale, in, note, common.NoteAmp(amp), common.NoteDur(dur)), nil
+	case lexer.VerticalBar:
+		_, _ = lx.Pop()
+		return common.Note(p.scale, in, note, common.NoteAmp(amp), common.NoteDur(dur)), nil
+	}
+	return nil, fmt.Errorf("Unexpected token at the end of signal: %v", tok)
 }

@@ -53,6 +53,7 @@ func NewLexer(in io.Reader) *Lexer {
 			{"]", RSquareBracket{}},
 			{"%%", DoublePercentToken{}},
 			{"%", PercentToken{}},
+			{"|", VerticalBar{}},
 		},
 	}
 }

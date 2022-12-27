@@ -1,0 +1,6 @@
+% sample K "2/kick"
+% sample N "2/snare"
+% wave S "sine"
+
+*8 :2 -> K|N
+:8 -> S seq [C4 A3] | S A2

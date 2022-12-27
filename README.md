@@ -19,3 +19,5 @@
 -   [x] Semisine wave
 
 -   [ ] Improve amplitude parameter
+
+-   [ ] Count "times" only one time per bit
