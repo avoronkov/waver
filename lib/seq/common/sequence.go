@@ -10,16 +10,16 @@ type Index struct {
 	N int
 }
 
-func Sequence(idx *Index, values types.ValueFn) types.ValueFn {
+func Sequence(idxName string, values types.ValueFn) types.ValueFn {
 	return &sequenceImpl{
-		fn:  values,
-		idx: idx,
+		fn:        values,
+		indexName: idxName,
 	}
 }
 
 type sequenceImpl struct {
-	fn  types.ValueFn
-	idx *Index
+	fn        types.ValueFn
+	indexName string
 }
 
 func (s *sequenceImpl) Val(bit int64, ctx types.Context) types.Value {
@@ -32,10 +32,15 @@ func (s *sequenceImpl) Val(bit int64, ctx types.Context) types.Value {
 	if l == 0 {
 		panic(fmt.Errorf("seq expects non-empty list"))
 	}
-	if s.idx.N >= l {
-		s.idx.N = 0
+	index := 0
+	if idx, ok := ctx.GlobalGet(s.indexName); ok {
+		index = idx.(int)
 	}
-	res := list.Get(s.idx.N)
-	s.idx.N = (s.idx.N + 1) % l
+	if index >= l {
+		index = 0
+	}
+	res := list.Get(index)
+	index = (index + 1) % l
+	ctx.GlobalPut(s.indexName, index)
 	return res
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"time"
 
 	"github.com/avoronkov/waver/lib/midisynth/signals"
@@ -42,7 +43,7 @@ func (m *MidiSynth) Start() error {
 		go func(in signals.Input) {
 			defer func() {
 				if r := recover(); r != nil {
-					m.logf("Input recovered: %v", r)
+					m.logf("Input recovered: %v\n%v", r, string(debug.Stack()))
 				}
 			}()
 			if err := in.Run(m.ch); err != nil {

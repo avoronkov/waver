@@ -26,13 +26,16 @@ type Sequencer struct {
 
 	startingBit int64
 	showBits    int64
+
+	globalContext map[string]any
 }
 
 var _ signals.Input = (*Sequencer)(nil)
 
 func NewSequencer(opts ...func(*Sequencer)) *Sequencer {
 	s := &Sequencer{
-		tempo: 120,
+		tempo:         120,
+		globalContext: make(map[string]any),
 	}
 	for _, o := range opts {
 		o(s)
@@ -132,7 +135,7 @@ func (s *Sequencer) processFuncs(tm time.Time, bit int64, dryRun bool) (bool, er
 	}
 
 	// eval variables first
-	ctx := types.NewContext()
+	ctx := types.NewContext(types.WithGlobalContext(s.globalContext))
 	// set default duration
 	_ = ctx.Put("_dur", common.Const(4))
 	for _, as := range s.currentVars {

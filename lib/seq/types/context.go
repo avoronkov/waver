@@ -2,16 +2,30 @@ package types
 
 import "fmt"
 
-func NewContext() Context {
-	return &contextImpl{
+func NewContext(opts ...func(*contextImpl)) Context {
+	impl := &contextImpl{
 		data:   map[string]ValueFn{},
 		values: map[string]Value{},
+	}
+	for _, opt := range opts {
+		opt(impl)
+	}
+	if impl.globalCtx == nil {
+		impl.globalCtx = make(map[string]interface{})
+	}
+	return impl
+}
+
+func WithGlobalContext(ctx map[string]any) func(*contextImpl) {
+	return func(impl *contextImpl) {
+		impl.globalCtx = ctx
 	}
 }
 
 type contextImpl struct {
-	data   map[string]ValueFn
-	values map[string]Value
+	data      map[string]ValueFn
+	values    map[string]Value
+	globalCtx map[string]any
 }
 
 func (c *contextImpl) Put(name string, fn ValueFn) error {
@@ -37,10 +51,20 @@ func (c *contextImpl) Get(name string, bit int64) Value {
 	return value
 }
 
+func (c *contextImpl) GlobalPut(name string, value any) {
+	c.globalCtx[name] = value
+}
+
+func (c *contextImpl) GlobalGet(name string) (value any, ok bool) {
+	value, ok = c.globalCtx[name]
+	return
+}
+
 func (c *contextImpl) Copy() Context {
 	cc := &contextImpl{
-		data:   map[string]ValueFn{},
-		values: map[string]Value{},
+		data:      map[string]ValueFn{},
+		values:    map[string]Value{},
+		globalCtx: c.globalCtx,
 	}
 	for k, v := range c.data {
 		cc.data[k] = v

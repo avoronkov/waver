@@ -17,14 +17,7 @@ func parseSequence(p *Parser, lx *lexer.Lexer, fn string) (types.ValueFn, error)
 		return nil, err
 	}
 	key := fmt.Sprintf("seq:%v", lx.LineNum())
-	var idx *common.Index
-	if i, ok := p.globalCtx[key].(*common.Index); ok {
-		idx = i
-	} else {
-		idx = new(common.Index)
-		p.globalCtx[key] = idx
-	}
-	return common.Sequence(idx, values), nil
+	return common.Sequence(key, values), nil
 }
 
 // up 3 A4

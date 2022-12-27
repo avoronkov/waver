@@ -20,12 +20,5 @@ func parseSequence(p *Parser, line *LineCtx) (types.ValueFn, int, error) {
 		return nil, 0, err
 	}
 	key := fmt.Sprintf("seq:%v", line.Num)
-	var idx *common.Index
-	if i, ok := p.globalCtx[key].(*common.Index); ok {
-		idx = i
-	} else {
-		idx = new(common.Index)
-		p.globalCtx[key] = idx
-	}
-	return common.Sequence(idx, values), shift + 1, nil
+	return common.Sequence(key, values), shift + 1, nil
 }
