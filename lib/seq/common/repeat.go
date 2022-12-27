@@ -6,10 +6,6 @@ import (
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
-type ValueHolder struct {
-	Value types.Value
-}
-
 func Repeat(idxName, valueName string, times, fn types.ValueFn) types.ValueFn {
 	return &repeatImpl{
 		times:     times,

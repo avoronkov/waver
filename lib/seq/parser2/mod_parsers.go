@@ -1,6 +1,9 @@
 package parser2
 
 import (
+	"fmt"
+
+	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	"github.com/avoronkov/waver/lib/seq/types"
 )
@@ -33,4 +36,13 @@ func makeTwoArgsModParser(name string, fn twoArgsModifier) ModParser {
 		}
 		return fn(a, b), nil
 	}
+}
+
+func parseTimesModifier(p *Parser, lx *lexer.Lexer) (types.Modifier, error) {
+	arg, err := p.parseAtom(lx)
+	if err != nil {
+		return nil, err
+	}
+	key := fmt.Sprintf("times:%v", lx.LineNum())
+	return common.Times(arg, key), nil
 }

@@ -25,6 +25,7 @@ func New(opts ...func(*Parser)) *Parser {
 		lexer.IdentToken("bits"):  makeSingleArgModParser("bits", common.Bits),
 		lexer.IdentToken("eucl"):  makeTwoArgsModParser("eucl", common.EuclideanFirst),
 		lexer.IdentToken("eucl'"): makeTwoArgsModParser("eucl'", common.EuclideanLast),
+		lexer.MultiplyToken{}:     parseTimesModifier,
 	}
 
 	// Init pragma parsers
