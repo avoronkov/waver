@@ -127,6 +127,15 @@ x = 11`,
 				NumberToken(11),
 			},
 		},
+		{
+			"Identifiers: eucl'",
+			`eucl' 3 8`,
+			[]Token{
+				IdentToken("eucl'"),
+				NumberToken(3),
+				NumberToken(8),
+			},
+		},
 	}
 
 	for _, test := range tests {

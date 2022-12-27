@@ -13,7 +13,7 @@ var (
 	floatRe       = regexp.MustCompile(`^[0-9]+\.[0-9]+`)
 	numberRe      = regexp.MustCompile(`^(0x)?[0-9]+`)
 	hexRe         = regexp.MustCompile(`^0[xX][0-9A-Fa-f]+`)
-	identRe       = regexp.MustCompile(`^[_a-zA-Z][_a-zA-Z0-9]*`)
+	identRe       = regexp.MustCompile(`^[_a-zA-Z][_a-zA-Z0-9']*`)
 	stringRe      = regexp.MustCompile(`^".*"`)
 	singleQuoteRe = regexp.MustCompile(`^'.*'`)
 )
