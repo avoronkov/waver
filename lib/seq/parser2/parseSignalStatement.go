@@ -10,9 +10,16 @@ import (
 
 // : 4 -> { sig }
 func (p *Parser) parseSignalStatement(lx *lexer.Lexer) error {
+	startingBit, err := p.parseStartingBit(lx)
+	if err != nil {
+		return err
+	}
 	mods, err := p.parseModifiers(lx)
 	if err != nil {
 		return err
+	}
+	if startingBit > 0 {
+		mods = append(mods, common.After(common.Const(startingBit)))
 	}
 	sigs, err := p.parseSignals(lx)
 	if err != nil {
@@ -23,6 +30,18 @@ func (p *Parser) parseSignalStatement(lx *lexer.Lexer) error {
 		p.seq.Add(x)
 	}
 	return nil
+}
+
+func (p *Parser) parseStartingBit(lx *lexer.Lexer) (int64, error) {
+	token, err := lx.Top()
+	if err != nil {
+		return 0, err
+	}
+	if bit, ok := token.(lexer.HexToken); ok {
+		_, _ = lx.Pop()
+		return int64(bit), nil
+	}
+	return 0, nil
 }
 
 func (p *Parser) parseModifiers(lx *lexer.Lexer) (result []types.Modifier, err error) {

@@ -1,0 +1,7 @@
+% sample Hat "2/hat"
+% sample Kick "2/kick"
+% sample Snare "2/snare"
+
+:2 *16 Hat
+0x10 :4 Kick
+0x20 :8 +4 Snare

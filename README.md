@@ -21,3 +21,9 @@
 -   [ ] Improve amplitude parameter
 
 -   [ ] Count "times" only one time per bit
+
+-   [x] 0x10 - starting frame
+
+-   [ ] Coma-separated lists
+
+-   [ ] "labels" (?)
