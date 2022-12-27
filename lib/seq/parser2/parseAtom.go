@@ -9,6 +9,31 @@ import (
 )
 
 func (p *Parser) parseAtom(lx *lexer.Lexer) (types.ValueFn, error) {
+	elements := []types.ValueFn{}
+	for {
+		elem, err := p.parseElement(lx)
+		if err != nil {
+			return nil, err
+		}
+		elements = append(elements, elem)
+
+		// Check if next token is coma (,)
+		tok, err := lx.Top()
+		if err != nil {
+			return nil, err
+		}
+		if _, ok := tok.(lexer.ComaToken); !ok {
+			break
+		}
+		_, _ = lx.Pop()
+	}
+	if len(elements) == 1 {
+		return elements[0], nil
+	}
+	return common.Lst(elements...), nil
+}
+
+func (p *Parser) parseElement(lx *lexer.Lexer) (types.ValueFn, error) {
 	token, err := lx.Pop()
 	if err != nil {
 		return nil, err

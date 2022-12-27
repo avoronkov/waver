@@ -1,0 +1,4 @@
+% wave T "triangle"
+
+:2,3,3 T seq A3,C4,[D4 G4],E4
+# :3,2 T seq [A3 C4 D4,G4 E4]

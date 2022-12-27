@@ -24,6 +24,12 @@
 
 -   [x] 0x10 - starting frame
 
--   [ ] Coma-separated lists
+-   [x] Coma-separated lists
 
 -   [ ] "labels" (?)
+
+-   [ ] Shorthand for random: `&`
+
+-   [ ] Shorthand for sequence: `@`
+
+-   [ ] Relative lists
