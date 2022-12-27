@@ -53,6 +53,16 @@ type AssignToken struct{}
 
 func (AssignToken) String() string { return "=" }
 
+// & (random)
+type AmpersandToken struct{}
+
+func (AmpersandToken) String() string { return "&" }
+
+// @ (sequence)
+type AtToken struct{}
+
+func (AtToken) String() string { return "@" }
+
 // {
 type LCurlyBracket struct{}
 

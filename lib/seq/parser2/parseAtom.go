@@ -48,7 +48,7 @@ func (p *Parser) parseElement(lx *lexer.Lexer) (types.ValueFn, error) {
 		if n, ok := p.scale.Parse(sa); ok {
 			return common.Const(int64(n.Num)), nil
 		}
-		if fnp, ok := p.funcParsers[sa]; ok {
+		if fnp, ok := p.funcParsers[token]; ok {
 			return fnp(p, lx, sa)
 		}
 		if udf, ok := p.userFunctions[sa]; ok {
@@ -57,6 +57,10 @@ func (p *Parser) parseElement(lx *lexer.Lexer) (types.ValueFn, error) {
 		return common.Var(sa), nil
 	case lexer.LSquareBracket:
 		return p.parseList(lx)
+	default:
+		if fnp, ok := p.funcParsers[token]; ok {
+			return fnp(p, lx, token.String())
+		}
 	}
 	return nil, fmt.Errorf("Unexpected token while parsing atom: %v", token)
 }

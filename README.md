@@ -28,8 +28,6 @@
 
 -   [ ] "labels" (?)
 
--   [ ] Shorthand for random: `&`
-
--   [ ] Shorthand for sequence: `@`
+-   [x] Shorthand for random, sequence and repeat: `&`, `@`, `*`
 
 -   [ ] Relative lists

@@ -1,0 +1,4 @@
+%wave S "sine"
+
+n = *4 &A3,C4,E4
+:2 S n

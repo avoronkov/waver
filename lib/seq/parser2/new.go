@@ -37,13 +37,16 @@ func New(opts ...func(*Parser)) *Parser {
 		"filter": parseFilter,
 	}
 
-	p.funcParsers = map[string]FunctionParser{
-		"seq":    parseSequence,
-		"rand":   makeSingleArgValueFnParser("rand", common.Random),
-		"up":     parseUpDown,
-		"down":   parseUpDown,
-		"repeat": parseRepeat,
-		"concat": makeSingleArgValueFnParser("concat", common.Concat),
+	p.funcParsers = map[lexer.Token]FunctionParser{
+		lexer.IdentToken("seq"):    parseSequence,
+		lexer.AtToken{}:            parseSequence,
+		lexer.IdentToken("rand"):   makeSingleArgValueFnParser("rand", common.Random),
+		lexer.AmpersandToken{}:     makeSingleArgValueFnParser("rand", common.Random),
+		lexer.IdentToken("up"):     parseUpDown,
+		lexer.IdentToken("down"):   parseUpDown,
+		lexer.IdentToken("repeat"): parseRepeat,
+		lexer.MultiplyToken{}:      parseRepeat,
+		lexer.IdentToken("concat"): makeSingleArgValueFnParser("concat", common.Concat),
 	}
 
 	return p

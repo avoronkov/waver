@@ -21,7 +21,7 @@ type Parser struct {
 	instSet      parser.InstrumentSet
 
 	modParsers    map[lexer.Token]ModParser
-	funcParsers   map[string]FunctionParser
+	funcParsers   map[lexer.Token]FunctionParser
 	userFunctions map[string]parser.UserFunction
 	pragmaParsers map[string]pragmaParser
 
