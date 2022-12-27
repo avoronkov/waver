@@ -27,8 +27,6 @@ type Parser struct {
 
 	scale notes.Scale
 
-	globalCtx map[string]interface{}
-
 	userFunctions map[string]UserFunction
 
 	globalFilters []map[string]any
@@ -42,7 +40,6 @@ func New(seq Seq, scale notes.Scale, opts ...func(*Parser)) *Parser {
 		scale:         scale,
 		modParsers:    modParsers,
 		sigParsers:    sigParsers,
-		globalCtx:     map[string]interface{}{},
 		userFunctions: map[string]UserFunction{},
 		tempo:         120,
 	}

@@ -6,10 +6,6 @@ import (
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
-type Index struct {
-	N int
-}
-
 func Sequence(idxName string, values types.ValueFn) types.ValueFn {
 	return &sequenceImpl{
 		fn:        values,

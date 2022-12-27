@@ -27,8 +27,6 @@ type Parser struct {
 
 	scale notes.Scale
 
-	globalCtx map[string]interface{}
-
 	globalFilters []map[string]any
 
 	tempo int

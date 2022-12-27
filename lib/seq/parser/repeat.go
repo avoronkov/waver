@@ -21,22 +21,7 @@ func parseRepeat(p *Parser, line *LineCtx) (types.ValueFn, int, error) {
 		return nil, 0, err
 	}
 
-	key := fmt.Sprintf("repeat-idx:%v", line.Num)
-	var idx *common.Index
-	if i, ok := p.globalCtx[key].(*common.Index); ok {
-		idx = i
-	} else {
-		idx = new(common.Index)
-		p.globalCtx[key] = idx
-	}
-
-	key = fmt.Sprintf("repeat-value:%v", line.Num)
-	var holder *common.ValueHolder
-	if i, ok := p.globalCtx[key].(*common.ValueHolder); ok {
-		holder = i
-	} else {
-		holder = new(common.ValueHolder)
-		p.globalCtx[key] = holder
-	}
-	return common.Repeat(idx, holder, times, fn), shift + shift2 + 1, nil
+	keyIndex := fmt.Sprintf("repeat-idx:%v", line.Num)
+	keyValue := fmt.Sprintf("repeat-value:%v", line.Num)
+	return common.Repeat(keyIndex, keyValue, times, fn), shift + shift2 + 1, nil
 }

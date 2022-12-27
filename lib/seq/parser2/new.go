@@ -10,7 +10,6 @@ import (
 func New(opts ...func(*Parser)) *Parser {
 	p := &Parser{
 		userFunctions: make(map[string]parser.UserFunction),
-		globalCtx:     make(map[string]interface{}),
 	}
 
 	for _, o := range opts {

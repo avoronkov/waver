@@ -10,12 +10,12 @@ type ValueHolder struct {
 	Value types.Value
 }
 
-func Repeat(idx *Index, h *ValueHolder, times, fn types.ValueFn) types.ValueFn {
+func Repeat(idxName, valueName string, times, fn types.ValueFn) types.ValueFn {
 	return &repeatImpl{
-		times: times,
-		fn:    fn,
-		idx:   idx,
-		value: h,
+		times:     times,
+		fn:        fn,
+		idxName:   idxName,
+		valueName: valueName,
 	}
 }
 
@@ -23,8 +23,8 @@ type repeatImpl struct {
 	times types.ValueFn
 	fn    types.ValueFn
 
-	idx   *Index
-	value *ValueHolder
+	idxName   string
+	valueName string
 }
 
 func (s *repeatImpl) Val(bit int64, ctx types.Context) types.Value {
@@ -33,13 +33,23 @@ func (s *repeatImpl) Val(bit int64, ctx types.Context) types.Value {
 	if !ok {
 		panic(fmt.Errorf("repeat expects integer as first argument, found: %v (%T)", nTimes, nTimes))
 	}
-	if s.idx.N >= int(intTimes) {
-		s.idx.N = 0
+	index := 0
+	if idx, ok := ctx.GlobalGet(s.idxName); ok {
+		index = idx.(int)
 	}
-	if s.idx.N == 0 {
-		s.value.Value = s.fn.Val(bit, ctx)
+	if index >= int(intTimes) {
+		index = 0
 	}
-	s.idx.N++
+	var value types.Value
+	val, ok := ctx.GlobalGet(s.valueName)
+	if index == 0 || !ok {
+		value = s.fn.Val(bit, ctx)
+		ctx.GlobalPut(s.valueName, value)
+	} else {
+		value = val.(types.Value)
+	}
+	index++
+	ctx.GlobalPut(s.idxName, index)
 
-	return s.value.Value
+	return value
 }

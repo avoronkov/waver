@@ -46,24 +46,9 @@ func parseRepeat(p *Parser, lx *lexer.Lexer, fn string) (types.ValueFn, error) {
 		return nil, err
 	}
 
-	key := fmt.Sprintf("repeat-idx:%v", lx.LineNum())
-	var idx *common.Index
-	if i, ok := p.globalCtx[key].(*common.Index); ok {
-		idx = i
-	} else {
-		idx = new(common.Index)
-		p.globalCtx[key] = idx
-	}
-
-	key = fmt.Sprintf("repeat-value:%v", lx.LineNum())
-	var holder *common.ValueHolder
-	if i, ok := p.globalCtx[key].(*common.ValueHolder); ok {
-		holder = i
-	} else {
-		holder = new(common.ValueHolder)
-		p.globalCtx[key] = holder
-	}
-	return common.Repeat(idx, holder, times, arg), nil
+	keyIndex := fmt.Sprintf("repeat-idx:%v", lx.LineNum())
+	keyValue := fmt.Sprintf("repeat-value:%v", lx.LineNum())
+	return common.Repeat(keyIndex, keyValue, times, arg), nil
 }
 
 type singleArgFuncion func(types.ValueFn) types.ValueFn
