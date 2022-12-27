@@ -28,18 +28,20 @@ func (p *Parser) parseSignalStatement(lx *lexer.Lexer) error {
 func (p *Parser) parseModifiers(lx *lexer.Lexer) (result []types.Modifier, err error) {
 L:
 	for {
-		token, err := lx.Pop()
+		token, err := lx.Top()
 		if err != nil {
 			return nil, err
 		}
 		if _, ok := token.(lexer.ArrowRightToken); ok {
+			_, _ = lx.Pop()
 			break L
 		}
 
 		parser, ok := p.modParsers[token]
 		if !ok {
-			return nil, fmt.Errorf("Unknown modParser: %v", token)
+			break
 		}
+		_, _ = lx.Pop()
 
 		modifier, err := parser(p, lx)
 		if err != nil {

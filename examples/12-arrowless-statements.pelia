@@ -1,0 +1,5 @@
+% sample K "2/kick"
+% sample S "2/snare"
+
+eucl 7 13 K
+:[2 2 3] S
