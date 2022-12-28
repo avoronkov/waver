@@ -1,0 +1,6 @@
+% wave S 'sine'
+
+n = @A3,+3,+7,-2
+
+major t = t, +4, +7, +11
+:2 S seq major C3

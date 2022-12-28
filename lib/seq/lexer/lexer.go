@@ -74,6 +74,10 @@ func (l *Lexer) Pop() (token Token, err error) {
 	return l.nextToken()
 }
 
+func (l *Lexer) Drop() {
+	_, _ = l.nextToken()
+}
+
 func (l *Lexer) nextToken() (token Token, err error) {
 	if l.current != nil {
 		token = l.current
