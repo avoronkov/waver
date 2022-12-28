@@ -10,6 +10,7 @@ import (
 func New(opts ...func(*Parser)) *Parser {
 	p := &Parser{
 		userFunctions: make(map[string]parser.UserFunction),
+		tempo:         120,
 	}
 
 	for _, o := range opts {
