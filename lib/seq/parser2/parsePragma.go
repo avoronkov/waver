@@ -140,7 +140,7 @@ func parseFilter(p *Parser, fields []lexer.Token, options []map[string]any) erro
 }
 
 func (p *Parser) parsePragmaOptions(body string, opts *[]map[string]any) error {
-	if body == "" {
+	if strings.TrimSpace(body) == "" {
 		return nil
 	}
 	r := strings.NewReader(body)

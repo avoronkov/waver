@@ -81,6 +81,25 @@ foo = bar
 			},
 		},
 		{
+			"Pragma: multiline, empty body",
+			`%%wave foo bar
+%%
+foo = bar
+`,
+			[]Token{
+				DoublePercentToken{},
+				IdentToken("wave"),
+				IdentToken("foo"),
+				IdentToken("bar"),
+				BodyToken("\n"),
+				DoublePercentToken{},
+				EolToken{},
+				IdentToken("foo"),
+				AssignToken{},
+				IdentToken("bar"),
+			},
+		},
+		{
 			"String literal",
 			`%sample kick "2/kick"`,
 			[]Token{
