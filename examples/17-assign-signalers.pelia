@@ -1,0 +1,11 @@
+%sample K "2/kick"
+%sample S "2/snare"
+%sample H "2/hat"
+%sample C "2/clap"
+
+:4 +2 H
+
+kks == :3,3,2 seq K,K,S
+clap == :8 +4 C
+
+0x10 kks | clap

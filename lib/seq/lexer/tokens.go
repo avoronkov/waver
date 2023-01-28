@@ -53,6 +53,11 @@ type AssignToken struct{}
 
 func (AssignToken) String() string { return "=" }
 
+// ==
+type DoubleAssignToken struct{}
+
+func (DoubleAssignToken) String() string { return "==" }
+
 // & (random)
 type AmpersandToken struct{}
 

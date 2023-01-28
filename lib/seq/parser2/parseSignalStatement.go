@@ -32,6 +32,21 @@ func (p *Parser) parseSignalStatement(lx *lexer.Lexer) error {
 	return nil
 }
 
+func (p *Parser) parseSignaler(lx *lexer.Lexer) (sigs []types.Signaler, err error) {
+	mods, err := p.parseModifiers(lx)
+	if err != nil {
+		return nil, err
+	}
+	sigs, err = p.parseSignals(lx)
+	if err != nil {
+		return nil, err
+	}
+	for i, sig := range sigs {
+		sigs[i] = common.Chain(sig, mods...)
+	}
+	return sigs, nil
+}
+
 func (p *Parser) parseStartingBit(lx *lexer.Lexer) (int64, error) {
 	token, err := lx.Top()
 	if err != nil {
@@ -77,15 +92,29 @@ func (p *Parser) parseSignals(lx *lexer.Lexer) (sigs []types.Signaler, err error
 		if err != nil {
 			return nil, err
 		}
-		switch token.(type) {
+		switch t := token.(type) {
 		case lexer.LCurlyBracket:
 			sig, err := p.parseSignal(lx)
 			if err != nil {
 				return nil, err
 			}
 			sigs = append(sigs, sig)
+		case lexer.VerticalBar:
+			lx.Drop()
 		case lexer.EolToken, lexer.EofToken:
 			return sigs, nil
+		case lexer.IdentToken:
+			if us, ok := p.userSignalers[t.String()]; ok {
+				lx.Drop()
+				sigs = append(sigs, us...)
+			} else {
+				// the same as default
+				sig, err := p.parsePlainSignal(lx)
+				if err != nil {
+					return nil, err
+				}
+				sigs = append(sigs, sig)
+			}
 		default:
 			sig, err := p.parsePlainSignal(lx)
 			if err != nil {

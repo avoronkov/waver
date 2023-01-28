@@ -11,6 +11,7 @@ import (
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	"github.com/avoronkov/waver/lib/seq/parser"
+	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 type Parser struct {
@@ -22,8 +23,10 @@ type Parser struct {
 
 	modParsers    map[lexer.Token]ModParser
 	funcParsers   map[lexer.Token]FunctionParser
-	userFunctions map[string]parser.UserFunction
 	pragmaParsers map[string]pragmaParser
+
+	userFunctions map[string]parser.UserFunction
+	userSignalers map[string][]types.Signaler
 
 	scale notes.Scale
 

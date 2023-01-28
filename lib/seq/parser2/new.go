@@ -5,11 +5,13 @@ import (
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	"github.com/avoronkov/waver/lib/seq/parser"
+	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 func New(opts ...func(*Parser)) *Parser {
 	p := &Parser{
 		userFunctions: make(map[string]parser.UserFunction),
+		userSignalers: make(map[string][]types.Signaler),
 		tempo:         120,
 	}
 

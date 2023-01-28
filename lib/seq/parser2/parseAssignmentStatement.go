@@ -26,6 +26,10 @@ func (p *Parser) parseAssignmentStatement(lx *lexer.Lexer) error {
 		return p.parseAssignVar(lx, string(name))
 	}
 
+	if _, ok := second.(lexer.DoubleAssignToken); ok {
+		return p.parseAssignSignaler(lx, string(name))
+	}
+
 	param, ok := second.(lexer.IdentToken)
 	if !ok {
 		return fmt.Errorf("Unexpected second token in assignment statement: %v (%T)", second, second)
@@ -81,5 +85,14 @@ func (p *Parser) parseUdf(lx *lexer.Lexer, name string, param string) error {
 		Arg:  param,
 		Fn:   atom,
 	}
+	return nil
+}
+
+func (p *Parser) parseAssignSignaler(lx *lexer.Lexer, name string) error {
+	sigs, err := p.parseSignaler(lx)
+	if err != nil {
+		return err
+	}
+	p.userSignalers[name] = sigs
 	return nil
 }
