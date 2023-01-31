@@ -155,6 +155,15 @@ x = 11`,
 				NumberToken(8),
 			},
 		},
+		{
+			"Range: 0..31",
+			`0..31`,
+			[]Token{
+				NumberToken(0),
+				DoubleDot{},
+				NumberToken(31),
+			},
+		},
 	}
 
 	for _, test := range tests {

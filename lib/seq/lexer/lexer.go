@@ -57,6 +57,7 @@ func NewLexer(in io.Reader) *Lexer {
 			{"|", VerticalBar{}},
 			{"&", AmpersandToken{}},
 			{"@", AtToken{}},
+			{"..", DoubleDot{}},
 		},
 	}
 }

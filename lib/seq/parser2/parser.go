@@ -78,6 +78,8 @@ func (p *Parser) parseReader(reader io.Reader) error {
 			err = p.parseSignalStatement(lx)
 		} else if _, ok := token.(lexer.HexToken); ok {
 			err = p.parseSignalStatement(lx)
+		} else if _, ok := token.(lexer.NumberToken); ok {
+			err = p.parseSignalStatement(lx)
 		} else if _, ok := token.(lexer.IdentToken); ok {
 			err = p.parseAssignmentStatement(lx)
 		} else if _, ok := token.(lexer.PercentToken); ok {

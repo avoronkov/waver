@@ -8,9 +8,9 @@ import (
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
-// : 4 -> { sig }
+// 0..15 : 4 -> { sig }
 func (p *Parser) parseSignalStatement(lx *lexer.Lexer) error {
-	startingBit, err := p.parseStartingBit(lx)
+	startingBit, endingBit, err := p.parseRange(lx)
 	if err != nil {
 		return err
 	}
@@ -21,6 +21,10 @@ func (p *Parser) parseSignalStatement(lx *lexer.Lexer) error {
 	if startingBit > 0 {
 		mods = append(mods, common.After(common.Const(startingBit)))
 	}
+	if endingBit >= 0 {
+		mods = append(mods, common.Before(common.Const(endingBit)))
+	}
+
 	sigs, err := p.parseSignals(lx)
 	if err != nil {
 		return err
@@ -47,16 +51,53 @@ func (p *Parser) parseSignaler(lx *lexer.Lexer) (sigs []types.Signaler, err erro
 	return sigs, nil
 }
 
-func (p *Parser) parseStartingBit(lx *lexer.Lexer) (int64, error) {
-	token, err := lx.Top()
-	if err != nil {
-		return 0, err
+func (p *Parser) parseRange(lx *lexer.Lexer) (begin int64, end int64, err error) {
+	end = -1
+	token, e := lx.Top()
+	if e != nil {
+		err = e
+		return
 	}
-	if bit, ok := token.(lexer.HexToken); ok {
-		_, _ = lx.Pop()
-		return int64(bit), nil
+	switch t := token.(type) {
+	case lexer.HexToken:
+		begin = int64(t)
+	case lexer.NumberToken:
+		begin = int64(t)
+	default:
+		return
 	}
-	return 0, nil
+	// Drop begining of the range
+	lx.Drop()
+
+	token, e = lx.Top()
+	if e != nil {
+		err = e
+		return
+	}
+	if _, ok := token.(lexer.DoubleDot); !ok {
+		return
+	}
+
+	// Drop ".."
+	lx.Drop()
+
+	token, e = lx.Top()
+	if e != nil {
+		err = e
+		return
+	}
+	switch t := token.(type) {
+	case lexer.HexToken:
+		end = int64(t)
+	case lexer.NumberToken:
+		end = int64(t)
+	default:
+		return
+	}
+
+	// Drop end of the range
+	lx.Drop()
+	return
 }
 
 func (p *Parser) parseModifiers(lx *lexer.Lexer) (result []types.Modifier, err error) {

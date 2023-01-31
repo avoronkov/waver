@@ -93,6 +93,11 @@ type VerticalBar struct{}
 
 func (VerticalBar) String() string { return "|" }
 
+// ..
+type DoubleDot struct{}
+
+func (DoubleDot) String() string { return ".." }
+
 // [0-9]+, 0x[0-9]+
 type NumberToken int64
 
