@@ -29,8 +29,8 @@ var (
 )
 
 func init() {
-	flag.IntVar(&udpPort, "udp-port", 49161, "UPD port")
-	flag.IntVar(&udpPort, "p", 49161, "UPD port (shorthand)")
+	flag.IntVar(&udpPort, "udp-port", 0, "UPD port (e.g. 49161)")
+	flag.IntVar(&udpPort, "p", 0, "UPD port (shorthand, e.g. 49161)")
 
 	flag.IntVar(&midiPort, "midi-port", 0, "MIDI port")
 	flag.IntVar(&midiPort, "m", 0, "MIDI port (shorthand)")

@@ -56,13 +56,15 @@ func main() {
 	// TODO fix this a little
 	common.Scale = scale
 
-	udpInput := udp.New(udpPort, scale)
-
 	channel := make(chan signals.Interface, 128)
 
 	opts := []func(*midisynth.MidiSynth){
-		midisynth.WithSignalInput(udpInput),
 		midisynth.WithChannel(channel),
+	}
+
+	if udpPort > 0 {
+		udpInput := udp.New(udpPort, scale)
+		opts = append(opts, midisynth.WithSignalInput(udpInput))
 	}
 
 	if midiPort > 0 {
