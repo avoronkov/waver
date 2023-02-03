@@ -91,6 +91,10 @@ func main() {
 	// .
 
 	// File sequencer
+	if fileInput == "" && flag.NArg() > 0 {
+		fileInput = flag.Arg(0)
+	}
+
 	var sequencer *seq.Sequencer
 	if fileInput != "" {
 		sequencer = seq.NewSequencer(
