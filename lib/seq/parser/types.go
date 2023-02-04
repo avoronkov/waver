@@ -9,6 +9,7 @@ type Seq interface {
 	Add(types.Signaler)
 	Commit() error
 	Assign(name string, value types.ValueFn)
+	SetStopBit(bit int64)
 }
 
 type TempoSetter interface {

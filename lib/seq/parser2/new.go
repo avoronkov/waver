@@ -39,6 +39,7 @@ func New(opts ...func(*Parser)) *Parser {
 		"wave":   parseWave,
 		"inst":   parseWave,
 		"filter": parseFilter,
+		"stop":   parseStopPragma,
 	}
 
 	p.funcParsers = map[lexer.Token]FunctionParser{

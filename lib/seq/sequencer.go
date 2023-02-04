@@ -28,6 +28,8 @@ type Sequencer struct {
 	showBits    int64
 
 	globalContext map[string]any
+
+	stopBit int64
 }
 
 var _ signals.Input = (*Sequencer)(nil)
@@ -36,6 +38,7 @@ func NewSequencer(opts ...func(*Sequencer)) *Sequencer {
 	s := &Sequencer{
 		tempo:         120,
 		globalContext: make(map[string]any),
+		stopBit:       -1,
 	}
 	for _, o := range opts {
 		o(s)
@@ -82,6 +85,10 @@ func (s *Sequencer) SetTempo(tempo int) {
 	}
 }
 
+func (s *Sequencer) SetStopBit(bit int64) {
+	s.stopBit = bit
+}
+
 func (s *Sequencer) delay() time.Duration {
 	return time.Duration((15.0 / float64(s.tempo)) * float64(time.Second))
 }
@@ -102,9 +109,14 @@ func (s *Sequencer) run() error {
 	s.ch <- &signals.StartTime{Start: start}
 
 	// Main loop
+LOOP:
 	for {
 		var ok bool
 		if !s.pause {
+			if s.bit == s.stopBit {
+				s.ch <- &signals.Stop{}
+				break LOOP
+			}
 			if s.showBits > 0 && s.bit%s.showBits == 0 {
 				go func(bit int64) {
 					time.Sleep(1 * time.Second)
@@ -127,6 +139,7 @@ func (s *Sequencer) run() error {
 			s.bit++
 		}
 	}
+	return nil
 }
 
 func (s *Sequencer) processFuncs(tm time.Time, bit int64, dryRun bool) (bool, error) {

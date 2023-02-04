@@ -139,6 +139,19 @@ func parseFilter(p *Parser, fields []lexer.Token, options []map[string]any) erro
 	return nil
 }
 
+// %% stop <int>
+func parseStopPragma(p *Parser, fields []lexer.Token, options []map[string]any) error {
+	if len(fields) != 1 {
+		return fmt.Errorf("Incorrect number of arguments for 'stop' pragma: %v", fields)
+	}
+	n, ok := fields[0].(lexer.NumberToken)
+	if !ok {
+		return fmt.Errorf("Cannot parse tempo, unexpected token: %v (%T)", fields[0], fields[0])
+	}
+	p.seq.SetStopBit(int64(n))
+	return nil
+}
+
 func (p *Parser) parsePragmaOptions(body string, opts *[]map[string]any) error {
 	if strings.TrimSpace(body) == "" {
 		return nil

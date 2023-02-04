@@ -1,0 +1,6 @@
+% sample K "4/kick"
+% sample S "4/snare"
+
+0..16 :2 @K,S
+
+% stop 48

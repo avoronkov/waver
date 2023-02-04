@@ -62,6 +62,11 @@ L:
 			if sig == nil {
 				continue L
 			}
+			if _, ok := sig.(*signals.Stop); ok {
+				log.Printf("Stopping...")
+				m.Close()
+				break L
+			}
 			tm := float64(time.Since(start)) / sec
 			for _, output := range m.outputs {
 				go output.ProcessAsync(tm, sig)
