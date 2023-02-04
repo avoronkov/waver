@@ -81,6 +81,11 @@ func main() {
 		unisynth.WithScale(scale),
 		unisynth.WithTempo(tempo),
 	}
+
+	if fileInput == "" && flag.NArg() > 0 {
+		fileInput = flag.Arg(0)
+	}
+
 	if fileInput != "" && dumpWav {
 		fileOutput := strings.TrimSuffix(fileInput, filepath.Ext(fileInput)) + ".wav"
 		audioOpts = append(audioOpts, unisynth.WithWavFileDump(fileOutput))
@@ -91,10 +96,6 @@ func main() {
 	// .
 
 	// File sequencer
-	if fileInput == "" && flag.NArg() > 0 {
-		fileInput = flag.Arg(0)
-	}
-
 	var sequencer *seq.Sequencer
 	if fileInput != "" {
 		sequencer = seq.NewSequencer(

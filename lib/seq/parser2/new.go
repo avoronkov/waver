@@ -23,6 +23,7 @@ func New(opts ...func(*Parser)) *Parser {
 	p.modParsers = map[lexer.Token]ModParser{
 		lexer.ColonToken{}:        makeSingleArgModParser(":", common.Every),
 		lexer.PlusToken{}:         makeSingleArgModParser("+", common.Shift),
+		lexer.MinusToken{}:        makeSingleArgModParser("-", common.ShiftLeft),
 		lexer.LessToken{}:         makeSingleArgModParser("<", common.Before),
 		lexer.GreaterToken{}:      makeSingleArgModParser(">", common.After),
 		lexer.IdentToken("bits"):  makeSingleArgModParser("bits", common.Bits),

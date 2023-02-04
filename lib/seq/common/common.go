@@ -37,6 +37,16 @@ func Shift(n types.ValueFn) types.Modifier {
 	}
 }
 
+func ShiftLeft(n types.ValueFn) types.Modifier {
+	return func(fn types.Signaler) types.Signaler {
+		f := func(bit int64, ctx types.Context) []signals.Signal {
+			nVal := n.Val(bit, ctx).(Num)
+			return fn.Eval(bit+int64(nVal), ctx)
+		}
+		return types.SignalFn(f)
+	}
+}
+
 func Var(name string) types.ValueFn {
 	return types.ValueFunc(func(n int64, ctx types.Context) (res types.Value) {
 		defer func() {
