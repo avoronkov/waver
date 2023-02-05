@@ -16,7 +16,6 @@ func main() {
 		Name:        "Waver",
 		Description: "Waver playground application",
 		Styles: []string{
-			// "https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css",
 			"/web/pico.min.css",
 			"/web/lib/codemirror.css",
 		},
