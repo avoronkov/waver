@@ -52,6 +52,15 @@ func (p *Parser) parse() error {
 	return p.parseReader(f)
 }
 
+func (p *Parser) ParseData(data []byte) error {
+	// WIP parse std lib
+	reader := bytes.NewReader(std.StdEdo12)
+	if err := p.parseReader(reader); err != nil {
+		return err
+	}
+	return p.parseReader(bytes.NewReader(data))
+}
+
 func (p *Parser) parseReader(reader io.Reader) error {
 	lx := lexer.NewLexer(reader)
 	_ = lx

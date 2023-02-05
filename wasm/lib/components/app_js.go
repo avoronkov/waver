@@ -12,7 +12,7 @@ import (
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq"
 	"github.com/avoronkov/waver/lib/seq/common"
-	"github.com/avoronkov/waver/lib/seq/parser"
+	parser "github.com/avoronkov/waver/lib/seq/parser2"
 
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
@@ -55,8 +55,8 @@ func (ap *App) OnNav(ctx app.Context) {
 
 		// Parser
 		goParser := parser.New(
-			goSequencer,
-			scale,
+			parser.WithSeq(goSequencer),
+			parser.WithScale(scale),
 			parser.WithTempoSetter(goSequencer),
 			parser.WithInstrumentSet(instSet),
 		)
