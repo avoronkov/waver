@@ -5,12 +5,12 @@
 <meta name="author" content>
 <meta name="description" content="Waver playground application">
 <meta name="keywords" content>
-<meta name="theme-color" content="#2d2c2c">
+<meta content="#2d2c2c" name="theme-color">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
-<meta property="og:url" content="http://127.0.0.1:41201/">
+<meta property="og:url" content="http://127.0.0.1:34473/">
 <meta property="og:title" content>
-<meta content="Waver playground application" property="og:description">
-<meta property="og:type" content="website">
+<meta property="og:description" content="Waver playground application">
+<meta content="website" property="og:type">
 <meta property="og:image" content>
 <title>
 
@@ -21,8 +21,8 @@
 <link type="text/css" rel="stylesheet" href="/waver/app.css">
 <script defer="true" src="/waver/wasm_exec.js"></script>
 <script defer="true" src="/waver/app.js"></script>
-<link type="text/css" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-<link rel="stylesheet" href="/waver/web/lib/codemirror.css" type="text/css">
+<link type="text/css" rel="stylesheet" href="/waver/web/pico.min.css">
+<link type="text/css" rel="stylesheet" href="/waver/web/lib/codemirror.css">
 <script defer="true" src="/waver/web/lib/codemirror.js"></script>
 <script defer="true" src="/waver/web/addon/mode/simple.js"></script>
 <script defer="true" src="/waver/web/init-codemirror.js"></script>
@@ -30,7 +30,7 @@
 <body>
 <div>
 <aside id="app-wasm-loader" class="goapp-app-info">
-<img class="goapp-logo goapp-spin" src="https://storage.googleapis.com/murlok-github/icon-192.png" id="app-wasm-loader-icon">
+<img src="https://storage.googleapis.com/murlok-github/icon-192.png" id="app-wasm-loader-icon" class="goapp-logo goapp-spin">
 <p id="app-wasm-loader-label" class="goapp-label">
 0%
 </p>
@@ -52,10 +52,10 @@ Source code
 <option value="code" selected="true">
 Code
 </option>
-<option selected="false" value="messages">
+<option value="messages" selected="false">
 Messages
 </option>
-<option selected="false" value="examples">
+<option value="examples" selected="false">
 Examples
 </option>
 </select>

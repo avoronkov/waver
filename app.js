@@ -5,7 +5,7 @@ var goappNav = function () {};
 var goappOnUpdate = function () {};
 var goappOnAppInstallChange = function () {};
 
-const goappEnv = {"GOAPP_INTERNAL_URLS":"null","GOAPP_ROOT_PREFIX":"/waver","GOAPP_STATIC_RESOURCES_URL":"/waver","GOAPP_VERSION":"2a430977c83d179cca26147f3957388533f0b21a"};
+const goappEnv = {"GOAPP_INTERNAL_URLS":"null","GOAPP_ROOT_PREFIX":"/waver","GOAPP_STATIC_RESOURCES_URL":"/waver","GOAPP_VERSION":"39659f6a9c082d8d5bc33d15ea53820321d46e1b"};
 const goappLoadingLabel = "{progress}%";
 const goappWasmContentLengthHeader = "";
 
