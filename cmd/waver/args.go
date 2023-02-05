@@ -23,7 +23,9 @@ var (
 
 	showBits int64
 
-	dumpWav bool
+	dumpWav       bool
+	wavSpaceLeft  float64
+	wavSpaceRight float64
 
 	shareFile string
 )
@@ -60,6 +62,8 @@ func init() {
 	flag.Int64Var(&showBits, "show-bits", 0, "Log bit number every n bits")
 
 	flag.BoolVar(&dumpWav, "dump-wav", false, "dump audio output into wav file")
+	flag.Float64Var(&wavSpaceRight, "wav-space-right", 0, "Add empty space to the end of wav output (seconds)")
+	flag.Float64Var(&wavSpaceLeft, "wav-space-left", 0, "Add empty space to the begining of wav output (seconds)")
 
 	flag.StringVar(&shareFile, "share", "", "Create sharable link with file content")
 }

@@ -32,8 +32,10 @@ type Output struct {
 
 	startTime time.Time
 
-	wavFilename string
-	saver       *WavDataSaver
+	wavFilename   string
+	wavSpaceLeft  float64
+	wavSpaceRight float64
+	saver         *WavDataSaver
 }
 
 var _ signals.Output = (*Output)(nil)
@@ -77,7 +79,9 @@ func New(opts ...func(*Output)) (*Output, error) {
 
 	if output.wavFilename != "" {
 		log.Printf("Unisynth: using WavDataSaver")
-		output.saver = NewWavDataSaver(output.play, output.wavFilename)
+		leftPad := secondsToFrames(output.settings, output.wavSpaceLeft)
+		rightPad := secondsToFrames(output.settings, output.wavSpaceRight)
+		output.saver = NewWavDataSaver(output.play, output.wavFilename, leftPad, rightPad)
 		output.player = output.context.NewPlayer(output.saver)
 	} else {
 		output.player = output.context.NewPlayer(output.play)
@@ -207,3 +211,7 @@ func (o *Output) SetTempo(tempo int) {
 	o.tempo = tempo
 }
 */
+
+func secondsToFrames(settings *wav.Settings, seconds float64) int {
+	return int(float64(settings.SampleRate) * seconds)
+}

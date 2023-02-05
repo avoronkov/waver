@@ -88,7 +88,12 @@ func main() {
 
 	if fileInput != "" && dumpWav {
 		fileOutput := strings.TrimSuffix(fileInput, filepath.Ext(fileInput)) + ".wav"
-		audioOpts = append(audioOpts, unisynth.WithWavFileDump(fileOutput))
+		audioOpts = append(audioOpts,
+			unisynth.WithWavFileDump(fileOutput),
+			unisynth.WithWavSpaceLeft(wavSpaceLeft),
+			unisynth.WithWavSpaceRight(wavSpaceRight),
+		)
+
 	}
 	audioOutput, err := unisynth.New(audioOpts...)
 	check("Syntheziser output", err)
@@ -109,7 +114,6 @@ func main() {
 			parser.WithScale(scale),
 			parser.WithFileInput(fileInput),
 			parser.WithTempoSetter(sequencer),
-			// parser.WithTempoSetter(audioOutput),
 			parser.WithInstrumentSet(instSet),
 		)
 		check("Parser start", ps.Start(true))

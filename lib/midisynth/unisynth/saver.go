@@ -13,13 +13,17 @@ type WavDataSaver struct {
 	orig io.Reader
 	file string
 
+	emptyFramesLeft, emptyFramesRight int
+
 	buffer bytes.Buffer
 }
 
-func NewWavDataSaver(r io.Reader, file string) *WavDataSaver {
+func NewWavDataSaver(r io.Reader, file string, emptyFramesLeft, emptyFramesRight int) *WavDataSaver {
 	return &WavDataSaver{
-		orig: r,
-		file: file,
+		orig:             r,
+		file:             file,
+		emptyFramesLeft:  emptyFramesLeft,
+		emptyFramesRight: emptyFramesRight,
 	}
 }
 
@@ -34,6 +38,14 @@ func (s *WavDataSaver) Read(data []byte) (int, error) {
 func (s *WavDataSaver) Close() error {
 	w := wav.CreateDefaultWav()
 	data := trimSamples(s.buffer.Bytes())
+	if s.emptyFramesLeft > 0 {
+		left := make([]byte, 4*s.emptyFramesLeft)
+		data = append(left, data...)
+	}
+	if s.emptyFramesRight > 0 {
+		right := make([]byte, 4*s.emptyFramesRight)
+		data = append(data, right...)
+	}
 	w.Data = &wav.DataBytes{Samples: data}
 
 	f, err := os.Create(s.file)

@@ -86,7 +86,8 @@ func (s *Sequencer) SetTempo(tempo int) {
 }
 
 func (s *Sequencer) SetStopBit(bit int64) {
-	s.stopBit = bit
+	// Let's add some more space before interupting (4 "seconds" = 32 bits)
+	s.stopBit = bit + 32
 }
 
 func (s *Sequencer) delay() time.Duration {

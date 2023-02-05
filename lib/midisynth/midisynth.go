@@ -17,6 +17,7 @@ type MidiSynth struct {
 	inputs    []signals.Input
 	outputs   []signals.Output
 	logf      func(format string, v ...any)
+	closed    bool
 }
 
 func NewMidiSynth(opts ...func(*MidiSynth)) (*MidiSynth, error) {
@@ -81,11 +82,17 @@ L:
 }
 
 func (m *MidiSynth) Close() error {
+	// Handle possible double close
+	if m.closed {
+		return nil
+	}
+	m.closed = true
 	for _, input := range m.inputs {
 		if err := input.Close(); err != nil {
 			log.Printf("Input Close() failed: %v", err)
 		}
 	}
+	log.Printf("[MidiSynth] Closing %v outputs", len(m.outputs))
 	for _, output := range m.outputs {
 		if err := output.Close(); err != nil {
 			log.Printf("Output Close() failed: %v", err)

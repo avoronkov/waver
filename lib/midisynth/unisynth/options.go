@@ -34,3 +34,15 @@ func WithWavFileDump(file string) func(*Output) {
 		o.wavFilename = file
 	}
 }
+
+func WithWavSpaceRight(value float64) func(*Output) {
+	return func(o *Output) {
+		o.wavSpaceRight = value
+	}
+}
+
+func WithWavSpaceLeft(value float64) func(*Output) {
+	return func(o *Output) {
+		o.wavSpaceLeft = value
+	}
+}

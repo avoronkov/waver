@@ -7,6 +7,8 @@ import (
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
+var rnd = rand.New(rand.NewSource(1))
+
 func Random(values types.ValueFn) types.ValueFn {
 	f := func(bit int64, ctx types.Context) types.Value {
 		vals := values.Val(bit, ctx)
@@ -14,7 +16,7 @@ func Random(values types.ValueFn) types.ValueFn {
 		if !ok {
 			panic(fmt.Errorf("rand expects list, found: %v", vals))
 		}
-		i := rand.Intn(list.Len())
+		i := rnd.Intn(list.Len())
 		return list.Get(i)
 	}
 	return types.ValueFunc(f)
