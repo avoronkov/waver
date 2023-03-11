@@ -51,6 +51,19 @@ func parseRepeat(p *Parser, lx *lexer.Lexer, fn string) (types.ValueFn, error) {
 	return common.Repeat(keyIndex, keyValue, times, arg), nil
 }
 
+// loop 16 rand [ ... ]
+func parseLoop(p *Parser, lx *lexer.Lexer, fn string) (types.ValueFn, error) {
+	size, err := p.parseAtom(lx)
+	if err != nil {
+		return nil, err
+	}
+	arg, err := p.parseAtom(lx)
+	if err != nil {
+		return nil, err
+	}
+	return common.Loop(size, arg), nil
+}
+
 type singleArgFuncion func(types.ValueFn) types.ValueFn
 
 func makeSingleArgValueFnParser(name string, fn singleArgFuncion) FunctionParser {

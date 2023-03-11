@@ -52,6 +52,7 @@ func New(opts ...func(*Parser)) *Parser {
 		lexer.IdentToken("repeat"): parseRepeat,
 		lexer.MultiplyToken{}:      parseRepeat,
 		lexer.IdentToken("concat"): makeSingleArgValueFnParser("concat", common.Concat),
+		lexer.IdentToken("loop"):   parseLoop,
 	}
 
 	return p

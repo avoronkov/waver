@@ -1,0 +1,8 @@
+% sample H "2/hat"
+: 16 H
+
+% wave T "triangle"
+
+n = loop 16 &A2,C3,E3,F3
+
+:4 T n
