@@ -4,9 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/avoronkov/waver/etc"
 	"github.com/avoronkov/waver/lib/midisynth"
@@ -42,6 +44,16 @@ func main() {
 		}
 		fmt.Println(link)
 		return
+	}
+
+	if seed >= 0 {
+		common.Srand(seed)
+		log.Printf("Using seed: %v", seed)
+	} else if randomSeed {
+		rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+		seed := rng.Int63()
+		common.Srand(seed)
+		log.Printf("Using seed: %v", seed)
 	}
 
 	var scale notes.Scale

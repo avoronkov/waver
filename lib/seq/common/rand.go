@@ -7,7 +7,19 @@ import (
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
-var rnd = rand.New(rand.NewSource(1))
+var (
+	rndSeeded = false
+	rnd       = rand.New(rand.NewSource(1))
+)
+
+func Srand(seed int64) {
+	if rndSeeded {
+		// Seed random only only
+		return
+	}
+	rndSeeded = true
+	rnd = rand.New(rand.NewSource(seed))
+}
 
 func Random(values types.ValueFn) types.ValueFn {
 	f := func(bit int64, ctx types.Context) types.Value {

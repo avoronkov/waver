@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/avoronkov/waver/lib/midisynth/config"
+	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	yaml "gopkg.in/yaml.v3"
 )
@@ -139,16 +140,29 @@ func parseFilter(p *Parser, fields []lexer.Token, options []map[string]any) erro
 	return nil
 }
 
-// %% stop <int>
+// % stop <int>
 func parseStopPragma(p *Parser, fields []lexer.Token, options []map[string]any) error {
 	if len(fields) != 1 {
 		return fmt.Errorf("Incorrect number of arguments for 'stop' pragma: %v", fields)
 	}
 	n, ok := fields[0].(lexer.NumberToken)
 	if !ok {
-		return fmt.Errorf("Cannot parse tempo, unexpected token: %v (%T)", fields[0], fields[0])
+		return fmt.Errorf("Cannot parse 'stop', unexpected token: %v (%T)", fields[0], fields[0])
 	}
 	p.seq.SetStopBit(int64(n))
+	return nil
+}
+
+// %srand 14254
+func parseSrandPragma(p *Parser, fields []lexer.Token, options []map[string]any) error {
+	if len(fields) != 1 {
+		return fmt.Errorf("Incorrect number of arguments for 'srand' pragma: %v", fields)
+	}
+	n, ok := fields[0].(lexer.NumberToken)
+	if !ok {
+		return fmt.Errorf("Cannot parse 'srand', unexpected token: %v (%T)", fields[0], fields[0])
+	}
+	common.Srand(int64(n))
 	return nil
 }
 

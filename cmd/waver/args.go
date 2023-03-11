@@ -28,6 +28,9 @@ var (
 	wavSpaceRight float64
 
 	shareFile string
+
+	randomSeed bool
+	seed       int64
 )
 
 func init() {
@@ -66,4 +69,7 @@ func init() {
 	flag.Float64Var(&wavSpaceLeft, "wav-space-left", 0, "Add empty space to the begining of wav output (seconds)")
 
 	flag.StringVar(&shareFile, "share", "", "Create sharable link with file content")
+
+	flag.BoolVar(&randomSeed, "random-seed", false, "Use random seed for srand")
+	flag.Int64Var(&seed, "seed", -1, "Use specified random seed")
 }
