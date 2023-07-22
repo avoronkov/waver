@@ -20,7 +20,7 @@ func New(opts ...func(*Parser)) *Parser {
 	}
 
 	//  Init mod parsers
-	p.modParsers = map[lexer.Token]ModParser{
+	p.ModParsers = map[lexer.Token]ModParser{
 		lexer.ColonToken{}:        makeSingleArgModParser(":", common.Every),
 		lexer.PlusToken{}:         makeSingleArgModParser("+", common.Shift),
 		lexer.MinusToken{}:        makeSingleArgModParser("-", common.ShiftLeft),
@@ -33,7 +33,7 @@ func New(opts ...func(*Parser)) *Parser {
 	}
 
 	// Init pragma parsers
-	p.pragmaParsers = map[string]pragmaParser{
+	p.PragmaParsers = map[string]pragmaParser{
 		"tempo":  parseTempo,
 		"sample": parseSample,
 		"wave":   parseWave,
@@ -43,7 +43,7 @@ func New(opts ...func(*Parser)) *Parser {
 		"srand":  parseSrandPragma,
 	}
 
-	p.funcParsers = map[lexer.Token]FunctionParser{
+	p.FuncParsers = map[lexer.Token]FunctionParser{
 		lexer.IdentToken("seq"):    parseSequence,
 		lexer.AtToken{}:            parseSequence,
 		lexer.IdentToken("rand"):   makeSingleArgValueFnParser("rand", common.Random),

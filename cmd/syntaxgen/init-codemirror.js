@@ -3,11 +3,11 @@
 function initCodeMirror() {
     CodeMirror.defineSimpleMode('waver', {
         start: [
-            { regex: /(?:filter|inst|sample|srand|stop|tempo|wave)\b/, token: 'comment' }, // keyword
-            { regex: /(?:maj|maj7|maj9|min|min7|min9)\b/, token: 'variable-2' },
-            { regex: /(?:concat|down|loop|rand|repeat|seq|up)\b/, token: 'variable-2' },
-            { regex: /(?:bits|eucl|eucl')\b/, token: 'variable-3' },
-            { regex: /(?:_|_dur|true|false)\b/, token: 'variable-3' },
+            { regex: /(?:{{ stringsJoin .Pragmas "|" }})\b/, token: 'comment' }, // keyword
+            { regex: /(?:{{ stringsJoin .StdFunctions "|" }})\b/, token: 'variable-2' },
+            { regex: /(?:{{ stringsJoin .Functions "|" }})\b/, token: 'variable-2' },
+            { regex: /(?:{{ stringsJoin .Modifiers "|" }})\b/, token: 'variable-3' },
+            { regex: /(?:{{ stringsJoin .Identifiers "|" }})\b/, token: 'variable-3' },
             { regex: /".*"/, token: 'string' },
             { regex: /'.*'/, token: 'string' },
             { regex: /#.*/, sol: true, token: 'meta' },
@@ -19,8 +19,8 @@ function initCodeMirror() {
             // notes
             { regex: /\b[ABCDEFG][sb]?\d\b/, token: 'keyword' },
             // filters tokens (variable-3)
-            { regex: /(?:adsr|am|delay|dist|distortion|exp|flanger|movexp|pan|ratio|swingexp|swingpan|timeshift|vibrato)\b/, token: 'variable-3' },
-            { regex: /(?:abs|abstime|amp|amplitude|attackLen|attackLevel|attacklen|attacklevel|carrier|carrierctx|decayLen|decayLevel|decaylen|decaylevel|fade|fadeout|feedback|freq|frequency|initialValue|initialvalue|int|interval|inverse|l|left|maxShift|maxshift|r|releaseLen|releaselen|right|shifter|shifterctx|speed|sustainLen|sustainlen|tempo|times|value)\b/, token: 'variable-3' },
+            { regex: /(?:{{ stringsJoin .Filters "|" }})\b/, token: 'variable-3' },
+            { regex: /(?:{{ stringsJoin .FilterOptions "|" }})\b/, token: 'variable-3' },
         ],
     });
 

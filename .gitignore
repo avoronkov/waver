@@ -10,3 +10,5 @@ node_modules
 /wasm/web/app.wasm
 /wasm/pwa
 /wasm/waver
+/vendor
+.*.sw[op]

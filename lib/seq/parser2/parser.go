@@ -21,9 +21,9 @@ type Parser struct {
 	tempoSetters []parser.TempoSetter
 	instSet      parser.InstrumentSet
 
-	modParsers    map[lexer.Token]ModParser
-	funcParsers   map[lexer.Token]FunctionParser
-	pragmaParsers map[string]pragmaParser
+	ModParsers    map[lexer.Token]ModParser
+	FuncParsers   map[lexer.Token]FunctionParser
+	PragmaParsers map[string]pragmaParser
 
 	userFunctions map[string]parser.UserFunction
 	userSignalers map[string][]types.Signaler
@@ -83,7 +83,7 @@ func (p *Parser) parseReader(reader io.Reader) error {
 		if _, ok := token.(lexer.EofToken); ok {
 			break
 		}
-		if _, ok := p.modParsers[token]; ok {
+		if _, ok := p.ModParsers[token]; ok {
 			err = p.parseSignalStatement(lx)
 		} else if _, ok := token.(lexer.HexToken); ok {
 			err = p.parseSignalStatement(lx)

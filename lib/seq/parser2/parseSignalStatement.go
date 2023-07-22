@@ -112,7 +112,7 @@ L:
 			break L
 		}
 
-		parser, ok := p.modParsers[token]
+		parser, ok := p.ModParsers[token]
 		if !ok {
 			break
 		}

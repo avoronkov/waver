@@ -32,7 +32,7 @@ func (p *Parser) parsePragma(lx *lexer.Lexer) error {
 		return fmt.Errorf("Expected pragma identifier, found: %v", pr)
 	}
 	ps := string(pragma)
-	parserFn, ok := p.pragmaParsers[ps]
+	parserFn, ok := p.PragmaParsers[ps]
 	if !ok {
 		return fmt.Errorf("Unknown pragma: %v", ps)
 	}
