@@ -23,6 +23,19 @@ func ParseSample(data []byte) (*Sample, error) {
 	return parseSample(f, int64(len(data)))
 }
 
+func ParseSampleFile(path string) (*Sample, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("Opening file '%v' failed: %w", path, err)
+	}
+	defer f.Close()
+	stat, err := f.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("Stat file '%v' failed: %w", path, err)
+	}
+	return parseSample(f, stat.Size())
+}
+
 func parseSample(f io.ReadSeeker, size int64) (*Sample, error) {
 	reader, err := wav.NewReader(f, size)
 	if err != nil {
@@ -58,7 +71,6 @@ func parseSample(f io.ReadSeeker, size int64) (*Sample, error) {
 	}
 	s.datalen = len(s.data)
 	return s, nil
-
 }
 
 func ReadSample(file string) (*Sample, error) {
@@ -120,3 +132,11 @@ func (s *Sample) Value(t float64, ctx *NoteCtx) float64 {
 }
 
 func (s *Sample) TimeLimited() {}
+
+func (s *Sample) Data() []float64 {
+	res := make([]float64, len(s.data))
+	for i, v := range s.data {
+		res[i] = float64(v) / maxInt16Value
+	}
+	return res
+}

@@ -1,6 +1,7 @@
 /waver
 /midisynth
 /controller
+/surfer
 /wasm/server
 /public
 *.wasm.gz
