@@ -10,22 +10,21 @@ import (
 	"github.com/avoronkov/waver/etc/std"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/lexer"
-	"github.com/avoronkov/waver/lib/seq/parser"
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 type Parser struct {
 	file string
 
-	seq          parser.Seq
-	tempoSetters []parser.TempoSetter
-	instSet      parser.InstrumentSet
+	seq          Seq
+	tempoSetters []TempoSetter
+	instSet      InstrumentSet
 
 	ModParsers    map[lexer.Token]ModParser
 	FuncParsers   map[lexer.Token]FunctionParser
 	PragmaParsers map[string]pragmaParser
 
-	userFunctions map[string]parser.UserFunction
+	userFunctions map[string]UserFunction
 	userSignalers map[string][]types.Signaler
 
 	scale notes.Scale

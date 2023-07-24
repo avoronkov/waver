@@ -1,4 +1,4 @@
-package parser
+package parser2
 
 import (
 	"github.com/avoronkov/waver/lib/midisynth/instruments"

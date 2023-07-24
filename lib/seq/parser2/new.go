@@ -4,13 +4,12 @@ import (
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/lexer"
-	"github.com/avoronkov/waver/lib/seq/parser"
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
 func New(opts ...func(*Parser)) *Parser {
 	p := &Parser{
-		userFunctions: make(map[string]parser.UserFunction),
+		userFunctions: make(map[string]UserFunction),
 		userSignalers: make(map[string][]types.Signaler),
 		tempo:         120,
 	}
@@ -59,7 +58,7 @@ func New(opts ...func(*Parser)) *Parser {
 	return p
 }
 
-func WithSeq(seq parser.Seq) func(*Parser) {
+func WithSeq(seq Seq) func(*Parser) {
 	return func(p *Parser) {
 		p.seq = seq
 	}
@@ -71,13 +70,13 @@ func WithScale(scale notes.Scale) func(*Parser) {
 	}
 }
 
-func WithTempoSetter(setter parser.TempoSetter) func(*Parser) {
+func WithTempoSetter(setter TempoSetter) func(*Parser) {
 	return func(p *Parser) {
 		p.tempoSetters = append(p.tempoSetters, setter)
 	}
 }
 
-func WithInstrumentSet(set parser.InstrumentSet) func(*Parser) {
+func WithInstrumentSet(set InstrumentSet) func(*Parser) {
 	return func(p *Parser) {
 		p.instSet = set
 	}

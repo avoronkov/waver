@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/avoronkov/waver/lib/seq/lexer"
-	"github.com/avoronkov/waver/lib/seq/parser"
 )
 
 func (p *Parser) parseAssignmentStatement(lx *lexer.Lexer) error {
@@ -80,7 +79,7 @@ func (p *Parser) parseUdf(lx *lexer.Lexer, name string, param string) error {
 	default:
 		return fmt.Errorf("Expected EOL at the end of assign statement, found: %v (%T)", endl, endl)
 	}
-	p.userFunctions[name] = parser.UserFunction{
+	p.userFunctions[name] = UserFunction{
 		Name: name,
 		Arg:  param,
 		Fn:   atom,
