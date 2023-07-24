@@ -1,6 +1,6 @@
 //go:build !js
 
-package parser2
+package parser
 
 import (
 	"log"

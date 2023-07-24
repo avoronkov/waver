@@ -23,7 +23,7 @@ import (
 	"github.com/avoronkov/waver/lib/project"
 	"github.com/avoronkov/waver/lib/seq"
 	"github.com/avoronkov/waver/lib/seq/common"
-	parser "github.com/avoronkov/waver/lib/seq/parser2"
+	"github.com/avoronkov/waver/lib/seq/parser"
 	"github.com/avoronkov/waver/lib/share"
 )
 

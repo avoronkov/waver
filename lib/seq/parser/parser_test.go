@@ -1,4 +1,4 @@
-package parser2
+package parser
 
 import (
 	"strings"
@@ -13,7 +13,7 @@ import (
 
 type TestSeq struct {
 	signalers []types.Signaler
-	vars map[string]types.ValueFn
+	vars      map[string]types.ValueFn
 }
 
 func (t *TestSeq) Add(s types.Signaler) {
@@ -79,7 +79,7 @@ func TestVarAssignment(t *testing.T) {
 	if !ok {
 		t.Fatalf("Variable 'x' not found in %v", seq.vars)
 	}
-	
+
 	val := v.Val(0, types.NewContext())
 	if val != common.Num(12) {
 		t.Errorf("Incorrect value of variable x: expected Num(12), found %v", val)

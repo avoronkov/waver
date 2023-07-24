@@ -14,7 +14,7 @@ import (
 	"github.com/avoronkov/waver/etc/std"
 	"github.com/avoronkov/waver/lib/midisynth/filters"
 	"github.com/avoronkov/waver/lib/seq/lexer"
-	"github.com/avoronkov/waver/lib/seq/parser2"
+	"github.com/avoronkov/waver/lib/seq/parser"
 	"github.com/avoronkov/waver/lib/utils"
 )
 
@@ -57,7 +57,7 @@ func main() {
 }
 
 type Params struct {
-	parser            *parser2.Parser
+	parser            *parser.Parser
 	Pragmas           []string
 	StdFunctions      []string
 	Functions         []string
@@ -71,7 +71,7 @@ type Params struct {
 
 func NewParams() *Params {
 	p := &Params{
-		parser: parser2.New(),
+		parser: parser.New(),
 	}
 	p.initPragmas()
 	p.initStdFunctions()

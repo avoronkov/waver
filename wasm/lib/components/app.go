@@ -6,7 +6,7 @@ import (
 
 	"github.com/avoronkov/waver/lib/midisynth"
 	"github.com/avoronkov/waver/lib/seq"
-	parser "github.com/avoronkov/waver/lib/seq/parser2"
+	"github.com/avoronkov/waver/lib/seq/parser"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
