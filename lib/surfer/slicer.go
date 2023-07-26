@@ -1,4 +1,4 @@
-package main
+package surfer
 
 func SlicesFromSamples(data []float64) [][]float64 {
 	result := [][]float64{}

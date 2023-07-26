@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/lib/surfer"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 	}
 
 	data := sample.Data()
-	slices := SlicesFromSamples(data)
+	slices := surfer.SlicesFromSamples(data)
 	for _, slice := range slices {
 		fmt.Printf("(%v) %v\n", len(slice), slice)
 	}
