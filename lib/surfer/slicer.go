@@ -60,3 +60,29 @@ func getSignedSlice(data []float64, idx int, sign float64) (int, []float64) {
 	}
 	return idx, res
 }
+
+func getHemisphere(data []float64) (slice []float64, sign int) {
+	sign = 0
+	res := []float64{}
+	for _, val := range data {
+		if val == 0 {
+			if sign != 0 {
+				break
+			}
+			res = append(res, 0.0)
+			continue
+		}
+		if sign > 0 && val < 0 {
+			break
+		}
+		if sign < 0 && val > 0 {
+			break
+		}
+		sign = 1
+		if val < 0 {
+			sign = -1
+		}
+		res = append(res, val)
+	}
+	return res, sign
+}

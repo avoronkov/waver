@@ -46,10 +46,14 @@ func InitInterpreter(forthFile, wavFile, outFile string) (*Interpreter, error) {
 		outFile:   outFile,
 	}
 	forth.WithFuncs(map[string]forth.StackFn{
-		"Play": in.Play,
-		"FF":   in.FastForward,
-		"Pos":  in.Position,
-		"Len":  in.Length,
+		"Play":     in.Play,
+		"|>":       in.Play,
+		"PlayBack": in.PlayBack,
+		"<|":       in.PlayBack,
+		"FF":       in.FastForward,
+		"Pos":      in.Position,
+		"Len":      in.Length,
+		"Goto":     in.Goto,
 	})(in.forth)
 
 	return in, nil
@@ -77,6 +81,20 @@ func (i *Interpreter) Play(f *forth.Forth) error {
 	return nil
 }
 
+func (i *Interpreter) PlayBack(f *forth.Forth) error {
+	if i.position <= 0 {
+		f.Stack.Push(0)
+		return nil
+	}
+	i.position--
+	slice := i.slices[i.position]
+	for j := len(slice) - 1; j >= 0; j-- {
+		i.output = append(i.output, slice[j])
+	}
+	f.Stack.Push(-1)
+	return nil
+}
+
 // Returns actual "shift"
 func (i *Interpreter) FastForward(f *forth.Forth) error {
 	shift, ok := f.Stack.Pop()
@@ -93,6 +111,22 @@ func (i *Interpreter) FastForward(f *forth.Forth) error {
 	log.Printf("Actual shift (%v): %v -> %v == %v", shift, i.position, newPos, actualShift)
 	i.position = newPos
 	f.Stack.Push(actualShift)
+	return nil
+}
+
+func (i *Interpreter) Goto(f *forth.Forth) error {
+	newPos, ok := f.Stack.Pop()
+	if !ok {
+		return forth.EmptyStack
+	}
+	if newPos < 0 {
+		newPos = 0
+	}
+	if newPos > i.slicesLen {
+		newPos = i.slicesLen
+	}
+	i.position = newPos
+	f.Stack.Push(i.position)
 	return nil
 }
 
