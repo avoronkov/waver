@@ -100,6 +100,7 @@ func setMapOptions(obj any, opts map[string]any) error {
 func setOptionByName(obj any, name string, f any) error {
 	typ := reflect.TypeOf(obj).Elem()
 	n := typ.NumField()
+	knownFields := []string{}
 	for i := 0; i < n; i++ {
 		fld := typ.Field(i)
 		tagsRaw := fld.Tag.Get("option")
@@ -112,8 +113,10 @@ func setOptionByName(obj any, name string, f any) error {
 			assignToField(v.Field(i), f)
 			return nil
 		}
+
+		knownFields = append(knownFields, fld.Name)
 	}
-	return fmt.Errorf("Cannot save option '%v' (%v) into %+v", name, f, obj)
+	return fmt.Errorf("Cannot save option '%v' (%v) into %+v (fields: %v)", name, f, obj, knownFields)
 }
 
 func setParamByTagName(obj any, name string, f any) {

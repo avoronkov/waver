@@ -56,6 +56,17 @@ func Loop(fns []StackFn) func(*Forth) error {
 	}
 }
 
+func Sequence(fns []StackFn) func(*Forth) error {
+	return func(f *Forth) error {
+		for _, fn := range fns {
+			if err := fn(f); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}
+
 func Message(msg string) func(*Forth) error {
 	return func(f *Forth) error {
 		fmt.Print(msg)
@@ -68,7 +79,7 @@ func ShowTop(f *Forth) error {
 	if !ok {
 		return EmptyStack
 	}
-	fmt.Print(v)
+	fmt.Println(v)
 	return nil
 }
 
@@ -95,6 +106,19 @@ func Minus(f *Forth) error {
 		return EmptyStack
 	}
 	f.Stack.Push(b - a)
+	return nil
+}
+
+func Multiply(f *Forth) error {
+	a, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	b, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	f.Stack.Push(a * b)
 	return nil
 }
 

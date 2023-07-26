@@ -3,6 +3,7 @@ package surfer
 import (
 	"encoding/binary"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/avoronkov/waver/lib/forth"
@@ -46,6 +47,9 @@ func InitInterpreter(forthFile, wavFile, outFile string) (*Interpreter, error) {
 	}
 	forth.WithFuncs(map[string]forth.StackFn{
 		"Play": in.Play,
+		"FF":   in.FastForward,
+		"Pos":  in.Position,
+		"Len":  in.Length,
 	})(in.forth)
 
 	return in, nil
@@ -60,6 +64,8 @@ func (i *Interpreter) Run() error {
 	return i.saveWavFile()
 }
 
+// "1" if Played successfully
+// "0" if EOF
 func (i *Interpreter) Play(f *forth.Forth) error {
 	if i.position >= i.slicesLen {
 		f.Stack.Push(0)
@@ -71,9 +77,39 @@ func (i *Interpreter) Play(f *forth.Forth) error {
 	return nil
 }
 
+// Returns actual "shift"
+func (i *Interpreter) FastForward(f *forth.Forth) error {
+	shift, ok := f.Stack.Pop()
+	if !ok {
+		return forth.EmptyStack
+	}
+	newPos := i.position + shift
+	if newPos > i.slicesLen {
+		newPos = i.slicesLen
+	} else if newPos < 0 {
+		newPos = 0
+	}
+	actualShift := newPos - i.position
+	log.Printf("Actual shift (%v): %v -> %v == %v", shift, i.position, newPos, actualShift)
+	i.position = newPos
+	f.Stack.Push(actualShift)
+	return nil
+}
+
+func (i *Interpreter) Position(f *forth.Forth) error {
+	f.Stack.Push(i.position)
+	return nil
+}
+
+func (i *Interpreter) Length(f *forth.Forth) error {
+	f.Stack.Push(i.slicesLen)
+	return nil
+}
+
 const maxInt16Value = float64((1 << 15) + 1)
 
 func (i *Interpreter) saveWavFile() error {
+	log.Printf("Saving file: %v", i.outFile)
 	meta := wav.File{
 		Channels:        1,
 		SampleRate:      44100,
@@ -81,7 +117,7 @@ func (i *Interpreter) saveWavFile() error {
 	}
 	f, err := os.Create(i.outFile)
 	if err != nil {
-		return nil
+		return err
 	}
 	defer f.Close()
 	writer, err := meta.NewWriter(f)

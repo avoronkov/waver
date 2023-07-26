@@ -1,28 +1,32 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/avoronkov/waver/lib/midisynth/waves"
 	"github.com/avoronkov/waver/lib/surfer"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatal("Not enough arguments")
+	flag.Parse()
+	if wavFile == "" {
+		log.Fatal("Wav file is not specified")
 	}
-	file := os.Args[1]
-	sample, err := waves.ParseSampleFile(file)
-	if err != nil {
-		log.Fatalf("ParseSampleFile failed: %v", err)
+	if forthFile == "" {
+		log.Fatal("Forth file is not specified")
+	}
+	if outFile == "" {
+		log.Fatal("Output file is not specified")
 	}
 
-	data := sample.Data()
-	slices := surfer.SlicesFromSamples(data)
-	for _, slice := range slices {
-		fmt.Printf("(%v) %v\n", len(slice), slice)
+	in, err := surfer.InitInterpreter(forthFile, wavFile, outFile)
+	if err != nil {
+		log.Fatal(err)
 	}
-	fmt.Println(len(slices))
+	if err := in.Run(); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintln(os.Stderr, "OK")
 }

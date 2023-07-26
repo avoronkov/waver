@@ -4,12 +4,69 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/avoronkov/waver/lib/forth"
 )
+
+type Parser struct {
+	forth *forth.Forth
+}
+
+func (p *Parser) Parse(r io.Reader) (*forth.Forth, error) {
+	sc := bufio.NewScanner(r)
+	sc.Split(bufio.ScanLines)
+	tokens := []string{}
+	for sc.Scan() {
+		line := sc.Text()
+		log.Printf("Parsing line: %v", line)
+		if strings.HasPrefix(strings.TrimSpace(line), "#") {
+			log.Printf("Skipping line: %v", line)
+			continue
+		}
+		tokens = append(tokens, strings.Fields(line)...)
+	}
+	if err := sc.Err(); err != nil {
+		return nil, err
+	}
+	err := p.parseTokens(tokens)
+	if err != nil {
+		return nil, err
+	}
+	return p.forth, nil
+}
+
+func (p *Parser) parseTokens(tokens []string) error {
+	program := []forth.StackFn{}
+	idx := 0
+	l := len(tokens)
+	for idx < l {
+		log.Printf("Parsing token %v at %v", tokens[idx], idx)
+		newIdx, err := p.parseDefine(tokens, idx)
+		if err != nil {
+			return err
+		}
+		defineParsed := idx != newIdx
+		idx = newIdx
+		// parse possible define again
+		if defineParsed {
+			continue
+		}
+		fn, newIdx, err := p.parseAtom(tokens, idx)
+		if err != nil {
+			return err
+		}
+		program = append(program, fn)
+		idx = newIdx
+	}
+
+	forth.WithProgram(program)(p.forth)
+
+	return nil
+}
 
 func ParseFile(file string) (*forth.Forth, error) {
 	f, err := os.Open(file)
@@ -21,50 +78,30 @@ func ParseFile(file string) (*forth.Forth, error) {
 }
 
 func Parse(r io.Reader) (*forth.Forth, error) {
-	sc := bufio.NewScanner(r)
-	sc.Split(bufio.ScanLines)
-	tokens := []string{}
-	for sc.Scan() {
-		line := sc.Text()
-		tokens = append(tokens, strings.Fields(line)...)
+	parser := &Parser{
+		forth: forth.New(),
 	}
-	if err := sc.Err(); err != nil {
-		return nil, err
-	}
-	return parseTokens(tokens)
+	return parser.Parse(r)
 }
 
 var funcs = map[string]forth.StackFn{
 	"+":    forth.Plus,
 	"-":    forth.Minus,
+	"*":    forth.Multiply,
 	"dup":  forth.Dup,
 	"drop": forth.Drop,
 	"top":  forth.ShowTop,
 }
 
-func parseTokens(tokens []string) (*forth.Forth, error) {
-	program := []forth.StackFn{}
-	idx := 0
-	l := len(tokens)
-	for idx < l {
-		fn, newIdx, err := parseAtom(tokens, idx)
-		if err != nil {
-			return nil, err
-		}
-		program = append(program, fn)
-		idx = newIdx
-	}
-
-	return forth.New(
-		forth.WithProgram(program),
-	), nil
-}
-
-func parseAtom(tokens []string, idx int) (forth.StackFn, int, error) {
+func (p *Parser) parseAtom(tokens []string, idx int) (forth.StackFn, int, error) {
 	token := tokens[idx]
 
 	if n, err := strconv.Atoi(token); err == nil {
 		return forth.Number(n), idx + 1, nil
+	}
+
+	if strings.HasPrefix(token, "\"") && strings.HasSuffix(token, "\"") {
+		return forth.Message(token), idx + 1, nil
 	}
 
 	if fn, ok := funcs[token]; ok {
@@ -72,13 +109,13 @@ func parseAtom(tokens []string, idx int) (forth.StackFn, int, error) {
 	}
 
 	if token == "[" {
-		return parseLoop(tokens, idx+1)
+		return p.parseLoop(tokens, idx+1)
 	}
 
 	return forth.Function(token), idx + 1, nil
 }
 
-func parseLoop(tokens []string, idx int) (forth.StackFn, int, error) {
+func (p *Parser) parseLoop(tokens []string, idx int) (forth.StackFn, int, error) {
 	l := len(tokens)
 	funcs := []forth.StackFn{}
 	for idx < l {
@@ -87,7 +124,7 @@ func parseLoop(tokens []string, idx int) (forth.StackFn, int, error) {
 			return forth.Loop(funcs), idx + 1, nil
 		}
 
-		fn, newIdx, err := parseAtom(tokens, idx)
+		fn, newIdx, err := p.parseAtom(tokens, idx)
 		if err != nil {
 			return nil, newIdx, err
 		}
@@ -95,4 +132,35 @@ func parseLoop(tokens []string, idx int) (forth.StackFn, int, error) {
 		idx = newIdx
 	}
 	return nil, idx, fmt.Errorf("Closing ']' not found")
+}
+
+func (p *Parser) parseDefine(tokens []string, idx int) (int, error) {
+	l := len(tokens)
+	token := tokens[idx]
+	if token != "define" {
+		return idx, nil
+	}
+
+	funcs := []forth.StackFn{}
+	idx++
+	if idx >= l {
+		return idx, fmt.Errorf("Unexpected EOF after 'define'")
+	}
+	name := tokens[idx]
+	idx++
+	for idx < l {
+		token := tokens[idx]
+		if token == ";" {
+			forth.WithFunc(name, forth.Sequence(funcs))(p.forth)
+			return idx + 1, nil
+		}
+
+		fn, newIdx, err := p.parseAtom(tokens, idx)
+		if err != nil {
+			return newIdx, err
+		}
+		funcs = append(funcs, fn)
+		idx = newIdx
+	}
+	return idx, fmt.Errorf("Token ';' not found")
 }
