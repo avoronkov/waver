@@ -50,6 +50,7 @@ func InitInterpreter(forthFile, wavFile, outFile string) (*Interpreter, error) {
 		"|>":       in.Play,
 		"PlayBack": in.PlayBack,
 		"<|":       in.PlayBack,
+		"NPlay":    in.NPlay,
 		"FF":       in.FastForward,
 		"Pos":      in.Position,
 		"Len":      in.Length,
@@ -78,6 +79,44 @@ func (i *Interpreter) Play(f *forth.Forth) error {
 	i.output = append(i.output, i.slices[i.position]...)
 	i.position++
 	f.Stack.Push(1)
+	return nil
+}
+
+func (i *Interpreter) NPlay(f *forth.Forth) error {
+	n, ok := f.Stack.Pop()
+	if !ok {
+		return forth.EmptyStack
+	}
+	if n > 0 {
+		cnt := 0
+		for j := 0; j < n; j++ {
+			if i.position >= i.slicesLen {
+				break
+			}
+			i.output = append(i.output, i.slices[i.position]...)
+			cnt++
+			i.position++
+		}
+		log.Printf("NPlay returns: %v", cnt)
+		f.Stack.Push(cnt)
+	} else if n < 0 {
+		cnt := 0
+		for j := 0; j > n; j-- {
+			if i.position <= 0 {
+				break
+			}
+			i.position--
+			slice := i.slices[i.position]
+			for k := len(slice) - 1; k >= 0; k-- {
+				i.output = append(i.output, slice[k])
+			}
+			cnt--
+		}
+		f.Stack.Push(cnt)
+
+	} else {
+		f.Stack.Push(0)
+	}
 	return nil
 }
 

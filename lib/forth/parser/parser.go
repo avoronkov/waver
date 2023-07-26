@@ -85,12 +85,16 @@ func Parse(r io.Reader) (*forth.Forth, error) {
 }
 
 var funcs = map[string]forth.StackFn{
-	"+":    forth.Plus,
-	"-":    forth.Minus,
-	"*":    forth.Multiply,
-	"dup":  forth.Dup,
-	"drop": forth.Drop,
-	"top":  forth.ShowTop,
+	"+":     forth.Plus,
+	"-":     forth.Minus,
+	"*":     forth.Multiply,
+	"dup":   forth.Dup,
+	"drop":  forth.Drop,
+	"top":   forth.ShowTop,
+	"stack": forth.ShowStack,
+	"and":   forth.And,
+	"or":    forth.Or,
+	"not":   forth.Not,
 }
 
 func (p *Parser) parseAtom(tokens []string, idx int) (forth.StackFn, int, error) {

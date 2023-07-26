@@ -83,6 +83,11 @@ func ShowTop(f *Forth) error {
 	return nil
 }
 
+func ShowStack(f *Forth) error {
+	fmt.Println(f.Stack.stack)
+	return nil
+}
+
 func Plus(f *Forth) error {
 	a, ok := f.Stack.Pop()
 	if !ok {
@@ -119,6 +124,53 @@ func Multiply(f *Forth) error {
 		return EmptyStack
 	}
 	f.Stack.Push(a * b)
+	return nil
+}
+
+func And(f *Forth) error {
+	a, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	b, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	res := 0
+	if a != 0 && b != 0 {
+		res = 1
+	}
+	f.Stack.Push(res)
+	return nil
+}
+
+func Or(f *Forth) error {
+	a, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	b, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	res := 0
+	if a != 0 || b != 0 {
+		res = 1
+	}
+	f.Stack.Push(res)
+	return nil
+}
+
+func Not(f *Forth) error {
+	a, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	res := 0
+	if a == 0 {
+		res = 1
+	}
+	f.Stack.Push(res)
 	return nil
 }
 
