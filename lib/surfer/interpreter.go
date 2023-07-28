@@ -108,7 +108,7 @@ func (i *Interpreter) NPlay(f *forth.Forth) error {
 			i.position--
 			slice := i.slices[i.position]
 			for k := len(slice) - 1; k >= 0; k-- {
-				i.output = append(i.output, slice[k])
+				i.output = append(i.output, -slice[k])
 			}
 			cnt--
 		}
@@ -128,7 +128,7 @@ func (i *Interpreter) PlayBack(f *forth.Forth) error {
 	i.position--
 	slice := i.slices[i.position]
 	for j := len(slice) - 1; j >= 0; j-- {
-		i.output = append(i.output, slice[j])
+		i.output = append(i.output, -slice[j])
 	}
 	f.Stack.Push(-1)
 	return nil
