@@ -1,6 +1,7 @@
 package surfer
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"log"
@@ -9,7 +10,8 @@ import (
 	"github.com/avoronkov/waver/lib/forth"
 	"github.com/avoronkov/waver/lib/forth/parser"
 	"github.com/avoronkov/waver/lib/midisynth/waves"
-	"github.com/cryptix/wav"
+	"github.com/avoronkov/waver/lib/utils"
+	"github.com/avoronkov/waver/wav"
 )
 
 type Interpreter struct {
@@ -22,7 +24,12 @@ type Interpreter struct {
 	forth *forth.Forth
 
 	// Output
-	output  []float64
+	outputLeft  []float64
+	outputRight []float64
+
+	levelLeft  float64
+	levelRight float64
+
 	outFile string
 }
 
@@ -40,10 +47,12 @@ func InitInterpreter(forthFile, wavFile, outFile string) (*Interpreter, error) {
 	slices := SlicesFromSamples(sample.Data())
 
 	in := &Interpreter{
-		slices:    slices,
-		slicesLen: len(slices),
-		forth:     frt,
-		outFile:   outFile,
+		slices:     slices,
+		slicesLen:  len(slices),
+		forth:      frt,
+		outFile:    outFile,
+		levelLeft:  1.0,
+		levelRight: 1.0,
 	}
 	forth.WithFuncs(map[string]forth.StackFn{
 		"Play":     in.Play,
@@ -76,10 +85,22 @@ func (i *Interpreter) Play(f *forth.Forth) error {
 		f.Stack.Push(0)
 		return nil
 	}
-	i.output = append(i.output, i.slices[i.position]...)
+	i.writeOutput(i.slices[i.position]...)
 	i.position++
 	f.Stack.Push(1)
 	return nil
+}
+
+func (i *Interpreter) writeOutput(values ...float64) {
+	valuesLeft := utils.SliceMap(values, func(x float64) float64 {
+		return x * i.levelLeft
+	})
+	i.outputLeft = append(i.outputLeft, valuesLeft...)
+
+	valuesRight := utils.SliceMap(values, func(x float64) float64 {
+		return x * i.levelRight
+	})
+	i.outputRight = append(i.outputRight, valuesRight...)
 }
 
 func (i *Interpreter) NPlay(f *forth.Forth) error {
@@ -93,7 +114,7 @@ func (i *Interpreter) NPlay(f *forth.Forth) error {
 			if i.position >= i.slicesLen {
 				break
 			}
-			i.output = append(i.output, i.slices[i.position]...)
+			i.writeOutput(i.slices[i.position]...)
 			cnt++
 			i.position++
 		}
@@ -108,7 +129,7 @@ func (i *Interpreter) NPlay(f *forth.Forth) error {
 			i.position--
 			slice := i.slices[i.position]
 			for k := len(slice) - 1; k >= 0; k-- {
-				i.output = append(i.output, -slice[k])
+				i.writeOutput(-slice[k])
 			}
 			cnt--
 		}
@@ -128,7 +149,7 @@ func (i *Interpreter) PlayBack(f *forth.Forth) error {
 	i.position--
 	slice := i.slices[i.position]
 	for j := len(slice) - 1; j >= 0; j-- {
-		i.output = append(i.output, -slice[j])
+		i.writeOutput(-slice[j])
 	}
 	f.Stack.Push(-1)
 	return nil
@@ -183,27 +204,30 @@ const maxInt16Value = float64((1 << 15) + 1)
 
 func (i *Interpreter) saveWavFile() error {
 	log.Printf("Saving file: %v", i.outFile)
-	meta := wav.File{
-		Channels:        1,
-		SampleRate:      44100,
-		SignificantBits: 16,
+	w := wav.CreateDefaultWav()
+	buffer := new(bytes.Buffer)
+
+	for idx, sampleLeft := range i.outputLeft {
+		l := uint16(sampleLeft * maxInt16Value)
+		bytesLeft := []byte{0, 0}
+		binary.LittleEndian.PutUint16(bytesLeft, l)
+		_, _ = buffer.Write(bytesLeft)
+
+		sampleRight := i.outputRight[idx]
+		r := uint16(sampleRight * maxInt16Value)
+		bytesRight := []byte{0, 0}
+		binary.LittleEndian.PutUint16(bytesRight, r)
+		_, _ = buffer.Write(bytesRight)
 	}
+	w.Data = &wav.DataBytes{
+		Samples: buffer.Bytes(),
+	}
+
 	f, err := os.Create(i.outFile)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	writer, err := meta.NewWriter(f)
-	if err != nil {
-		return err
-	}
 
-	for _, sample := range i.output {
-		u := uint16(sample * maxInt16Value)
-		bytes := []byte{0, 0}
-		binary.LittleEndian.PutUint16(bytes, u)
-		writer.WriteSample(bytes)
-	}
-
-	return writer.Close()
+	return w.Write(f)
 }
