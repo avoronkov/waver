@@ -5,7 +5,7 @@ import "log"
 type StackFn func(s *Forth) error
 
 type Forth struct {
-	Stack *Stack
+	Stack *Stack[any]
 
 	funcs map[string]StackFn
 
@@ -14,7 +14,7 @@ type Forth struct {
 
 func New(opts ...func(*Forth)) *Forth {
 	f := &Forth{
-		Stack: NewStack(),
+		Stack: NewStack[any](),
 		funcs: map[string]StackFn{},
 	}
 

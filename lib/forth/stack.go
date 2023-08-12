@@ -1,30 +1,32 @@
 package forth
 
-type Stack struct {
-	stack []int
+type Stack[T any] struct {
+	stack []T
 }
 
-func NewStack() *Stack {
-	return &Stack{}
+func NewStack[T any]() *Stack[T] {
+	return &Stack[T]{}
 }
 
-func (s *Stack) Push(value int) {
+func (s *Stack[T]) Push(value T) {
 	s.stack = append(s.stack, value)
 }
 
-func (s *Stack) Pop() (int, bool) {
+func (s *Stack[T]) Pop() (T, bool) {
 	if l := len(s.stack); l > 0 {
 		value := s.stack[l-1]
 		s.stack = s.stack[0 : l-1]
 		return value, true
 	}
-	return 0, false
+	var t T
+	return t, false
 }
 
-func (s *Stack) Top() (int, bool) {
+func (s *Stack[T]) Top() (T, bool) {
 	if l := len(s.stack); l > 0 {
 		value := s.stack[l-1]
 		return value, true
 	}
-	return 0, false
+	var t T
+	return t, false
 }

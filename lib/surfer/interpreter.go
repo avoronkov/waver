@@ -104,9 +104,9 @@ func (i *Interpreter) writeOutput(values ...float64) {
 }
 
 func (i *Interpreter) NPlay(f *forth.Forth) error {
-	n, ok := f.Stack.Pop()
-	if !ok {
-		return forth.EmptyStack
+	n, err := forth.Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
 	if n > 0 {
 		cnt := 0
@@ -157,9 +157,9 @@ func (i *Interpreter) PlayBack(f *forth.Forth) error {
 
 // Returns actual "shift"
 func (i *Interpreter) FastForward(f *forth.Forth) error {
-	shift, ok := f.Stack.Pop()
-	if !ok {
-		return forth.EmptyStack
+	shift, err := forth.Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
 	newPos := i.position + shift
 	if newPos > i.slicesLen {
@@ -175,8 +175,8 @@ func (i *Interpreter) FastForward(f *forth.Forth) error {
 }
 
 func (i *Interpreter) Goto(f *forth.Forth) error {
-	newPos, ok := f.Stack.Pop()
-	if !ok {
+	newPos, err := forth.Pop[int](f.Stack)
+	if err != nil {
 		return forth.EmptyStack
 	}
 	if newPos < 0 {

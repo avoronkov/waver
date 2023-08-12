@@ -12,6 +12,19 @@ func Number(n int) func(*Forth) error {
 	}
 }
 
+func Pop[T any](s *Stack[any]) (val T, err error) {
+	item, ok := s.Pop()
+	if !ok {
+		err = EmptyStack
+		return
+	}
+	if a, ok := item.(T); ok {
+		return a, nil
+	}
+	err = fmt.Errorf("Unexpected value on stack: %v (%T), extected %T", item, item, val)
+	return
+}
+
 func Dup(f *Forth) error {
 	// log.Printf("Dup: %v", s.stack)
 	v, ok := f.Stack.Pop()
@@ -89,52 +102,52 @@ func ShowStack(f *Forth) error {
 }
 
 func Plus(f *Forth) error {
-	a, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	a, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
-	b, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	b, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
 	f.Stack.Push(a + b)
 	return nil
 }
 
 func Minus(f *Forth) error {
-	a, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	a, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
-	b, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	b, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
 	f.Stack.Push(b - a)
 	return nil
 }
 
 func Multiply(f *Forth) error {
-	a, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	a, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
-	b, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	b, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
 	f.Stack.Push(a * b)
 	return nil
 }
 
 func And(f *Forth) error {
-	a, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	a, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
-	b, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	b, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
 	res := 0
 	if a != 0 && b != 0 {
@@ -145,13 +158,13 @@ func And(f *Forth) error {
 }
 
 func Or(f *Forth) error {
-	a, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	a, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
-	b, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	b, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
 	res := 0
 	if a != 0 || b != 0 {
@@ -162,9 +175,9 @@ func Or(f *Forth) error {
 }
 
 func Not(f *Forth) error {
-	a, ok := f.Stack.Pop()
-	if !ok {
-		return EmptyStack
+	a, err := Pop[int](f.Stack)
+	if err != nil {
+		return err
 	}
 	res := 0
 	if a == 0 {
