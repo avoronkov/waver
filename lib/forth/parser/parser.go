@@ -84,7 +84,7 @@ func Parse(r io.Reader) (*forth.Forth, error) {
 	return parser.Parse(r)
 }
 
-var funcs = map[string]forth.StackFn{
+var Funcs = map[string]forth.StackFn{
 	"+":     forth.Plus,
 	"-":     forth.Minus,
 	"*":     forth.Multiply,
@@ -108,7 +108,7 @@ func (p *Parser) parseAtom(tokens []string, idx int) (forth.StackFn, int, error)
 		return forth.Message(token), idx + 1, nil
 	}
 
-	if fn, ok := funcs[token]; ok {
+	if fn, ok := Funcs[token]; ok {
 		return fn, idx + 1, nil
 	}
 

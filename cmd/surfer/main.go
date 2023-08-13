@@ -21,11 +21,9 @@ func main() {
 		log.Fatal("Output file is not specified")
 	}
 
-	in, err := surfer.InitInterpreter(forthFile, wavFile, outFile)
+	in := surfer.NewInterpreter()
+	err := in.Run(forthFile, wavFile, outFile)
 	if err != nil {
-		log.Fatal(err)
-	}
-	if err := in.Run(); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Fprintln(os.Stderr, "OK")

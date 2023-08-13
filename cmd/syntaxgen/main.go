@@ -18,18 +18,21 @@ import (
 	"github.com/avoronkov/waver/lib/utils"
 )
 
-//go:embed syntax.vim
-var syntaxVim string
+//go:embed pelia.vim
+var peliaVim string
+
+//go:embed surfer.vim
+var surferVim string
 
 //go:embed init-codemirror.js
 var initCodemirrorJs string
 
-func processTemplate(params *Params, name, tpl, file string) error {
+func processTemplate(params any, name, tpl, file string) error {
 	t := template.Must(template.New(name).Funcs(template.FuncMap{
 		"stringsJoin": strings.Join,
 	}).Parse(tpl))
 
-	f, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC, 0644)
+	f, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,7 +45,7 @@ func main() {
 	params := NewParams()
 
 	log.Println("Generate pelia.vim...")
-	err := processTemplate(params, "pelia.vim", syntaxVim, "../../tools/vim/syntax/pelia.vim")
+	err := processTemplate(params, "pelia.vim", peliaVim, "../../tools/vim/syntax/pelia.vim")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,6 +55,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	surferParams := InitSurferParams()
+	log.Printf("Generate surfer.vim...")
+	err = processTemplate(surferParams, "surfer.vim", surferVim, "../../tools/vim/syntax/surfer.vim")
 
 	log.Printf("OK")
 }

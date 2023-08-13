@@ -31,30 +31,45 @@ type Interpreter struct {
 	levelRight float64
 
 	outFile string
+
+	// public
+	Functions map[string]forth.StackFn
 }
 
-func InitInterpreter(forthFile, wavFile, outFile string) (*Interpreter, error) {
+func NewInterpreter() *Interpreter {
+	in := &Interpreter{
+		levelLeft:  1.0,
+		levelRight: 1.0,
+	}
+	in.initFunctions()
+
+	return in
+}
+
+func (in *Interpreter) Run(forthFile, wavFile, outFile string) error {
 	frt, err := parser.ParseFile(forthFile)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	sample, err := waves.ParseSampleFile(wavFile)
 	if err != nil {
-		return nil, fmt.Errorf("ParseSampleFile failed: %v", err)
+		return fmt.Errorf("ParseSampleFile failed: %v", err)
 	}
 
 	slices := SlicesFromSamples(sample.Data())
 
-	in := &Interpreter{
-		slices:     slices,
-		slicesLen:  len(slices),
-		forth:      frt,
-		outFile:    outFile,
-		levelLeft:  1.0,
-		levelRight: 1.0,
-	}
-	forth.WithFuncs(map[string]forth.StackFn{
+	in.slices = slices
+	in.slicesLen = len(slices)
+	in.forth = frt
+	in.outFile = outFile
+	forth.WithFuncs(in.Functions)(in.forth)
+
+	return in.run()
+}
+
+func (in *Interpreter) initFunctions() {
+	in.Functions = map[string]forth.StackFn{
 		"Play":     in.Play,
 		"|>":       in.Play,
 		"PlayBack": in.PlayBack,
@@ -64,12 +79,10 @@ func InitInterpreter(forthFile, wavFile, outFile string) (*Interpreter, error) {
 		"Pos":      in.Position,
 		"Len":      in.Length,
 		"Goto":     in.Goto,
-	})(in.forth)
-
-	return in, nil
+	}
 }
 
-func (i *Interpreter) Run() error {
+func (i *Interpreter) run() error {
 	err := i.forth.Run()
 	if err != nil {
 		return err
