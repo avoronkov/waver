@@ -4,7 +4,7 @@
 if exists('b:current_syntax') | finish|  endif
 
 " Keywords
-syn keyword celPragmaSt filter inst sample srand stop tempo wave
+syn keyword celPragmaSt filter form inst sample srand stop tempo wave
 
 syn keyword celFunction maj maj7 maj9 min min7 min9
 syn keyword celRepeat concat down loop rand repeat seq up

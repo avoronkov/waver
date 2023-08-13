@@ -37,6 +37,7 @@ func New(opts ...func(*Parser)) *Parser {
 		"sample": parseSample,
 		"wave":   parseWave,
 		"inst":   parseWave,
+		"form":   parseForm,
 		"filter": parseFilter,
 		"stop":   parseStopPragma,
 		"srand":  parseSrandPragma,
