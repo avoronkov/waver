@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/avoronkov/waver/lib/forth/parser"
@@ -27,6 +28,7 @@ func (p *SurferParams) initStdFunctions() {
 	for fn := range parser.Funcs {
 		p.StdFunctions = append(p.StdFunctions, fn)
 	}
+	sort.Strings(p.StdFunctions)
 }
 
 func (p *SurferParams) initFunctions() {
@@ -37,4 +39,5 @@ func (p *SurferParams) initFunctions() {
 		}
 		p.Functions = append(p.Functions, fn)
 	}
+	sort.Strings(p.Functions)
 }

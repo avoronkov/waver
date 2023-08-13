@@ -6,8 +6,8 @@ if exists('b:current_syntax') | finish|  endif
 " Keywords
 syn keyword celPragmaSt define
 
-syn keyword celStdFunction - dup not and or + * drop top stack
-syn keyword celFunction Play PlayBack FF Pos Len NPlay Goto
+syn keyword celStdFunction * + - and drop dup not or stack top
+syn keyword celFunction FF Goto Len NPlay Play PlayBack Pos
 
 syn match celNumber '\<\d\+\>'
 syn match celNumber '\<\d\+\.\d\+\>'
