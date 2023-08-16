@@ -79,6 +79,7 @@ func (in *Interpreter) initFunctions() {
 		"Pos":      in.Position,
 		"Len":      in.Length,
 		"Goto":     in.Goto,
+		"Blank":    in.Blank,
 	}
 }
 
@@ -131,7 +132,6 @@ func (i *Interpreter) NPlay(f *forth.Forth) error {
 			cnt++
 			i.position++
 		}
-		log.Printf("NPlay returns: %v", cnt)
 		f.Stack.Push(cnt)
 	} else if n < 0 {
 		cnt := 0
@@ -181,7 +181,6 @@ func (i *Interpreter) FastForward(f *forth.Forth) error {
 		newPos = 0
 	}
 	actualShift := newPos - i.position
-	log.Printf("Actual shift (%v): %v -> %v == %v", shift, i.position, newPos, actualShift)
 	i.position = newPos
 	f.Stack.Push(actualShift)
 	return nil
@@ -210,6 +209,19 @@ func (i *Interpreter) Position(f *forth.Forth) error {
 
 func (i *Interpreter) Length(f *forth.Forth) error {
 	f.Stack.Push(i.slicesLen)
+	return nil
+}
+
+// Adds "N" blank samples.
+// Returns "void".
+func (i *Interpreter) Blank(f *forth.Forth) error {
+	n, err := forth.Pop[int](f.Stack)
+	if err != nil {
+		return err
+	}
+	for j := 0; j < n; j++ {
+		i.writeOutput(0.0)
+	}
 	return nil
 }
 

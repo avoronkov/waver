@@ -25,6 +25,7 @@ func Pop[T any](s *Stack[any]) (val T, err error) {
 	return
 }
 
+// ( n - n n )
 func Dup(f *Forth) error {
 	// log.Printf("Dup: %v", s.stack)
 	v, ok := f.Stack.Pop()
@@ -36,12 +37,64 @@ func Dup(f *Forth) error {
 	return nil
 }
 
+// ( n - )
 func Drop(f *Forth) error {
 	// log.Printf("Drop: %v", s.stack)
 	_, ok := f.Stack.Pop()
 	if !ok {
 		return EmptyStack
 	}
+	return nil
+}
+
+// ( n1 n2 - n2 n1 )
+func Swap(f *Forth) error {
+	a, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	b, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	f.Stack.Push(a)
+	f.Stack.Push(b)
+	return nil
+}
+
+// ( n1 n2 - n1 n2 n1 )
+func Over(f *Forth) error {
+	n2, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	n1, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	f.Stack.Push(n1)
+	f.Stack.Push(n2)
+	f.Stack.Push(n1)
+	return nil
+}
+
+// ( n1 n2 n3 - n2 n3 n1 )
+func Rot(f *Forth) error {
+	n3, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	n2, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	n1, ok := f.Stack.Pop()
+	if !ok {
+		return EmptyStack
+	}
+	f.Stack.Push(n2)
+	f.Stack.Push(n3)
+	f.Stack.Push(n1)
 	return nil
 }
 
