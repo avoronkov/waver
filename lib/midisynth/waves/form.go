@@ -71,6 +71,11 @@ func parseFormInput(in io.Reader) (*Form, error) {
 
 func (f *Form) Value(tm float64, ctx *NoteCtx) float64 {
 	t := tm - ctx.Period*float64(int(tm/ctx.Period))
+	tf := t * ctx.Freq * float64(f.nValues)
 	idx := int(t * ctx.Freq * float64(f.nValues))
-	return f.values[idx]
+	dtf := tf - float64(idx)
+	y1 := f.values[idx]
+	y2 := f.values[(idx+1)%f.nValues]
+	y := y1 + dtf*(y2-y1)
+	return y
 }
