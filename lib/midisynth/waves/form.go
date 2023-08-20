@@ -22,7 +22,7 @@ func ParseFormFile(path string) (*Form, error) {
 		return nil, err
 	}
 	defer f.Close()
-	return parseFormInput(f)
+	return ParseFormInput(f)
 }
 
 func abs(x int) int {
@@ -32,7 +32,7 @@ func abs(x int) int {
 	return -x
 }
 
-func parseFormInput(in io.Reader) (*Form, error) {
+func ParseFormInput(in io.Reader) (*Form, error) {
 	scanner := bufio.NewScanner(in)
 	scanner.Split(bufio.ScanLines)
 	intValues := []int{}
