@@ -137,6 +137,25 @@ func parseForm(p *Parser, fields []lexer.Token, options []map[string]any) error 
 	return nil
 }
 
+// %lagrange name "path"
+func parseLagrange(p *Parser, fields []lexer.Token, options []map[string]any) error {
+	if len(fields) != 2 {
+		return fmt.Errorf("Incorrect number of arguments for 'sample' pragma: %v", fields)
+	}
+	name := string(fields[0].(lexer.IdentToken))
+	filename := fields[1].(lexer.StringLiteral)
+	in, err := config.ParseLagrange(
+		string(filename),
+		append(options, p.globalFilters...),
+		config.Param("tempo", p.tempo),
+	)
+	if err != nil {
+		return err
+	}
+	p.instSet.AddInstrument(name, in)
+	return nil
+}
+
 // %tempo 130
 func parseTempo(p *Parser, fields []lexer.Token, options []map[string]any) error {
 	if len(fields) != 1 {

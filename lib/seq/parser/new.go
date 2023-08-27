@@ -33,14 +33,15 @@ func New(opts ...func(*Parser)) *Parser {
 
 	// Init pragma parsers
 	p.PragmaParsers = map[string]pragmaParser{
-		"tempo":  parseTempo,
-		"sample": parseSample,
-		"wave":   parseWave,
-		"inst":   parseWave,
-		"form":   parseForm,
-		"filter": parseFilter,
-		"stop":   parseStopPragma,
-		"srand":  parseSrandPragma,
+		"tempo":    parseTempo,
+		"sample":   parseSample,
+		"wave":     parseWave,
+		"inst":     parseWave,
+		"form":     parseForm,
+		"lagrange": parseLagrange,
+		"filter":   parseFilter,
+		"stop":     parseStopPragma,
+		"srand":    parseSrandPragma,
 	}
 
 	p.FuncParsers = map[lexer.Token]FunctionParser{

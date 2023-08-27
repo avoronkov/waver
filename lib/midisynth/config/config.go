@@ -211,6 +211,22 @@ func ParseForm(fileName string, filtersData []map[string]any, params ...*param) 
 	return instruments.NewInstrument(w, fs...), nil
 }
 
+func ParseLagrange(fileName string, filtersData []map[string]any, params ...*param) (*instruments.Instrument, error) {
+	w, err := waves.ParseLagrangeFile(fileName)
+	if err != nil {
+		return nil, err
+	}
+	var fs []filters.Filter
+	for _, f := range filtersData {
+		fx, err := handleFilter(f, params...)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to handle filter: %w", err)
+		}
+		fs = append(fs, fx)
+	}
+	return instruments.NewInstrument(w, fs...), nil
+}
+
 func handleFilter(f map[string]any, params ...*param) (filters.Filter, error) {
 	if len(f) != 1 {
 		return nil, fmt.Errorf("Filter description should contain exactly 1 element: %+v", f)
