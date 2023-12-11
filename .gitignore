@@ -12,4 +12,5 @@ node_modules
 /wasm/pwa
 /wasm/waver
 /vendor
+/result
 .*.sw[op]
