@@ -2,24 +2,29 @@ package unisynth
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"log/slog"
 	"time"
 
-	oto "github.com/hajimehoshi/oto/v2"
-
 	"github.com/avoronkov/waver/lib/midisynth/multiplayer"
+	"github.com/avoronkov/waver/lib/midisynth/output/pulse"
 	"github.com/avoronkov/waver/lib/midisynth/signals"
 	"github.com/avoronkov/waver/lib/midisynth/wav"
 	"github.com/avoronkov/waver/lib/midisynth/waves"
 	"github.com/avoronkov/waver/lib/notes"
 )
 
+type PlayCloser interface {
+	Play(io.Reader) error
+	Close() error
+}
+
 type Output struct {
 	settings *wav.Settings
 	play     *multiplayer.MultiPlayer
 
-	context *oto.Context
-	player  oto.Player
+	player PlayCloser
 
 	scale notes.Scale
 
@@ -61,8 +66,8 @@ func New(opts ...func(*Output)) (*Output, error) {
 		output.scale = notes.NewStandard()
 	}
 
-	// Init oto.Context
-	c, ready, err := oto.NewContext(
+	var err error
+	output.player, err = pulse.New(
 		output.settings.SampleRate,
 		output.settings.ChannelNum,
 		output.settings.BitDepthInBytes,
@@ -70,24 +75,27 @@ func New(opts ...func(*Output)) (*Output, error) {
 	if err != nil {
 		return nil, err
 	}
-	<-ready
 
 	// Init Player
 	output.play = multiplayer.New(output.settings)
 
-	output.context = c
-
+	// output.context = c
+	var reader io.Reader
 	if output.wavFilename != "" {
 		log.Printf("Unisynth: using WavDataSaver")
 		leftPad := secondsToFrames(output.settings, output.wavSpaceLeft)
 		rightPad := secondsToFrames(output.settings, output.wavSpaceRight)
 		output.saver = NewWavDataSaver(output.play, output.wavFilename, leftPad, rightPad)
-		output.player = output.context.NewPlayer(output.saver)
+		reader = output.saver
 	} else {
-		output.player = output.context.NewPlayer(output.play)
+		reader = output.play
 	}
 
-	output.player.Play()
+	go func() {
+		if err := output.player.Play(reader); err != nil {
+			slog.Error("Play failed", "error", err)
+		}
+	}()
 
 	log.Printf("Unisynth initialized!")
 	return output, nil
@@ -107,6 +115,7 @@ func (o *Output) ProcessAsync(tm float64, s signals.Interface) {
 }
 
 func (o *Output) processSignal(tm float64, s *signals.Signal) {
+	_ = tm
 	at := s.Time.Add(1 * time.Second)
 
 	absTime := float64(s.Time.Sub(o.startTime))/float64(time.Second) - 1.0

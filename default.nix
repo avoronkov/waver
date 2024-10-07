@@ -18,6 +18,7 @@ pkgs.buildGoModule rec {
 
 	buildInputs = with pkgs; [
 		alsa-lib
+		pulseaudio
 	];
 
 	nativeBuildInputs = with pkgs; [
