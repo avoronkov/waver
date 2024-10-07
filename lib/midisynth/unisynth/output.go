@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/avoronkov/waver/lib/midisynth/multiplayer"
-	"github.com/avoronkov/waver/lib/midisynth/output/pulse"
 	"github.com/avoronkov/waver/lib/midisynth/signals"
 	"github.com/avoronkov/waver/lib/midisynth/wav"
 	"github.com/avoronkov/waver/lib/midisynth/waves"
@@ -64,16 +63,6 @@ func New(opts ...func(*Output)) (*Output, error) {
 	// Init scale
 	if output.scale == nil {
 		output.scale = notes.NewStandard()
-	}
-
-	var err error
-	output.player, err = pulse.New(
-		output.settings.SampleRate,
-		output.settings.ChannelNum,
-		output.settings.BitDepthInBytes,
-	)
-	if err != nil {
-		return nil, err
 	}
 
 	// Init Player
@@ -148,7 +137,15 @@ func (o *Output) Close() error {
 	// oto.Context does not support method Close()
 	if o.saver != nil {
 		log.Printf("Unisynth: closing WavDataSaver")
-		return o.saver.Close()
+		if err := o.saver.Close(); err != nil {
+			return err
+		}
+	}
+	if o.player != nil {
+		log.Printf("Unisynth: closing player")
+		if err := o.player.Close(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

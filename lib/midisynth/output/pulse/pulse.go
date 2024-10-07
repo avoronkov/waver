@@ -9,7 +9,6 @@ import "C"
 import (
 	"fmt"
 	"io"
-	"log/slog"
 	"time"
 	"unsafe"
 )
@@ -78,7 +77,7 @@ func (p *Pulse) Play(r io.Reader) error {
 		ahead := writtenMicro - passed
 		// slog.Info("written", "writtenTime", writtenMicro, "passedTime", passed, "ahead", ahead)
 		if ahead > 5*time.Millisecond {
-			slog.Info("sleep", "d", ahead-5*time.Millisecond)
+			// slog.Info("sleep", "d", ahead-5*time.Millisecond)
 			time.Sleep(ahead - 5*time.Millisecond)
 		}
 	}

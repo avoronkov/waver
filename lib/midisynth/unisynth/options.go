@@ -46,3 +46,9 @@ func WithWavSpaceLeft(value float64) func(*Output) {
 		o.wavSpaceLeft = value
 	}
 }
+
+func WithPlayer(p PlayCloser) func(*Output) {
+	return func(o *Output) {
+		o.player = p
+	}
+}

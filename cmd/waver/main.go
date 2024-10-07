@@ -16,9 +16,11 @@ import (
 	"github.com/avoronkov/waver/lib/midisynth/dumper"
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
 	"github.com/avoronkov/waver/lib/midisynth/midi"
+	"github.com/avoronkov/waver/lib/midisynth/output/pulse"
 	"github.com/avoronkov/waver/lib/midisynth/signals"
 	"github.com/avoronkov/waver/lib/midisynth/udp"
 	"github.com/avoronkov/waver/lib/midisynth/unisynth"
+	"github.com/avoronkov/waver/lib/midisynth/wav"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/project"
 	"github.com/avoronkov/waver/lib/seq"
@@ -87,11 +89,21 @@ func main() {
 	// Instruments
 	instSet := instruments.NewSet()
 
+	wavSettings := wav.Default
+
+	// Pulseaudio player
+	player, err := pulse.New(wavSettings.SampleRate, wavSettings.ChannelNum, wavSettings.BitDepthInBytes)
+	if err != nil {
+		log.Fatalf("pulse.New failed: %v", err)
+	}
+
 	// Audio output
 	audioOpts := []func(*unisynth.Output){
 		unisynth.WithInstruments(instSet),
 		unisynth.WithScale(scale),
 		unisynth.WithTempo(tempo),
+		unisynth.WithWavSettings(wavSettings),
+		unisynth.WithPlayer(player),
 	}
 
 	if fileInput == "" && flag.NArg() > 0 {
@@ -105,8 +117,8 @@ func main() {
 			unisynth.WithWavSpaceLeft(wavSpaceLeft),
 			unisynth.WithWavSpaceRight(wavSpaceRight),
 		)
-
 	}
+
 	audioOutput, err := unisynth.New(audioOpts...)
 	check("Syntheziser output", err)
 	opts = append(opts, midisynth.WithSignalOutput(audioOutput))

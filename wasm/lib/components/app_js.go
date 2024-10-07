@@ -7,8 +7,10 @@ import (
 
 	"github.com/avoronkov/waver/lib/midisynth"
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/midisynth/output/oto"
 	"github.com/avoronkov/waver/lib/midisynth/signals"
 	synth "github.com/avoronkov/waver/lib/midisynth/unisynth"
+	"github.com/avoronkov/waver/lib/midisynth/wav"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq"
 	"github.com/avoronkov/waver/lib/seq/common"
@@ -42,11 +44,17 @@ func (ap *App) OnNav(ctx app.Context) {
 		// Instruments
 		instSet := instruments.NewSet()
 
+		wavSettings := wav.Default
+		player, err := oto.New(wavSettings.SampleRate, wavSettings.ChannelNum, wavSettings.BitDepthInBytes)
+		check(err)
+
 		// Audio output
 		audioOpts := []func(*synth.Output){
 			synth.WithInstruments(instSet),
 			synth.WithScale(scale),
 			synth.WithTempo(tempo),
+			synth.WithWavSettings(wavSettings),
+			synth.WithPlayer(player),
 		}
 		audioOutput, err := synth.New(audioOpts...)
 		check(err)
