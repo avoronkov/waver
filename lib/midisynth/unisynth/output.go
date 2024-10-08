@@ -142,10 +142,11 @@ func (o *Output) Close() error {
 		}
 	}
 	if o.player != nil {
-		log.Printf("Unisynth: closing player")
-		if err := o.player.Close(); err != nil {
-			return err
-		}
+		log.Printf("Unisynth: [skipped] closing player")
+		// TODO this hangs at the momemt.
+		// if err := o.player.Close(); err != nil {
+		// 	return err
+		// }
 	}
 	return nil
 }
