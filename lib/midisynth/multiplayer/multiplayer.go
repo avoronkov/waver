@@ -41,7 +41,7 @@ type playingWave struct {
 const maxInt16Amp = (1 << 15) - 1
 
 func (m *MultiPlayer) Read(data []byte) (n int, err error) {
-	return m.readStereo(data)
+	return m.readStereo(data), nil
 }
 
 func (m *MultiPlayer) readMono(data []byte) (n int, err error) {
@@ -78,18 +78,15 @@ func (m *MultiPlayer) readMono(data []byte) (n int, err error) {
 	return n, nil
 }
 
-func (m *MultiPlayer) readStereo(data []byte) (n int, err error) {
+func (m *MultiPlayer) readStereo(data []byte) (n int) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	l := 1024 // 640
+	l := len(data)
 	num := l / m.settings.BitDepthInBytes / m.settings.ChannelNum
 
-	buff := new(bytes.Buffer)
 	for x := 0; x < num; x++ {
 		finishedWaves := []int{}
-		// value := 0.0
-
 		values := make([]float64, m.settings.ChannelNum)
 		for i, pw := range m.playingWaves {
 			if pw.time >= 0.0 {
@@ -112,15 +109,15 @@ func (m *MultiPlayer) readStereo(data []byte) (n int, err error) {
 		}
 		for _, value := range values {
 			intValue := int16(maxInt16Amp * value)
-			_ = binary.Write(buff, binary.LittleEndian, intValue)
+			binary.LittleEndian.PutUint16(data[n:n+2], uint16(intValue))
+			n += 2
 		}
 		m.sampleCount++
 		if len(finishedWaves) > 0 {
 			m.removePlayingWaves(finishedWaves)
 		}
 	}
-	n = copy(data, buff.Bytes())
-	return n, nil
+	return n
 }
 
 func (m *MultiPlayer) AddWaveAt(at time.Time, wave waves.Wave, noteCtx *waves.NoteCtx) {
