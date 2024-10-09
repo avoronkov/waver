@@ -46,6 +46,13 @@ func (c *Code) Render() app.UI {
 				Text("Clear"),
 			app.Text(" "),
 			app.Button().
+				ID("copy-code").
+				Type("button").
+				Role("button").
+				OnClick(c.onCopy).
+				Text("Copy to clipboard"),
+			app.Text(" "),
+			app.Button().
 				ID("save").
 				Type("button").
 				Class("secondary").
@@ -97,6 +104,10 @@ func (c *Code) onClear(ctx app.Context, e app.Event) {
 	}
 	app.Window().Call("setCodeMirrorCode", "")
 	c.text = ""
+}
+
+func (c *Code) onCopy(ctx app.Context, e app.Event) {
+	app.Window().Call("copyCodeToClipboard")
 }
 
 func (c *Code) Sync(st app.BrowserStorage) {

@@ -24,6 +24,7 @@ func main() {
 			"/web/lib/codemirror.js",
 			"/web/addon/mode/simple.js",
 			"/web/init-codemirror.js",
+			"/web/clipboard.js",
 		},
 	})
 
