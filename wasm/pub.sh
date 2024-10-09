@@ -18,6 +18,7 @@ mkdir -p ./waver/web
 cp -rT ./web/ ./waver/web
 env GOOS=js GOARCH=wasm go build -o ./waver/web/app.wasm ./cmd/pwa
 go run ./cmd/pages
-cp -r ./waver ../public
+rm -rf ../public
+cp -rT ./waver ../public
 
 echo 'OK'
