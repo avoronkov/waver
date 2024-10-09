@@ -5,7 +5,7 @@ var goappNav = function () {};
 var goappOnUpdate = function () {};
 var goappOnAppInstallChange = function () {};
 
-const goappEnv = {"GOAPP_INTERNAL_URLS":"null","GOAPP_ROOT_PREFIX":"/waver","GOAPP_STATIC_RESOURCES_URL":"/waver","GOAPP_VERSION":"39659f6a9c082d8d5bc33d15ea53820321d46e1b"};
+const goappEnv = {"GOAPP_INTERNAL_URLS":"null","GOAPP_ROOT_PREFIX":"/waver","GOAPP_STATIC_RESOURCES_URL":"/waver","GOAPP_VERSION":"40d57b00564a70a33f3776a4d50b3707dccfce9f"};
 const goappLoadingLabel = "{progress}%";
 const goappWasmContentLengthHeader = "";
 
@@ -49,21 +49,18 @@ function goappWatchForUpdate() {
 }
 
 function goappSetupNotifyUpdate(registration) {
-  registration.onupdatefound = () => {
-    const installingWorker = registration.installing;
-
-    installingWorker.onstatechange = () => {
-      if (installingWorker.state != "installed") {
-        return;
-      }
-
+  registration.addEventListener("updatefound", (event) => {
+    const newSW = registration.installing;
+    newSW.addEventListener("statechange", (event) => {
       if (!navigator.serviceWorker.controller) {
         return;
       }
-
+      if (newSW.state != "installed") {
+        return;
+      }
       goappOnUpdate();
-    };
-  };
+    });
+  });
 }
 
 function goappSetupAutoUpdate(registration) {
@@ -190,8 +187,10 @@ function goappKeepBodyClean() {
 // Web Assembly
 // -----------------------------------------------------------------------------
 async function goappInitWebAssembly() {
+  const loader = document.getElementById("app-wasm-loader");
+
   if (!goappCanLoadWebAssembly()) {
-    document.getElementById("app-wasm-loader").style.display = "none";
+    loader.remove();
     return;
   }
 
@@ -219,6 +218,7 @@ async function goappInitWebAssembly() {
     );
 
     go.run(wasm.instance);
+    loader.remove();
   } catch (err) {
     loaderIcon.className = "goapp-logo";
     loaderLabel.innerText = err;
@@ -227,9 +227,14 @@ async function goappInitWebAssembly() {
 }
 
 function goappCanLoadWebAssembly() {
-  return !/bot|googlebot|crawler|spider|robot|crawling/i.test(
-    navigator.userAgent
-  );
+  if (
+    /bot|googlebot|crawler|spider|robot|crawling/i.test(navigator.userAgent)
+  ) {
+    return false;
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get("wasm") !== "false";
 }
 
 async function fetchWithProgress(url, progess) {

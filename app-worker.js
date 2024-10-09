@@ -1,8 +1,8 @@
-const cacheName = "app-" + "39659f6a9c082d8d5bc33d15ea53820321d46e1b";
-const resourcesToCache = ["/waver","/waver/app.css","/waver/app.js","/waver/manifest.webmanifest","/waver/wasm_exec.js","/waver/web/addon/mode/simple.js","/waver/web/app.wasm","/waver/web/init-codemirror.js","/waver/web/lib/codemirror.css","/waver/web/lib/codemirror.js","/waver/web/pico.min.css","https://storage.googleapis.com/murlok-github/icon-192.png","https://storage.googleapis.com/murlok-github/icon-512.png"];
+const cacheName = "app-" + "40d57b00564a70a33f3776a4d50b3707dccfce9f";
+const resourcesToCache = ["/waver","/waver/app.css","/waver/app.js","/waver/manifest.webmanifest","/waver/wasm_exec.js","/waver/web/addon/mode/simple.js","/waver/web/app.wasm","/waver/web/clipboard.js","/waver/web/init-codemirror.js","/waver/web/lib/codemirror.css","/waver/web/lib/codemirror.js","/waver/web/pico.min.css","https://raw.githubusercontent.com/maxence-charriere/go-app/master/docs/web/icon.png"];
 
 self.addEventListener("install", (event) => {
-  console.log("installing app worker 39659f6a9c082d8d5bc33d15ea53820321d46e1b");
+  console.log("installing app worker 40d57b00564a70a33f3776a4d50b3707dccfce9f");
 
   event.waitUntil(
     caches
@@ -28,7 +28,7 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
-  console.log("app worker 39659f6a9c082d8d5bc33d15ea53820321d46e1b is activated");
+  console.log("app worker 40d57b00564a70a33f3776a4d50b3707dccfce9f is activated");
 });
 
 self.addEventListener("fetch", (event) => {
