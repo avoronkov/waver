@@ -1,6 +1,8 @@
 package unisynth
 
 import (
+	"time"
+
 	"github.com/avoronkov/waver/lib/midisynth/wav"
 	"github.com/avoronkov/waver/lib/notes"
 )
@@ -50,5 +52,11 @@ func WithWavSpaceLeft(value float64) func(*Output) {
 func WithPlayer(p PlayCloser) func(*Output) {
 	return func(o *Output) {
 		o.player = p
+	}
+}
+
+func WithDelay(d time.Duration) func(*Output) {
+	return func(o *Output) {
+		o.delay = d
 	}
 }

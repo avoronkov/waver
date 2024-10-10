@@ -104,6 +104,7 @@ func main() {
 		unisynth.WithTempo(tempo),
 		unisynth.WithWavSettings(wavSettings),
 		unisynth.WithPlayer(player),
+		unisynth.WithDelay(20 * time.Millisecond),
 	}
 
 	if fileInput == "" && flag.NArg() > 0 {

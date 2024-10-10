@@ -36,6 +36,9 @@ type Output struct {
 
 	startTime time.Time
 
+	// Delay playing of input signal to handle bufferred audio output.
+	delay time.Duration
+
 	wavFilename   string
 	wavSpaceLeft  float64
 	wavSpaceRight float64
@@ -55,6 +58,7 @@ func New(opts ...func(*Output)) (*Output, error) {
 		settings:      wav.Default,
 		tempo:         120,
 		notesReleases: make(map[notes.Note]func()),
+		delay:         time.Second,
 	}
 	for _, opt := range opts {
 		opt(output)
@@ -105,7 +109,8 @@ func (o *Output) ProcessAsync(tm float64, s signals.Interface) {
 
 func (o *Output) processSignal(tm float64, s *signals.Signal) {
 	_ = tm
-	at := s.Time.Add(1 * time.Second)
+
+	at := s.Time.Add(o.delay)
 
 	absTime := float64(s.Time.Sub(o.startTime))/float64(time.Second) - 1.0
 	var err error
