@@ -25,8 +25,6 @@ type Output struct {
 
 	player PlayCloser
 
-	scale notes.Scale
-
 	tempo int
 
 	instruments InstrumentSet
@@ -62,11 +60,6 @@ func New(opts ...func(*Output)) (*Output, error) {
 	}
 	for _, opt := range opts {
 		opt(output)
-	}
-
-	// Init scale
-	if output.scale == nil {
-		output.scale = notes.NewStandard()
 	}
 
 	// Init Player

@@ -60,15 +60,17 @@ func main() {
 
 	var scale notes.Scale
 	if edo19 {
-		log.Printf("Using EDO-19 scale.")
 		scale = notes.NewEdo19()
 	} else {
-		log.Printf("Using Standard 12 tone scale.")
 		scale = notes.NewStandard()
 	}
 
 	// TODO fix this a little
 	common.Scale = scale
+
+	scaleSetters := []parser.ScaleSetter{
+		func(scale notes.Scale) { common.Scale = scale },
+	}
 
 	channel := make(chan signals.Interface, 128)
 
@@ -79,11 +81,13 @@ func main() {
 	if udpPort > 0 {
 		udpInput := udp.New(udpPort, scale)
 		opts = append(opts, midisynth.WithSignalInput(udpInput))
+		scaleSetters = append(scaleSetters, udpInput.SetScale)
 	}
 
 	if midiPort > 0 {
 		midiInput := midi.NewInput(midiPort, scale)
 		opts = append(opts, midisynth.WithSignalInput(midiInput))
+		scaleSetters = append(scaleSetters, midiInput.SetScale)
 	}
 
 	// Instruments
@@ -100,7 +104,6 @@ func main() {
 	// Audio output
 	audioOpts := []func(*unisynth.Output){
 		unisynth.WithInstruments(instSet),
-		unisynth.WithScale(scale),
 		unisynth.WithTempo(tempo),
 		unisynth.WithWavSettings(wavSettings),
 		unisynth.WithPlayer(player),
@@ -140,6 +143,7 @@ func main() {
 			parser.WithFileInput(fileInput),
 			parser.WithTempoSetter(sequencer),
 			parser.WithInstrumentSet(instSet),
+			parser.WithScaleSetters(scaleSetters...),
 		)
 		check("Parser start", ps.Start(true))
 		opts = append(opts, midisynth.WithSignalInput(sequencer))

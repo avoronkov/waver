@@ -18,6 +18,7 @@ type Parser struct {
 
 	seq          Seq
 	tempoSetters []TempoSetter
+	scaleSetters []ScaleSetter
 	instSet      InstrumentSet
 
 	ModParsers    map[lexer.Token]ModParser

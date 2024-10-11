@@ -62,6 +62,10 @@ func (i *Input) Run(ch chan<- signals.Interface) (err error) {
 	return fmt.Errorf("aseqdump unexpectedly closed")
 }
 
+func (i *Input) SetScale(s notes.Scale) {
+	i.scale = s
+}
+
 func (i *Input) Close() error {
 	if i.dumpProcess != nil {
 		_ = i.dumpProcess.Process.Signal(syscall.SIGINT)

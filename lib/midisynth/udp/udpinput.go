@@ -55,6 +55,10 @@ func (u *UdpInput) Run(ch chan<- signals.Interface) (err error) {
 	}
 }
 
+func (u *UdpInput) SetScale(scale notes.Scale) {
+	u.scale = scale
+}
+
 func (u *UdpInput) Close() error {
 	return u.listener.Close()
 }

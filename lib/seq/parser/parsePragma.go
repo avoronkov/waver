@@ -2,9 +2,11 @@ package parser
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/avoronkov/waver/lib/midisynth/config"
+	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	yaml "gopkg.in/yaml.v3"
@@ -201,6 +203,34 @@ func parseSrandPragma(p *Parser, fields []lexer.Token, options []map[string]any)
 		return fmt.Errorf("Cannot parse 'srand', unexpected token: %v (%T)", fields[0], fields[0])
 	}
 	common.Srand(int64(n))
+	return nil
+}
+
+// % scale edo12|edo19
+func parseScalePragma(p *Parser, fields []lexer.Token, options []map[string]any) error {
+	if len(fields) != 1 {
+		return fmt.Errorf("Incorrect number of arguments for 'scale' pragma: %v", fields)
+	}
+	n, ok := fields[0].(lexer.IdentToken)
+	if !ok {
+		return fmt.Errorf("Cannot parse 'scale', unexpected token: %v (%T)", fields[0], fields[0])
+	}
+
+	var scale notes.Scale
+	switch n {
+	case "edo12":
+		log.Printf("Using Standard 12 tone scale.")
+		scale = notes.NewStandard()
+	case "edo19":
+		log.Printf("Using EDO-19 scale.")
+		scale = notes.NewEdo19()
+	default:
+		return fmt.Errorf("Unknown scale: %v", n)
+	}
+	p.scale = scale
+	for _, setScale := range p.scaleSetters {
+		setScale(scale)
+	}
 	return nil
 }
 

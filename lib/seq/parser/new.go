@@ -42,6 +42,7 @@ func New(opts ...func(*Parser)) *Parser {
 		"filter":   parseFilter,
 		"stop":     parseStopPragma,
 		"srand":    parseSrandPragma,
+		"scale":    parseScalePragma,
 	}
 
 	p.FuncParsers = map[lexer.Token]FunctionParser{
@@ -69,6 +70,12 @@ func WithSeq(seq Seq) func(*Parser) {
 func WithScale(scale notes.Scale) func(*Parser) {
 	return func(p *Parser) {
 		p.scale = scale
+	}
+}
+
+func WithScaleSetters(s ...ScaleSetter) func(*Parser) {
+	return func(p *Parser) {
+		p.scaleSetters = append(p.scaleSetters, s...)
 	}
 }
 

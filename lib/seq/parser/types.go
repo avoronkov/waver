@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
@@ -15,6 +16,8 @@ type Seq interface {
 type TempoSetter interface {
 	SetTempo(int)
 }
+
+type ScaleSetter func(notes.Scale)
 
 type InstrumentSet interface {
 	AddInstrument(n string, in *instruments.Instrument)
