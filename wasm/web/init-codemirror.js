@@ -3,7 +3,7 @@
 function initCodeMirror() {
     CodeMirror.defineSimpleMode('waver', {
         start: [
-            { regex: /(?:filter|form|inst|lagrange|sample|srand|stop|tempo|wave)\b/, token: 'comment' }, // keyword
+            { regex: /(?:filter|form|inst|lagrange|sample|scale|srand|stop|tempo|wave)\b/, token: 'comment' }, // keyword
             { regex: /(?:maj|maj7|maj9|min|min7|min9)\b/, token: 'variable-2' },
             { regex: /(?:concat|down|loop|rand|repeat|seq|up)\b/, token: 'variable-2' },
             { regex: /(?:bits|eucl|eucl')\b/, token: 'variable-3' },
