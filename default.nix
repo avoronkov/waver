@@ -4,7 +4,7 @@ in
 pkgs.buildGoModule rec {
 	pname = "avoronkov-waver";
 
-	version = "1.2.0";
+	version = "2.8.0";
 
 	src = ./.;
 

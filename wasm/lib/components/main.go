@@ -24,10 +24,12 @@ type Main struct {
 	examplesCompo *Examples
 }
 
+const version = "2.8.0"
+
 func (m *Main) Render() app.UI {
 	return app.Main().Role("main").Body(
 		app.Section().Class("container").Body(
-			app.H3().Text("Waver Playground (v2.6)"),
+			app.H3().Text(fmt.Sprintf("Waver Playground (v%v)", version)),
 			app.P().Body(
 				app.A().Href("https://github.com/avoronkov/waver").Text("Source code"),
 			),
