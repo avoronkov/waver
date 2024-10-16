@@ -114,6 +114,7 @@ LOOP:
 	for {
 		var ok bool
 		if !s.pause {
+			fmt.Printf("\033[2K\rBit: %4d", s.bit)
 			if s.bit == s.stopBit {
 				s.ch <- &signals.Stop{}
 				break LOOP
@@ -158,9 +159,15 @@ func (s *Sequencer) processFuncs(tm time.Time, bit int64, dryRun bool) (bool, er
 		}
 	}
 
+	fmt.Print("  ")
 	for _, fn := range s.current {
 		ct := ctx.Copy()
 		signals := fn.Eval(bit, ct)
+		if len(signals) > 0 {
+			fmt.Print(".")
+		} else {
+			fmt.Print(" ")
+		}
 		if !dryRun {
 			for _, sig := range signals {
 				sg := sig
@@ -169,6 +176,7 @@ func (s *Sequencer) processFuncs(tm time.Time, bit int64, dryRun bool) (bool, er
 			}
 		}
 	}
+	fmt.Print("\r")
 	return true, nil
 }
 

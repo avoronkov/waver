@@ -1,9 +1,12 @@
 % sample OpHat "Kit_08_Vinyl/CYCdh_VinylK1-OpHat.wav"
 % sample Kick1 "Kit_08_Vinyl/CYCdh_VinylK1-Kick01.wav"
 % sample Snr1  "Kit_08_Vinyl/CYCdh_VinylK1-Snr01.wav"
+% sample Tamb  "Kit_08_Vinyl/CYCdh_VinylK1-Tamb.wav"
 
 :32 OpHat
 
 eucl 3 8 Kick1
 
 128.. :8 +4 Snr1
+
+64.. :2 Tamb
