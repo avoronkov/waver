@@ -138,7 +138,7 @@ func findFile(dir fs.FS, filename string) ([]byte, error) {
 	}
 	d := comps[0]
 	file := comps[1]
-	sub, err := fs.Sub(static.Files, fmt.Sprintf("samples/%v", d))
+	sub, err := fs.Sub(dir, fmt.Sprintf("samples/%v", d))
 	if err != nil {
 		return nil, err
 	}

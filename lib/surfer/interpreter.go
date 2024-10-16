@@ -57,7 +57,8 @@ func (in *Interpreter) Run(forthFile, wavFile, outFile string) error {
 		return fmt.Errorf("ParseSampleFile failed: %v", err)
 	}
 
-	slices := SlicesFromSamples(sample.Data())
+	// TODO suuport stereo
+	slices := SlicesFromSamples(sample.Data(0))
 
 	in.slices = slices
 	in.slicesLen = len(slices)

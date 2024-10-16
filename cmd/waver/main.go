@@ -27,6 +27,7 @@ import (
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/parser"
 	"github.com/avoronkov/waver/lib/share"
+	"github.com/go-errors/errors"
 )
 
 func main() {
@@ -172,7 +173,10 @@ func main() {
 
 func check(msg string, err error) {
 	if err != nil {
-		log.Fatal(msg, err)
+		if e, ok := err.(*errors.Error); ok {
+			log.Fatalf("%v: %v\n%v", msg, e, e.ErrorStack())
+		}
+		log.Fatalf("%v: %v", msg, err)
 	}
 }
 

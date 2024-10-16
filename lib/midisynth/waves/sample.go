@@ -2,7 +2,6 @@ package waves
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 	"io"
 	"math"
@@ -14,8 +13,10 @@ import (
 type Sample struct {
 	sampleRate float64
 
-	data    []int16
-	datalen int
+	data     [][]int32
+	datalen  int
+	channels int
+	maxValue float64
 }
 
 func ParseSample(data []byte) (*Sample, error) {
@@ -42,35 +43,58 @@ func parseSample(f io.ReadSeeker, size int64) (*Sample, error) {
 		return nil, fmt.Errorf("Failed to create wav.Reader: %w", err)
 	}
 
-	if nc := reader.GetNumChannels(); nc != 1 {
-		return nil, fmt.Errorf("Only mono wav files supported (number of channels: %v)", nc)
-	}
+	nc := reader.GetNumChannels()
 
-	if bits := reader.GetBitsPerSample(); bits != 16 {
-		return nil, fmt.Errorf("Only 16bit samples are supported: %v", bits)
+	nBits := int(reader.GetBitsPerSample())
+	if nBits > 32 {
+		return nil, fmt.Errorf("%b bit samples are not supported (too large)", nBits)
 	}
+	nBytes := nBits / 8
 
 	s := &Sample{
 		sampleRate: float64(reader.GetSampleRate()),
+		data:       make([][]int32, nc),
+		channels:   int(nc),
+		maxValue:   float64((int32(1) << (nBits - 1)) + 1),
 	}
 
-	sampleCount := int(reader.GetSampleCount())
+	sampleCount := int(reader.GetSampleCount()) / s.channels
 	for i := 0; i < sampleCount; i++ {
-		sample, err := reader.ReadRawSample()
-		if err == io.EOF {
-			break
+		for ch := 0; ch < s.channels; ch++ {
+			sample, err := reader.ReadRawSample()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				return nil, fmt.Errorf("ReadRawSample failed: %w", err)
+			}
+			if len(sample) != nBytes {
+				return nil, fmt.Errorf("Sample read size is not %v bit: %v", nBytes, len(sample))
+			}
+			num := bytesToInt32(sample, nBits)
+			s.data[ch] = append(s.data[ch], num)
 		}
-		if err != nil {
-			return nil, fmt.Errorf("ReadRawSample failed: %w", err)
-		}
-		if len(sample) != 2 {
-			return nil, fmt.Errorf("Sample read size is not 16bit: %v", len(sample))
-		}
-		num := binary.LittleEndian.Uint16(sample)
-		s.data = append(s.data, int16(num))
 	}
-	s.datalen = len(s.data)
+	s.datalen = len(s.data[0])
 	return s, nil
+}
+
+// See also: binary/encoding.LittleEndian.Uint16
+func bytesToInt32(b []byte, nBits int) int32 {
+	switch nBits {
+	case 16:
+		return int32(int16(uint16(b[0]) | uint16(b[1])<<8))
+	case 24:
+		n := int32(uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16)
+		if n >= (1 << 23) {
+			n -= (1 << 24)
+		}
+		return n
+	case 32:
+		return int32(uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24)
+	default:
+		panic(fmt.Errorf("bit size not supported: %v", nBits))
+	}
 }
 
 func ReadSample(file string) (*Sample, error) {
@@ -83,43 +107,8 @@ func ReadSample(file string) (*Sample, error) {
 		return nil, fmt.Errorf("Failed to open %v: %w", file, err)
 	}
 	defer f.Close()
-	reader, err := wav.NewReader(f, info.Size())
-	if err != nil {
-		return nil, fmt.Errorf("Failed to create wav.Reader: %w", err)
-	}
-
-	if nc := reader.GetNumChannels(); nc != 1 {
-		return nil, fmt.Errorf("Only mono wav files supported (number of channels: %v)", nc)
-	}
-
-	if bits := reader.GetBitsPerSample(); bits != 16 {
-		return nil, fmt.Errorf("Only 16bit samples are supported: %v", bits)
-	}
-
-	s := &Sample{
-		sampleRate: float64(reader.GetSampleRate()),
-	}
-
-	sampleCount := int(reader.GetSampleCount())
-	for i := 0; i < sampleCount; i++ {
-		sample, err := reader.ReadRawSample()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, fmt.Errorf("ReadRawSample failed: %w", err)
-		}
-		if len(sample) != 2 {
-			return nil, fmt.Errorf("Sample read size is not 16bit: %v", len(sample))
-		}
-		num := binary.LittleEndian.Uint16(sample)
-		s.data = append(s.data, int16(num))
-	}
-	s.datalen = len(s.data)
-	return s, nil
+	return parseSample(f, info.Size())
 }
-
-const maxInt16Value = float64((1 << 15) + 1)
 
 func (s *Sample) Value(t float64, ctx *NoteCtx) float64 {
 	n := int(t * s.sampleRate)
@@ -127,16 +116,16 @@ func (s *Sample) Value(t float64, ctx *NoteCtx) float64 {
 		return math.NaN()
 	}
 
-	res := float64(s.data[n]) / maxInt16Value
+	res := float64(s.data[0][n]) / s.maxValue
 	return res
 }
 
 func (s *Sample) TimeLimited() {}
 
-func (s *Sample) Data() []float64 {
-	res := make([]float64, len(s.data))
-	for i, v := range s.data {
-		res[i] = float64(v) / maxInt16Value
+func (s *Sample) Data(ch int) []float64 {
+	res := make([]float64, len(s.data[ch]))
+	for i, v := range s.data[ch] {
+		res[i] = float64(v) / s.maxValue
 	}
 	return res
 }
