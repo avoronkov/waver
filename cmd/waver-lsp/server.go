@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"regexp"
+	"strings"
 
 	"github.com/avoronkov/waver/lib/seq/syntaxgen"
 	"github.com/avoronkov/waver/static"
@@ -14,12 +16,15 @@ import (
 
 type Server struct {
 	params *syntaxgen.Params
+
+	docs map[string][]string
 }
 
 func NewServer() *Server {
 	params := syntaxgen.NewParams()
 	return &Server{
 		params: params,
+		docs:   make(map[string][]string),
 	}
 }
 
@@ -44,7 +49,14 @@ func (s *Server) Shutdown(context *glsp.Context) error {
 }
 
 func (s *Server) TextDocumentDidChange(context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
-	// slog.Info("TextDocumentDidChange", "context", context, "params", params)
+	slog.Info("TextDocumentDidChange", "document", params.TextDocument.URI, "changes", params.ContentChanges, "type", fmt.Sprintf("%T", params.ContentChanges[0]))
+	for _, change := range params.ContentChanges {
+		if wc, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
+			s.docs[params.TextDocument.URI] = strings.Split(wc.Text, "\n")
+		} else {
+			slog.Error("Unsupported change type", "type", fmt.Sprintf("%T", params.ContentChanges[0]))
+		}
+	}
 	return nil
 }
 
@@ -61,13 +73,40 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 	slog.Info(fmt.Sprintf("Params: %v (%v)", params.PartialResultToken, params.WorkDoneProgressParams))
 
 	// complete pragmas
-	completionItems = append(completionItems, s.completePragmas()...)
+	if s.lineMatchRe(params.TextDocument.URI, int(params.Position.Line), int(params.Position.Character), pragmaRe) {
+		completionItems = append(completionItems, s.completePragmas()...)
+	}
 
 	// complete sample files
-	completionItems = append(completionItems, s.completeSampleFiles()...)
+	if s.lineMatchRe(params.TextDocument.URI, int(params.Position.Line), int(params.Position.Character), sampleFileRe) {
+		completionItems = append(completionItems, s.completeSampleFiles()...)
+	}
 
 	slog.Info("Completion", "items", completionItems)
 	return completionItems, nil
+}
+
+var pragmaRe = regexp.MustCompile(`^%%?\s*\w+`)
+var sampleFileRe = regexp.MustCompile(`^%%?\s*sample\s+\w+\s+"\S+`)
+
+func (s *Server) lineMatchRe(doc string, line, pos int, re *regexp.Regexp) bool {
+	lines, ok := s.docs[doc]
+	if !ok {
+		slog.Warn("Document not found", "name", doc)
+		return false
+	}
+	if line >= len(lines) {
+		slog.Warn("Line index out of range", "line", line)
+		return false
+	}
+	str := lines[line]
+	if pos > len(str) {
+		slog.Warn("Position index out of range", "pos", pos)
+		return false
+	}
+	str = str[0:pos]
+	slog.Info("lineMatchRe", "str", str)
+	return re.MatchString(str)
 }
 
 func (s *Server) completePragmas() (items []protocol.CompletionItem) {
