@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 	"github.com/avoronkov/waver/lib/seq/syntaxgen"
 	"github.com/avoronkov/waver/static"
 	"github.com/tliron/commonlog"
@@ -69,9 +70,6 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 
 	var completionItems []protocol.CompletionItem
 
-	slog.Info("TDC", "context.Params", context.Params, "params", params)
-	slog.Info(fmt.Sprintf("Params: %v (%v)", params.PartialResultToken, params.WorkDoneProgressParams))
-
 	// complete pragmas
 	if s.lineMatchRe(params.TextDocument.URI, int(params.Position.Line), int(params.Position.Character), pragmaRe) {
 		completionItems = append(completionItems, s.completePragmas()...)
@@ -82,12 +80,16 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 		completionItems = append(completionItems, s.completeSampleFiles()...)
 	}
 
-	slog.Info("Completion", "items", completionItems)
+	if s.lineMatchRe(params.TextDocument.URI, int(params.Position.Line), int(params.Position.Character), waveNameRe) {
+		completionItems = append(completionItems, s.completeWaveNames()...)
+	}
+
 	return completionItems, nil
 }
 
-var pragmaRe = regexp.MustCompile(`^%%?\s*\w+`)
-var sampleFileRe = regexp.MustCompile(`^%%?\s*sample\s+\w+\s+"\S+`)
+var pragmaRe = regexp.MustCompile(`^%%?\s*\w+$`)
+var sampleFileRe = regexp.MustCompile(`^%%?\s*sample\s+\w+\s+"\S*$`)
+var waveNameRe = regexp.MustCompile(`^%%?\s*(wave|inst)\s+\w+\s+"\S*$`)
 
 func (s *Server) lineMatchRe(doc string, line, pos int, re *regexp.Regexp) bool {
 	lines, ok := s.docs[doc]
@@ -138,14 +140,24 @@ func (s *Server) completeSampleFiles() (items []protocol.CompletionItem) {
 
 		items = append(items, protocol.CompletionItem{
 			Label: path[subdirlen:],
-			// Detail:     &detail,
-			Kind: &kind,
+			Kind:  &kind,
 		})
 		slog.Info("Sample", "file", path)
 		return nil
 	})
 	if err != nil {
 		slog.Error("WalkDir failed", "error", err)
+	}
+	return items
+}
+
+func (s *Server) completeWaveNames() (items []protocol.CompletionItem) {
+	kind := protocol.CompletionItemKindConstant
+	for w := range waves.Waves {
+		items = append(items, protocol.CompletionItem{
+			Label: w,
+			Kind:  &kind,
+		})
 	}
 	return items
 }
