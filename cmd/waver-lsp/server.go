@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"reflect"
 	"regexp"
 	"strings"
 
+	"github.com/avoronkov/waver/lib/midisynth/filters"
 	"github.com/avoronkov/waver/lib/midisynth/waves"
 	"github.com/avoronkov/waver/lib/seq/syntaxgen"
+	"github.com/avoronkov/waver/lib/utils"
 	"github.com/avoronkov/waver/static"
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
@@ -22,6 +25,7 @@ type Server struct {
 }
 
 func NewServer() *Server {
+
 	params := syntaxgen.NewParams()
 	return &Server{
 		params: params,
@@ -84,12 +88,17 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 		completionItems = append(completionItems, s.completeWaveNames()...)
 	}
 
+	if s.isPragmaOptions(params.TextDocument.URI, int(params.Position.Line)) {
+		completionItems = append(completionItems, s.completeFilters()...)
+		completionItems = append(completionItems, s.completeFilterOptions()...)
+	}
+
 	return completionItems, nil
 }
 
-var pragmaRe = regexp.MustCompile(`^%%?\s*\w+$`)
-var sampleFileRe = regexp.MustCompile(`^%%?\s*sample\s+\w+\s+"\S*$`)
-var waveNameRe = regexp.MustCompile(`^%%?\s*(wave|inst)\s+\w+\s+"\S*$`)
+var pragmaRe = regexp.MustCompile(`^%%?\s*\S+$`)
+var sampleFileRe = regexp.MustCompile(`^%%?\s*sample\s+\w+\s+"[^"]*$`)
+var waveNameRe = regexp.MustCompile(`^%%?\s*(wave|inst)\s+\w+\s+"[^"]*$`)
 
 func (s *Server) lineMatchRe(doc string, line, pos int, re *regexp.Regexp) bool {
 	lines, ok := s.docs[doc]
@@ -107,8 +116,9 @@ func (s *Server) lineMatchRe(doc string, line, pos int, re *regexp.Regexp) bool 
 		return false
 	}
 	str = str[0:pos]
-	slog.Info("lineMatchRe", "str", str)
-	return re.MatchString(str)
+	res := re.MatchString(str)
+	slog.Info("lineMatchRe", "str", str, "result", res)
+	return res
 }
 
 func (s *Server) completePragmas() (items []protocol.CompletionItem) {
@@ -122,6 +132,7 @@ func (s *Server) completePragmas() (items []protocol.CompletionItem) {
 			InsertText: &item,
 			Kind:       &kind,
 		})
+		slog.Info("completePragmas", "label", item)
 	}
 	return items
 }
@@ -157,6 +168,72 @@ func (s *Server) completeWaveNames() (items []protocol.CompletionItem) {
 		items = append(items, protocol.CompletionItem{
 			Label: w,
 			Kind:  &kind,
+		})
+	}
+	return items
+}
+
+func (s *Server) isPragmaOptions(doc string, line int) (result bool) {
+	lines, ok := s.docs[doc]
+	if !ok {
+		slog.Warn("Document not found", "name", doc)
+		return false
+	}
+	if line >= len(lines) {
+		slog.Warn("Line index out of range", "line", line)
+		return false
+	}
+	for i := range line {
+		str := lines[i]
+		if strings.HasPrefix(str, "%%") {
+			result = !result
+			slog.Info("isPragmaOptions", "line", i, "res", result)
+		}
+	}
+	if strings.HasPrefix(lines[line], "%%") {
+		return false
+	}
+	slog.Info("isPragmaOptions", "result", result)
+	return result
+}
+
+func (s *Server) completeFilters() (items []protocol.CompletionItem) {
+	kind := protocol.CompletionItemKindFunction
+	for name, obj := range filters.Filters {
+		item := name
+		filterOptions := utils.NewSet[string]()
+
+		v := reflect.TypeOf(obj)
+		nField := v.NumField()
+		for i := 0; i < nField; i++ {
+			fld := v.Field(i)
+			filterOptions.Add(strings.ToLower(fld.Name))
+			tagsRaw := fld.Tag.Get("option")
+			if tagsRaw == "" {
+				continue
+			}
+			tags := strings.Split(tagsRaw, ",")
+			filterOptions.Add(tags...)
+		}
+		detail := strings.Join(filterOptions.Values(), ", ")
+		items = append(items, protocol.CompletionItem{
+			Label:      item,
+			Detail:     &detail,
+			InsertText: &item,
+			Kind:       &kind,
+		})
+	}
+	return items
+}
+
+func (s *Server) completeFilterOptions() (items []protocol.CompletionItem) {
+	for _, opt := range s.params.FilterOptions {
+		item := opt
+		kind := protocol.CompletionItemKindProperty
+		items = append(items, protocol.CompletionItem{
+			Label:      item,
+			InsertText: &item,
+			Kind:       &kind,
 		})
 	}
 	return items
