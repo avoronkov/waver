@@ -77,23 +77,33 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 
 	var completionItems []protocol.CompletionItem
 
+	docUri := params.TextDocument.URI
+	posLine := int(params.Position.Line)
+	posChar := int(params.Position.Character)
+
 	// complete pragmas
-	if s.lineMatchRe(params.TextDocument.URI, int(params.Position.Line), int(params.Position.Character), pragmaRe) {
+	if s.lineMatchRe(docUri, posLine, posChar, pragmaRe) {
 		completionItems = append(completionItems, s.completePragmas()...)
 	}
 
 	// complete sample files
-	if s.lineMatchRe(params.TextDocument.URI, int(params.Position.Line), int(params.Position.Character), sampleFileRe) {
+	if s.lineMatchRe(docUri, posLine, posChar, sampleFileRe) {
 		completionItems = append(completionItems, s.completeSampleFiles()...)
 	}
 
-	if s.lineMatchRe(params.TextDocument.URI, int(params.Position.Line), int(params.Position.Character), waveNameRe) {
+	if s.lineMatchRe(docUri, posLine, posChar, waveNameRe) {
 		completionItems = append(completionItems, s.completeWaveNames()...)
 	}
 
-	if s.isPragmaOptions(params.TextDocument.URI, int(params.Position.Line)) {
-		completionItems = append(completionItems, s.completeFilters()...)
-		completionItems = append(completionItems, s.completeFilterOptions()...)
+	if s.isPragmaOptions(docUri, posLine) {
+		if s.lineMatchRe(docUri, posLine, posChar, filterRe) {
+			completionItems = append(completionItems, s.completeFilters()...)
+		}
+
+		if s.lineMatchRe(docUri, posLine, posChar, filterOptionRe) {
+			curFilter := s.currentFilter(docUri, posLine)
+			completionItems = append(completionItems, s.completeFilterOptions(curFilter)...)
+		}
 	}
 
 	return completionItems, nil
@@ -102,6 +112,8 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 var pragmaRe = regexp.MustCompile(`^%%?\s*\S+$`)
 var sampleFileRe = regexp.MustCompile(`^%%?\s*sample\s+\w+\s+"[^"]*$`)
 var waveNameRe = regexp.MustCompile(`^%%?\s*(wave|inst)\s+\w+\s+"[^"]*$`)
+var filterRe = regexp.MustCompile(`^-\s*\S*$`)
+var filterOptionRe = regexp.MustCompile(`^\s+\S*$`)
 
 func (s *Server) lineMatchRe(doc string, line, pos int, re *regexp.Regexp) bool {
 	lines, ok := s.docs[doc]
@@ -211,7 +223,6 @@ func (s *Server) completeFilters() (items []protocol.CompletionItem) {
 		nField := v.NumField()
 		for i := 0; i < nField; i++ {
 			fld := v.Field(i)
-			filterOptions.Add(strings.ToLower(fld.Name))
 			tagsRaw := fld.Tag.Get("option")
 			if tagsRaw == "" {
 				continue
@@ -230,15 +241,64 @@ func (s *Server) completeFilters() (items []protocol.CompletionItem) {
 	return items
 }
 
-func (s *Server) completeFilterOptions() (items []protocol.CompletionItem) {
-	for _, opt := range s.params.FilterOptions {
-		item := opt
-		kind := protocol.CompletionItemKindProperty
-		items = append(items, protocol.CompletionItem{
-			Label:      item,
-			InsertText: &item,
-			Kind:       &kind,
-		})
+var currentFilterRe = regexp.MustCompile(`^-\s*(\S+):`)
+
+func (s *Server) currentFilter(doc string, line int) string {
+	lines, ok := s.docs[doc]
+	if !ok {
+		slog.Warn("Document not found", "name", doc)
+		return ""
+	}
+	if line >= len(lines) {
+		slog.Warn("Line index out of range", "line", line)
+		return ""
+	}
+	res := ""
+	for i := range line {
+		str := lines[i]
+		if str == "%%" {
+			res = ""
+			continue
+		}
+		matches := currentFilterRe.FindStringSubmatch(str)
+		if len(matches) >= 2 {
+			res = matches[1]
+		}
+	}
+	return res
+}
+
+func (s *Server) completeFilterOptions(filter string) (items []protocol.CompletionItem) {
+	if filter == "" {
+		return nil
+	}
+	kind := protocol.CompletionItemKindProperty
+	for name, obj := range filters.Filters {
+		if name != filter {
+			continue
+		}
+
+		v := reflect.TypeOf(obj)
+		nField := v.NumField()
+		for i := 0; i < nField; i++ {
+			fld := v.Field(i)
+			tagsRaw := fld.Tag.Get("option")
+			if tagsRaw == "" {
+				continue
+			}
+			tags := strings.Split(tagsRaw, ",")
+			for _, tag := range tags {
+				item := tag
+				detail := fld.Type.String()
+				items = append(items, protocol.CompletionItem{
+					Label:      item,
+					Detail:     &detail,
+					InsertText: &item,
+					Kind:       &kind,
+				})
+			}
+		}
+		break
 	}
 	return items
 }
