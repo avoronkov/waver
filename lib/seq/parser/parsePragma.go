@@ -12,7 +12,11 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
-type pragmaParser func(*Parser, []lexer.Token, []map[string]any) error
+type pragmaParser struct {
+	Usage      string
+	Parse      func(*Parser, []lexer.Token, []map[string]any) error
+	Deprecated bool
+}
 
 func (p *Parser) parsePragma(lx *lexer.Lexer) error {
 	percent, err := lx.Pop()
@@ -79,7 +83,7 @@ L:
 		return err
 	}
 
-	return parserFn(p, fields, options)
+	return parserFn.Parse(p, fields, options)
 }
 
 // % sample kick "7/kick"

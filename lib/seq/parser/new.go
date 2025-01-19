@@ -33,16 +33,46 @@ func New(opts ...func(*Parser)) *Parser {
 
 	// Init pragma parsers
 	p.PragmaParsers = map[string]pragmaParser{
-		"tempo":    parseTempo,
-		"sample":   parseSample,
-		"wave":     parseWave,
-		"inst":     parseWave,
-		"form":     parseForm,
-		"lagrange": parseLagrange,
-		"filter":   parseFilter,
-		"stop":     parseStopPragma,
-		"srand":    parseSrandPragma,
-		"scale":    parseScalePragma,
+		"tempo": {
+			Usage: "<int>",
+			Parse: parseTempo,
+		},
+		"sample": {
+			Usage: `<Name> "<sample-file>"`,
+			Parse: parseSample,
+		},
+		"wave": {
+			Usage: `<Name> "<wave-form>"`,
+			Parse: parseWave,
+		},
+		"inst": {
+			Parse:      parseWave,
+			Deprecated: true,
+		},
+		"form": {
+			Usage: `<Name> "<file-path>"`,
+			Parse: parseForm,
+		},
+		"lagrange": {
+			Usage: `<Name> "<file-path>"`,
+			Parse: parseLagrange,
+		},
+		"filter": {
+			Usage: ``,
+			Parse: parseFilter,
+		},
+		"stop": {
+			Usage: `<frame[int]>`,
+			Parse: parseStopPragma,
+		},
+		"srand": {
+			Usage: `<int>`,
+			Parse: parseSrandPragma,
+		},
+		"scale": {
+			Usage: "edo12|edo19",
+			Parse: parseScalePragma,
+		},
 	}
 
 	p.FuncParsers = map[lexer.Token]FunctionParser{

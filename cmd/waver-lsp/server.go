@@ -10,6 +10,7 @@ import (
 
 	"github.com/avoronkov/waver/lib/midisynth/filters"
 	"github.com/avoronkov/waver/lib/midisynth/waves"
+	"github.com/avoronkov/waver/lib/seq/parser"
 	"github.com/avoronkov/waver/lib/seq/syntaxgen"
 	"github.com/avoronkov/waver/lib/utils"
 	"github.com/avoronkov/waver/static"
@@ -20,6 +21,7 @@ import (
 
 type Server struct {
 	params *syntaxgen.Params
+	parser *parser.Parser
 
 	docs map[string][]string
 }
@@ -29,6 +31,7 @@ func NewServer() *Server {
 	params := syntaxgen.NewParams()
 	return &Server{
 		params: params,
+		parser: parser.New(),
 		docs:   make(map[string][]string),
 	}
 }
@@ -122,15 +125,16 @@ func (s *Server) lineMatchRe(doc string, line, pos int, re *regexp.Regexp) bool 
 }
 
 func (s *Server) completePragmas() (items []protocol.CompletionItem) {
-	for _, pragma := range s.params.Pragmas {
+	// kind := protocol.CompletionItemKindProperty
+	for pragma, meta := range s.parser.PragmaParsers {
 		item := pragma
-		// detail := "[pragma]"
-		kind := protocol.CompletionItemKindProperty
+		detail := meta.Usage
 		items = append(items, protocol.CompletionItem{
-			Label: item,
-			// Detail:     &detail,
+			Label:      item,
+			Detail:     &detail,
 			InsertText: &item,
-			Kind:       &kind,
+			// Kind:       &kind,
+			Deprecated: &meta.Deprecated,
 		})
 		slog.Info("completePragmas", "label", item)
 	}
