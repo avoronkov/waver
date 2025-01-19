@@ -106,6 +106,10 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 		}
 	}
 
+	if s.isRegularCode(docUri, posLine) {
+		completionItems = append(completionItems, s.completeFunctions()...)
+	}
+
 	return completionItems, nil
 }
 
@@ -213,6 +217,31 @@ func (s *Server) isPragmaOptions(doc string, line int) (result bool) {
 	return result
 }
 
+func (s *Server) isRegularCode(doc string, line int) bool {
+	lines, ok := s.docs[doc]
+	if !ok {
+		slog.Warn("Document not found", "name", doc)
+		return false
+	}
+	if line >= len(lines) {
+		slog.Warn("Line index out of range", "line", line)
+		return false
+	}
+	result := true
+	for i := range line {
+		str := lines[i]
+		if strings.HasPrefix(str, "%%") {
+			result = !result
+			slog.Info("isRegularCode", "line", i, "res", result)
+		}
+	}
+	if strings.HasPrefix(lines[line], "%%") {
+		return false
+	}
+	slog.Info("isRegularCode", "result", result)
+	return result
+}
+
 func (s *Server) completeFilters() (items []protocol.CompletionItem) {
 	kind := protocol.CompletionItemKindFunction
 	for name, obj := range filters.Filters {
@@ -299,6 +328,21 @@ func (s *Server) completeFilterOptions(filter string) (items []protocol.Completi
 			}
 		}
 		break
+	}
+	return items
+}
+
+func (s *Server) completeFunctions() (items []protocol.CompletionItem) {
+	kind := protocol.CompletionItemKindFunction
+	for token, meta := range s.parser.FuncParsers {
+		item := token.String()
+		detail := meta.Usage
+		items = append(items, protocol.CompletionItem{
+			Label:      item,
+			Detail:     &detail,
+			Kind:       &kind,
+			InsertText: &item,
+		})
 	}
 	return items
 }

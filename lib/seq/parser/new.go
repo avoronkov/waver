@@ -76,16 +76,46 @@ func New(opts ...func(*Parser)) *Parser {
 	}
 
 	p.FuncParsers = map[lexer.Token]FunctionParser{
-		lexer.IdentToken("seq"):    parseSequence,
-		lexer.AtToken{}:            parseSequence,
-		lexer.IdentToken("rand"):   makeSingleArgValueFnParser("rand", common.Random),
-		lexer.AmpersandToken{}:     makeSingleArgValueFnParser("rand", common.Random),
-		lexer.IdentToken("up"):     parseUpDown,
-		lexer.IdentToken("down"):   parseUpDown,
-		lexer.IdentToken("repeat"): parseRepeat,
-		lexer.MultiplyToken{}:      parseRepeat,
-		lexer.IdentToken("concat"): makeSingleArgValueFnParser("concat", common.Concat),
-		lexer.IdentToken("loop"):   parseLoop,
+		lexer.IdentToken("seq"): {
+			Usage: "(@) [ 1 2 3 ]",
+			Parse: parseSequence,
+		},
+		lexer.AtToken{}: {
+			Usage: "[ 1 2 3 ]",
+			Parse: parseSequence,
+		},
+		lexer.IdentToken("rand"): {
+			Usage: "(&) [ 1 2 3 ]",
+			Parse: makeSingleArgValueFnParser("rand", common.Random),
+		},
+		lexer.AmpersandToken{}: {
+			Usage: "[ 1 2 3 ]",
+			Parse: makeSingleArgValueFnParser("rand", common.Random),
+		},
+		lexer.IdentToken("up"): {
+			Usage: "<int> <Note>",
+			Parse: parseUpDown,
+		},
+		lexer.IdentToken("down"): {
+			Usage: "<int> <Note>",
+			Parse: parseUpDown,
+		},
+		lexer.IdentToken("repeat"): {
+			Usage: "(*) <int> <sequence...>",
+			Parse: parseRepeat,
+		},
+		lexer.MultiplyToken{}: {
+			Usage: "<int> <sequence...>",
+			Parse: parseRepeat,
+		},
+		lexer.IdentToken("concat"): {
+			Usage: "[ list1, list2 ... ]",
+			Parse: makeSingleArgValueFnParser("concat", common.Concat),
+		},
+		lexer.IdentToken("loop"): {
+			Usage: "<size[int]> <sequence...>",
+			Parse: parseLoop,
+		},
 	}
 
 	return p

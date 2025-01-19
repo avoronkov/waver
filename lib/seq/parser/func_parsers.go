@@ -8,7 +8,12 @@ import (
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
-type FunctionParser func(p *Parser, lx *lexer.Lexer, fn string) (types.ValueFn, error)
+type ParseFunction func(p *Parser, lx *lexer.Lexer, fn string) (types.ValueFn, error)
+
+type FunctionParser struct {
+	Usage string
+	Parse ParseFunction
+}
 
 // seq [ 1 2 3 ]
 func parseSequence(p *Parser, lx *lexer.Lexer, fn string) (types.ValueFn, error) {
@@ -66,7 +71,7 @@ func parseLoop(p *Parser, lx *lexer.Lexer, fn string) (types.ValueFn, error) {
 
 type singleArgFuncion func(types.ValueFn) types.ValueFn
 
-func makeSingleArgValueFnParser(name string, fn singleArgFuncion) FunctionParser {
+func makeSingleArgValueFnParser(name string, fn singleArgFuncion) ParseFunction {
 	return func(p *Parser, lx *lexer.Lexer, name string) (types.ValueFn, error) {
 		value, err := p.parseAtom(lx)
 		if err != nil {
