@@ -108,6 +108,7 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 
 	if s.isRegularCode(docUri, posLine) {
 		completionItems = append(completionItems, s.completeFunctions()...)
+		completionItems = append(completionItems, s.completeModifiers()...)
 	}
 
 	return completionItems, nil
@@ -335,6 +336,21 @@ func (s *Server) completeFilterOptions(filter string) (items []protocol.Completi
 func (s *Server) completeFunctions() (items []protocol.CompletionItem) {
 	kind := protocol.CompletionItemKindFunction
 	for token, meta := range s.parser.FuncParsers {
+		item := token.String()
+		detail := meta.Usage
+		items = append(items, protocol.CompletionItem{
+			Label:      item,
+			Detail:     &detail,
+			Kind:       &kind,
+			InsertText: &item,
+		})
+	}
+	return items
+}
+
+func (s *Server) completeModifiers() (items []protocol.CompletionItem) {
+	kind := protocol.CompletionItemKindFunction
+	for token, meta := range s.parser.ModParsers {
 		item := token.String()
 		detail := meta.Usage
 		items = append(items, protocol.CompletionItem{

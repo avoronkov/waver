@@ -8,11 +8,17 @@ import (
 	"github.com/avoronkov/waver/lib/seq/types"
 )
 
-type ModParser func(p *Parser, lx *lexer.Lexer) (types.Modifier, error)
+type ParseModifier func(p *Parser, lx *lexer.Lexer) (types.Modifier, error)
+
+type ModParser struct {
+	Usage      string
+	Parse      func(p *Parser, lx *lexer.Lexer) (types.Modifier, error)
+	Deprecated bool
+}
 
 type singleArgModifier func(types.ValueFn) types.Modifier
 
-func makeSingleArgModParser(name string, fn singleArgModifier) ModParser {
+func makeSingleArgModParser(name string, fn singleArgModifier) ParseModifier {
 	return func(p *Parser, lx *lexer.Lexer) (types.Modifier, error) {
 		arg, err := p.parseAtom(lx)
 		if err != nil {
@@ -24,7 +30,7 @@ func makeSingleArgModParser(name string, fn singleArgModifier) ModParser {
 
 type twoArgsModifier func(types.ValueFn, types.ValueFn) types.Modifier
 
-func makeTwoArgsModParser(name string, fn twoArgsModifier) ModParser {
+func makeTwoArgsModParser(name string, fn twoArgsModifier) ParseModifier {
 	return func(p *Parser, lx *lexer.Lexer) (types.Modifier, error) {
 		a, err := p.parseAtom(lx)
 		if err != nil {

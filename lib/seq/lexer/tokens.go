@@ -43,6 +43,11 @@ type MultiplyToken struct{}
 
 func (MultiplyToken) String() string { return "*" }
 
+// ^
+type CaretToken struct{}
+
+func (CaretToken) String() string { return "^" }
+
 // ,
 type ComaToken struct{}
 
@@ -112,7 +117,7 @@ func (t HexToken) String() string {
 	return fmt.Sprintf("%#x", int64(t))
 }
 
-//[0-9]+\.[0-9]+
+// [0-9]+\.[0-9]+
 type FloatToken float64
 
 func (t FloatToken) String() string {

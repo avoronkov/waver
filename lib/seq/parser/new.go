@@ -20,15 +20,47 @@ func New(opts ...func(*Parser)) *Parser {
 
 	//  Init mod parsers
 	p.ModParsers = map[lexer.Token]ModParser{
-		lexer.ColonToken{}:        makeSingleArgModParser(":", common.Every),
-		lexer.PlusToken{}:         makeSingleArgModParser("+", common.Shift),
-		lexer.MinusToken{}:        makeSingleArgModParser("-", common.ShiftLeft),
-		lexer.LessToken{}:         makeSingleArgModParser("<", common.Before),
-		lexer.GreaterToken{}:      makeSingleArgModParser(">", common.After),
-		lexer.IdentToken("bits"):  makeSingleArgModParser("bits", common.Bits),
-		lexer.IdentToken("eucl"):  makeTwoArgsModParser("eucl", common.EuclideanFirst),
-		lexer.IdentToken("eucl'"): makeTwoArgsModParser("eucl'", common.EuclideanLast),
-		lexer.MultiplyToken{}:     parseTimesModifier,
+		lexer.ColonToken{}: {
+			Usage: "<n[int]> | <n, m, l...>",
+			Parse: makeSingleArgModParser(":", common.Every),
+		},
+		lexer.PlusToken{}: {
+			Usage: "<n[int]>",
+			Parse: makeSingleArgModParser("+", common.Shift),
+		},
+		lexer.MinusToken{}: {
+			Usage: "<n[int]>",
+			Parse: makeSingleArgModParser("-", common.ShiftLeft),
+		},
+		lexer.LessToken{}: {
+			Usage: "<frame[int]>",
+			Parse: makeSingleArgModParser("<", common.Before),
+		},
+		lexer.GreaterToken{}: {
+			Usage: "<frame[int]>",
+			Parse: makeSingleArgModParser(">", common.After),
+		},
+		lexer.IdentToken("bits"): {
+			Usage: "<a, b, c... totalBits[int]>",
+			Parse: makeSingleArgModParser("bits", common.Bits),
+		},
+		lexer.IdentToken("eucl"): {
+			Usage: "<pulses> <steps> (pulses <= steps)",
+			Parse: makeTwoArgsModParser("eucl", common.EuclideanFirst),
+		},
+		lexer.IdentToken("eucl'"): {
+			Usage: "<pulses> <steps> (pulses <= steps)",
+			Parse: makeTwoArgsModParser("eucl'", common.EuclideanLast),
+		},
+		lexer.MultiplyToken{}: {
+			Usage:      "^ <times[int]>",
+			Parse:      parseTimesModifier,
+			Deprecated: true,
+		},
+		lexer.CaretToken{}: {
+			Usage: "<times[int]>",
+			Parse: parseTimesModifier,
+		},
 	}
 
 	// Init pragma parsers

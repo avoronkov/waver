@@ -118,7 +118,7 @@ L:
 		}
 		_, _ = lx.Pop()
 
-		modifier, err := parser(p, lx)
+		modifier, err := parser.Parse(p, lx)
 		if err != nil {
 			return nil, err
 		}
