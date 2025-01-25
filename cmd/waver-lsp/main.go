@@ -33,7 +33,9 @@ func main() {
 		Initialize:             serverImpl.Initialize,
 		Shutdown:               serverImpl.Shutdown,
 		TextDocumentCompletion: serverImpl.TextDocumentCompletion,
+		TextDocumentDidOpen:    serverImpl.TextDocumentDidOpen,
 		TextDocumentDidChange:  serverImpl.TextDocumentDidChange,
+		TextDocumentHover:      serverImpl.TextDocumentHover,
 	}
 
 	server := server.NewServer(&handler, lsName, true)

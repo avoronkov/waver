@@ -23,17 +23,20 @@ type Server struct {
 	params *syntaxgen.Params
 	parser *parser.Parser
 
-	docs map[string][]string
+	docs      map[string][]string
+	hoverInfo map[string]string
 }
 
 func NewServer() *Server {
-
 	params := syntaxgen.NewParams()
-	return &Server{
-		params: params,
-		parser: parser.New(),
-		docs:   make(map[string][]string),
+	s := &Server{
+		params:    params,
+		parser:    parser.New(),
+		docs:      make(map[string][]string),
+		hoverInfo: make(map[string]string),
 	}
+	s.initHoverInfo()
+	return s
 }
 
 func (s *Server) Initialize(context *glsp.Context, params *protocol.InitializeParams) (any, error) {
@@ -56,8 +59,12 @@ func (s *Server) Shutdown(context *glsp.Context) error {
 	return nil
 }
 
+func (s *Server) TextDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
+	s.docs[params.TextDocument.URI] = strings.Split(params.TextDocument.Text, "\n")
+	return nil
+}
+
 func (s *Server) TextDocumentDidChange(context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
-	slog.Info("TextDocumentDidChange", "document", params.TextDocument.URI, "changes", params.ContentChanges, "type", fmt.Sprintf("%T", params.ContentChanges[0]))
 	for _, change := range params.ContentChanges {
 		if wc, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
 			s.docs[params.TextDocument.URI] = strings.Split(wc.Text, "\n")
@@ -211,7 +218,7 @@ func (s *Server) isPragmaOptions(doc string, line int) (result bool) {
 			slog.Info("isPragmaOptions", "line", i, "res", result)
 		}
 	}
-	if strings.HasPrefix(lines[line], "%%") {
+	if strings.HasPrefix(lines[line], "%") {
 		return false
 	}
 	slog.Info("isPragmaOptions", "result", result)
@@ -236,7 +243,7 @@ func (s *Server) isRegularCode(doc string, line int) bool {
 			slog.Info("isRegularCode", "line", i, "res", result)
 		}
 	}
-	if strings.HasPrefix(lines[line], "%%") {
+	if strings.HasPrefix(lines[line], "%") {
 		return false
 	}
 	slog.Info("isRegularCode", "result", result)
