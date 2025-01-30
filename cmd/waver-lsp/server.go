@@ -25,6 +25,15 @@ type Server struct {
 
 	docs      map[string][]string
 	hoverInfo map[string]string
+
+	// Completion caches
+	pragmasCompletions       []protocol.CompletionItem
+	sampleFilesCompletions   []protocol.CompletionItem
+	waveNamesCompletions     []protocol.CompletionItem
+	filtersCompletions       []protocol.CompletionItem
+	filterOptionsCompletions map[string][]protocol.CompletionItem
+	functionsCompletions     []protocol.CompletionItem
+	modifiersCompletions     []protocol.CompletionItem
 }
 
 func NewServer() *Server {
@@ -148,7 +157,12 @@ func (s *Server) lineMatchRe(doc string, line, pos int, re *regexp.Regexp) bool 
 	return res
 }
 
-func (s *Server) completePragmas() (items []protocol.CompletionItem) {
+func (s *Server) completePragmas() []protocol.CompletionItem {
+	if s.pragmasCompletions != nil {
+		return s.pragmasCompletions
+	}
+
+	items := []protocol.CompletionItem{}
 	// kind := protocol.CompletionItemKindProperty
 	for pragma, meta := range s.parser.PragmaParsers {
 		item := pragma
@@ -162,10 +176,17 @@ func (s *Server) completePragmas() (items []protocol.CompletionItem) {
 		})
 		slog.Info("completePragmas", "label", item)
 	}
+
+	s.pragmasCompletions = items
 	return items
 }
 
-func (s *Server) completeSampleFiles() (items []protocol.CompletionItem) {
+func (s *Server) completeSampleFiles() []protocol.CompletionItem {
+	if s.sampleFilesCompletions != nil {
+		return s.sampleFilesCompletions
+	}
+
+	items := []protocol.CompletionItem{}
 	subdir := "samples"
 	subdirlen := len(subdir) + 1
 	err := fs.WalkDir(static.Files, subdir, func(path string, d fs.DirEntry, err error) error {
@@ -187,10 +208,17 @@ func (s *Server) completeSampleFiles() (items []protocol.CompletionItem) {
 	if err != nil {
 		slog.Error("WalkDir failed", "error", err)
 	}
+
+	s.sampleFilesCompletions = items
 	return items
 }
 
-func (s *Server) completeWaveNames() (items []protocol.CompletionItem) {
+func (s *Server) completeWaveNames() []protocol.CompletionItem {
+	if s.waveNamesCompletions != nil {
+		return s.waveNamesCompletions
+	}
+
+	items := []protocol.CompletionItem{}
 	kind := protocol.CompletionItemKindConstant
 	for w := range waves.Waves {
 		items = append(items, protocol.CompletionItem{
@@ -198,6 +226,8 @@ func (s *Server) completeWaveNames() (items []protocol.CompletionItem) {
 			Kind:  &kind,
 		})
 	}
+
+	s.waveNamesCompletions = items
 	return items
 }
 
@@ -250,7 +280,14 @@ func (s *Server) isRegularCode(doc string, line int) bool {
 	return result
 }
 
-func (s *Server) completeFilters() (items []protocol.CompletionItem) {
+func (s *Server) completeFilters() []protocol.CompletionItem {
+	if s.filtersCompletions != nil {
+		return s.filtersCompletions
+	}
+
+	items := []protocol.CompletionItem{}
+	s.filterOptionsCompletions = make(map[string][]protocol.CompletionItem)
+
 	kind := protocol.CompletionItemKindFunction
 	for name, obj := range filters.Filters {
 		item := name
@@ -258,6 +295,7 @@ func (s *Server) completeFilters() (items []protocol.CompletionItem) {
 
 		v := reflect.TypeOf(obj)
 		nField := v.NumField()
+		optionItems := []protocol.CompletionItem{}
 		for i := 0; i < nField; i++ {
 			fld := v.Field(i)
 			tagsRaw := fld.Tag.Get("option")
@@ -266,6 +304,17 @@ func (s *Server) completeFilters() (items []protocol.CompletionItem) {
 			}
 			tags := strings.Split(tagsRaw, ",")
 			filterOptions.Add(tags...)
+
+			for _, tag := range tags {
+				item := tag
+				detail := fld.Type.String()
+				optionItems = append(optionItems, protocol.CompletionItem{
+					Label:      item,
+					Detail:     &detail,
+					InsertText: &item,
+					Kind:       &kind,
+				})
+			}
 		}
 		detail := strings.Join(filterOptions.Values(), ", ")
 		items = append(items, protocol.CompletionItem{
@@ -274,7 +323,10 @@ func (s *Server) completeFilters() (items []protocol.CompletionItem) {
 			InsertText: &item,
 			Kind:       &kind,
 		})
+		s.filterOptionsCompletions[name] = optionItems
 	}
+
+	s.filtersCompletions = items
 	return items
 }
 
@@ -305,42 +357,22 @@ func (s *Server) currentFilter(doc string, line int) string {
 	return res
 }
 
-func (s *Server) completeFilterOptions(filter string) (items []protocol.CompletionItem) {
+func (s *Server) completeFilterOptions(filter string) []protocol.CompletionItem {
 	if filter == "" {
 		return nil
 	}
-	kind := protocol.CompletionItemKindProperty
-	for name, obj := range filters.Filters {
-		if name != filter {
-			continue
-		}
-
-		v := reflect.TypeOf(obj)
-		nField := v.NumField()
-		for i := 0; i < nField; i++ {
-			fld := v.Field(i)
-			tagsRaw := fld.Tag.Get("option")
-			if tagsRaw == "" {
-				continue
-			}
-			tags := strings.Split(tagsRaw, ",")
-			for _, tag := range tags {
-				item := tag
-				detail := fld.Type.String()
-				items = append(items, protocol.CompletionItem{
-					Label:      item,
-					Detail:     &detail,
-					InsertText: &item,
-					Kind:       &kind,
-				})
-			}
-		}
-		break
+	if s.filterOptionsCompletions == nil {
+		_ = s.completeFilters()
 	}
-	return items
+	return s.filterOptionsCompletions[filter]
 }
 
-func (s *Server) completeFunctions() (items []protocol.CompletionItem) {
+func (s *Server) completeFunctions() []protocol.CompletionItem {
+	if s.functionsCompletions != nil {
+		return s.functionsCompletions
+	}
+
+	items := []protocol.CompletionItem{}
 	kind := protocol.CompletionItemKindFunction
 	for token, meta := range s.parser.FuncParsers {
 		item := token.String()
@@ -352,10 +384,17 @@ func (s *Server) completeFunctions() (items []protocol.CompletionItem) {
 			InsertText: &item,
 		})
 	}
+
+	s.functionsCompletions = items
 	return items
 }
 
-func (s *Server) completeModifiers() (items []protocol.CompletionItem) {
+func (s *Server) completeModifiers() []protocol.CompletionItem {
+	if s.modifiersCompletions != nil {
+		return s.modifiersCompletions
+	}
+
+	items := []protocol.CompletionItem{}
 	kind := protocol.CompletionItemKindFunction
 	for token, meta := range s.parser.ModParsers {
 		item := token.String()
@@ -367,5 +406,7 @@ func (s *Server) completeModifiers() (items []protocol.CompletionItem) {
 			InsertText: &item,
 		})
 	}
+
+	s.modifiersCompletions = items
 	return items
 }
