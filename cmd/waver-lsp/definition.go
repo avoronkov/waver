@@ -8,7 +8,7 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-var instDefinitionRe = regexp.MustCompile(`^%%?\s*(?:wave|sample)\s+(\S+)\s`)
+var instDefinitionRe = regexp.MustCompile(`^%%?\s*(?:wave|inst|sample)\s+(\S+)\s`)
 var varDefinitionRe = regexp.MustCompile(`^(\S+)\s*=`)
 var funcDefinitionRe = regexp.MustCompile(`^(\S+)\s+\S+\s*=`)
 
