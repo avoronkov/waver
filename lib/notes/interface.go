@@ -9,3 +9,7 @@ type Scale interface {
 type EdoScale interface {
 	Edo() int
 }
+
+type StdFuncsScale interface {
+	Std() []byte
+}

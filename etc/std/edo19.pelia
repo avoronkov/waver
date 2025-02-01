@@ -1,0 +1,5 @@
+maj maj_argument = maj_argument,+6,+11
+maj7 maj7_argument = maj7_argument,+6,+11,+17
+
+min min_argument = min_argument,+5,+11
+min7 min7_argument = min7_argument,+5,+11,+16

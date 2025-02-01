@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"strings"
@@ -234,6 +235,12 @@ func parseScalePragma(p *Parser, fields []lexer.Token, options []map[string]any)
 	p.scale = scale
 	for _, setScale := range p.scaleSetters {
 		setScale(scale)
+	}
+	if stdFuncs, ok := scale.(notes.StdFuncsScale); ok {
+		reader := bytes.NewReader(stdFuncs.Std())
+		if err := p.parseReader(reader); err != nil {
+			return err
+		}
 	}
 	return nil
 }

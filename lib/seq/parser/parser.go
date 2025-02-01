@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/avoronkov/waver/etc/std"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	"github.com/avoronkov/waver/lib/seq/types"
@@ -36,12 +35,6 @@ type Parser struct {
 }
 
 func (p *Parser) parse() error {
-	// WIP parse std lib
-	reader := bytes.NewReader(std.StdEdo12)
-	if err := p.parseReader(reader); err != nil {
-		return err
-	}
-
 	// Parse the file itself
 	f, err := os.Open(p.file)
 	if err != nil {
@@ -53,17 +46,11 @@ func (p *Parser) parse() error {
 }
 
 func (p *Parser) ParseData(data []byte) error {
-	// WIP parse std lib
-	reader := bytes.NewReader(std.StdEdo12)
-	if err := p.parseReader(reader); err != nil {
-		return err
-	}
 	return p.parseReader(bytes.NewReader(data))
 }
 
 func (p *Parser) parseReader(reader io.Reader) error {
 	lx := lexer.NewLexer(reader)
-	_ = lx
 
 	log.Printf("Parsing started.")
 	for {

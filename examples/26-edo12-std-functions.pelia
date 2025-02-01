@@ -1,0 +1,5 @@
+% scale edo12
+
+% wave Sine "sine"
+
+:4 Sine @concat [ maj7 C3 min7 D3 ]

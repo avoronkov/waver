@@ -1,6 +1,10 @@
 package notes
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/avoronkov/waver/etc/std"
+)
 
 // 19th root of 2.0
 const Edo19Step = 1.0371550444462
@@ -13,6 +17,7 @@ type Edo19 struct {
 
 var _ (Scale) = (*Edo19)(nil)
 var _ (EdoScale) = (*Edo19)(nil)
+var _ (StdFuncsScale) = (*Edo19)(nil)
 
 func NewEdo19() *Edo19 {
 	e := &Edo19{}
@@ -198,4 +203,8 @@ func (e *Edo19) ByNumber(n int) (Note, bool) {
 
 func (e *Edo19) Edo() int {
 	return 19
+}
+
+func (s *Edo19) Std() []byte {
+	return std.StdEdo19
 }

@@ -1,6 +1,10 @@
 package notes
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/avoronkov/waver/etc/std"
+)
 
 // 12th root of 2.0
 const HalfStep = 1.0594630943593
@@ -14,6 +18,7 @@ type Standard struct {
 
 var _ Scale = (*Standard)(nil)
 var _ EdoScale = (*Standard)(nil)
+var _ StdFuncsScale = (*Standard)(nil)
 
 func NewStandard() *Standard {
 	s := &Standard{}
@@ -147,4 +152,8 @@ func (e *Standard) ByNumber(n int) (Note, bool) {
 
 func (s *Standard) Edo() int {
 	return 12
+}
+
+func (s *Standard) Std() []byte {
+	return std.StdEdo12
 }
