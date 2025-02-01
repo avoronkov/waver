@@ -23,8 +23,9 @@ type Server struct {
 	params *syntaxgen.Params
 	parser *parser.Parser
 
-	docs      map[string][]string
-	hoverInfo map[string]string
+	docs            map[string][]string
+	hoverInfo       map[string]string
+	definitionsInfo map[string]map[string]protocol.Location
 
 	// Completion caches
 	pragmasCompletions       []protocol.CompletionItem
@@ -39,10 +40,11 @@ type Server struct {
 func NewServer() *Server {
 	params := syntaxgen.NewParams()
 	s := &Server{
-		params:    params,
-		parser:    parser.New(),
-		docs:      make(map[string][]string),
-		hoverInfo: make(map[string]string),
+		params:          params,
+		parser:          parser.New(),
+		docs:            make(map[string][]string),
+		hoverInfo:       make(map[string]string),
+		definitionsInfo: make(map[string]map[string]protocol.Location),
 	}
 	s.initHoverInfo()
 	return s
@@ -70,6 +72,7 @@ func (s *Server) Shutdown(context *glsp.Context) error {
 
 func (s *Server) TextDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	s.docs[params.TextDocument.URI] = strings.Split(params.TextDocument.Text, "\n")
+	s.updateDocumentDefinitions(params.TextDocument.URI)
 	return nil
 }
 
@@ -81,6 +84,7 @@ func (s *Server) TextDocumentDidChange(context *glsp.Context, params *protocol.D
 			slog.Error("Unsupported change type", "type", fmt.Sprintf("%T", params.ContentChanges[0]))
 		}
 	}
+	s.updateDocumentDefinitions(params.TextDocument.URI)
 	return nil
 }
 

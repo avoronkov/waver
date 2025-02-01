@@ -93,7 +93,27 @@ func (s *Server) findSymbolUnderCursor(doc string, line, pos int) *protocol.Mark
 		}
 	}
 
-	// find the word under cursor
+	word := s.findWordUnderCursor(doc, line, pos)
+	if meta, ok := s.hoverInfo[word]; ok {
+		return &protocol.MarkupContent{
+			Kind:  protocol.MarkupKindPlainText,
+			Value: meta,
+		}
+	}
+	return nil
+}
+
+func (s *Server) findWordUnderCursor(doc string, line, pos int) string {
+	lines, ok := s.docs[doc]
+	if !ok {
+		slog.Warn("Document not found", "name", doc)
+		return ""
+	}
+	if line >= len(lines) {
+		slog.Warn("Line index out of range", "line", line)
+		return ""
+	}
+	str := lines[line]
 	i := pos - 1
 	if i >= 0 {
 		for ; i >= 0; i-- {
@@ -124,14 +144,7 @@ func (s *Server) findSymbolUnderCursor(doc string, line, pos int) *protocol.Mark
 	}
 	slog.Debug("findSymbolUnderCursor", "j", j)
 	word := str[i:j]
-	slog.Info("findSymbolUnderCursor", "line", line, "pos", pos, "word", word, "i", i, "j", "j")
-	if meta, ok := s.hoverInfo[word]; ok {
-		return &protocol.MarkupContent{
-			Kind:  protocol.MarkupKindPlainText,
-			Value: meta,
-		}
-	}
-	return nil
+	return word
 }
 
 func isWordSymbol(r byte) bool {
