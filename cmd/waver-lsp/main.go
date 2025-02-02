@@ -22,6 +22,13 @@ var handler protocol.Handler
 func main() {
 	flag.Parse()
 
+	serverImpl := NewServer()
+
+	if reference {
+		serverImpl.WriteReference(os.Stdout)
+		return
+	}
+
 	var logOutput io.Writer = os.Stderr
 	if debugFile {
 		logfile, err := os.Create("waver-lsp.log")
@@ -34,8 +41,6 @@ func main() {
 	slog.SetDefault(logger)
 
 	commonlog.Configure(2, nil)
-
-	serverImpl := NewServer()
 
 	handler = protocol.Handler{
 		Initialize:             serverImpl.Initialize,

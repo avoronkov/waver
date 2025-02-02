@@ -26,6 +26,7 @@ type Server struct {
 	docs            map[string][]string
 	hoverInfo       map[string]string
 	definitionsInfo map[string]map[string]protocol.Location
+	languageDefs    map[string]protocol.Location
 
 	// Completion caches
 	pragmasCompletions       []protocol.CompletionItem
@@ -45,8 +46,10 @@ func NewServer() *Server {
 		docs:            make(map[string][]string),
 		hoverInfo:       make(map[string]string),
 		definitionsInfo: make(map[string]map[string]protocol.Location),
+		languageDefs:    make(map[string]protocol.Location),
 	}
 	s.initHoverInfo()
+	s.initLanguageDefinitions()
 	return s
 }
 

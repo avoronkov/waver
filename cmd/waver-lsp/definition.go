@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
+	"os"
 	"regexp"
+	"strings"
 
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -45,6 +48,51 @@ func (s *Server) updateDocumentDefinitions(doc string) error {
 	return nil
 }
 
+func (s *Server) initLanguageDefinitions() {
+	file, err := os.CreateTemp("", "waver-reference-*.md")
+	if err != nil {
+		slog.Error("initLanguageDefinitions createTemp", "error", err)
+		return
+	}
+	filename := file.Name()
+	s.WriteReference(file)
+	file.Close()
+	s.scanReferenceDefinitions(filename)
+}
+
+var referenceDefRe = regexp.MustCompile(`^### (\S+)`)
+
+func (s *Server) scanReferenceDefinitions(filename string) {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		slog.Error("scanReferenceDefinitions Read file", "error", err)
+		return
+	}
+
+	refUri := fmt.Sprintf("file://%v", filename)
+	lines := strings.Split(string(data), "\n")
+	for i, line := range lines {
+		matches := referenceDefRe.FindStringSubmatch(line)
+		if len(matches) < 2 {
+			continue
+		}
+		name := matches[1]
+		s.languageDefs[name] = protocol.Location{
+			URI: refUri,
+			Range: protocol.Range{
+				Start: protocol.Position{
+					Line:      protocol.UInteger(i),
+					Character: protocol.UInteger(5),
+				},
+				End: protocol.Position{
+					Line:      protocol.UInteger(i),
+					Character: protocol.UInteger(len(name) + 5),
+				},
+			},
+		}
+	}
+}
+
 // Returns: Location | []Location | []LocationLink | nil
 func (s *Server) TextDocumentDefinition(context *glsp.Context, params *protocol.DefinitionParams) (any, error) {
 	docUri := params.TextDocument.URI
@@ -53,11 +101,17 @@ func (s *Server) TextDocumentDefinition(context *glsp.Context, params *protocol.
 
 	defs := s.definitionsInfo[docUri]
 	word := s.findWordUnderCursor(docUri, posLine, posChar)
-	loc, ok := defs[word]
-	if !ok {
-		return nil, nil
-	}
-	return loc, nil
-}
 
-// TODO
+	// language definitions
+	loc, ok := s.languageDefs[word]
+	if ok {
+		return loc, nil
+	}
+
+	// document definitions
+	loc, ok = defs[word]
+	if ok {
+		return loc, nil
+	}
+	return nil, nil
+}
