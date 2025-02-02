@@ -31,15 +31,29 @@ func (s *Server) TextDocumentHover(context *glsp.Context, params *protocol.Hover
 	}, nil
 }
 
+func trimLeadingSpaces(s string) string {
+	ls := strings.Split(s, "\n")
+	for i, l := range ls {
+		ls[i] = strings.TrimSpace(l)
+	}
+	return strings.Join(ls, "\n")
+}
+
 func (s *Server) initHoverInfo() {
 	for pragma, meta := range s.parser.PragmaParsers {
 		info := fmt.Sprintf("[pragma] %v: %v", pragma, meta.Usage)
+		if meta.Desc != "" {
+			info += "\n" + trimLeadingSpaces(meta.Desc)
+		}
 		s.hoverInfo[pragma] = info
 	}
 
 	for token, meta := range s.parser.FuncParsers {
 		t := token.String()
 		info := fmt.Sprintf("[func] %v: %v", t, meta.Usage)
+		if meta.Desc != "" {
+			info += "\n" + trimLeadingSpaces(meta.Desc)
+		}
 		s.hoverInfo[token.String()] = info
 	}
 

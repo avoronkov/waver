@@ -12,6 +12,7 @@ type ParseFunction func(p *Parser, lx *lexer.Lexer, fn string) (types.ValueFn, e
 
 type FunctionParser struct {
 	Usage string
+	Desc string
 	Parse ParseFunction
 }
 

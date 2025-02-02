@@ -67,14 +67,20 @@ func New(opts ...func(*Parser)) *Parser {
 	p.PragmaParsers = map[string]pragmaParser{
 		"tempo": {
 			Usage: "<int>",
+			Desc: `Specify tempo in BMP (bits-per-minute).
+			Each "bit" is subdivided into 4 frames.`,
 			Parse: parseTempo,
 		},
 		"sample": {
 			Usage: `<Name> "<sample-file>"`,
+			Desc: `Define an instrument using a sample.
+			Waver has a number of builtin percussion samples which can be used.`,
 			Parse: parseSample,
 		},
 		"wave": {
 			Usage: `<Name> "<wave-form>"`,
+			Desc: `Define an instrument using basic waveform.
+			Supported waveforms are: sine, triangle, square, saw and semisine.`,
 			Parse: parseWave,
 		},
 		"inst": {
@@ -95,10 +101,12 @@ func New(opts ...func(*Parser)) *Parser {
 		},
 		"stop": {
 			Usage: `<frame[int]>`,
+			Desc:  `Stop processing file after the specified frame.`,
 			Parse: parseStopPragma,
 		},
 		"srand": {
 			Usage: `<int>`,
+			Desc:  `Specify seed for PRNG.`,
 			Parse: parseSrandPragma,
 		},
 		"scale": {
@@ -110,42 +118,55 @@ func New(opts ...func(*Parser)) *Parser {
 	p.FuncParsers = map[lexer.Token]FunctionParser{
 		lexer.IdentToken("seq"): {
 			Usage: "(@) [ 1 2 3 ]",
+			Desc:  `Convert a list into a sequence generator which returns each item of the list at a time.`,
 			Parse: parseSequence,
 		},
 		lexer.AtToken{}: {
 			Usage: "[ 1 2 3 ]",
+			Desc: `Convert a list into a sequence generator which returns each item of the list at a time.
+			Shorthand for function "seq".`,
 			Parse: parseSequence,
 		},
 		lexer.IdentToken("rand"): {
 			Usage: "(&) [ 1 2 3 ]",
+			Desc:  `Take a random element from a list.`,
 			Parse: makeSingleArgValueFnParser("rand", common.Random),
 		},
 		lexer.AmpersandToken{}: {
 			Usage: "[ 1 2 3 ]",
+			Desc: `Take a random element from a list.
+			Shorthand for function "rand"`,
 			Parse: makeSingleArgValueFnParser("rand", common.Random),
 		},
 		lexer.IdentToken("up"): {
-			Usage: "<int> <Note>",
+			Usage: "<int> (<Note> | <Chord>)",
+			Desc:  `Increase a pitch of a note (or a chord).`,
 			Parse: parseUpDown,
 		},
 		lexer.IdentToken("down"): {
-			Usage: "<int> <Note>",
+			Usage: "<int> (<Note> | <Chord>)",
+			Desc:  `Decrease a pitch of a note (or a chord).`,
 			Parse: parseUpDown,
 		},
 		lexer.IdentToken("repeat"): {
-			Usage: "(*) <int> <sequence...>",
+			Usage: "(*) <n[int]> <sequence...>",
+			Desc:  `Repeat each element of a sequence n times.`,
 			Parse: parseRepeat,
 		},
 		lexer.MultiplyToken{}: {
 			Usage: "<int> <sequence...>",
+			Desc: `Repeat each element of a sequence n times.
+			Shorthand for function "repeat"`,
 			Parse: parseRepeat,
 		},
 		lexer.IdentToken("concat"): {
 			Usage: "[ list1, list2 ... ]",
+			Desc:  `Concatenate lists.`,
 			Parse: makeSingleArgValueFnParser("concat", common.Concat),
 		},
 		lexer.IdentToken("loop"): {
 			Usage: "<size[int]> <sequence...>",
+			Desc:  `Take "size" elements from a sequence and repeat them over and over.`,
 			Parse: parseLoop,
 		},
 	}

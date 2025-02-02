@@ -15,6 +15,7 @@ import (
 
 type pragmaParser struct {
 	Usage      string
+	Desc       string
 	Parse      func(*Parser, []lexer.Token, []map[string]any) error
 	Deprecated bool
 }
