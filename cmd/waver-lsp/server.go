@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/fs"
 	"log/slog"
 	"reflect"
 	"regexp"
@@ -193,29 +192,15 @@ func (s *Server) completeSampleFiles() []protocol.CompletionItem {
 		return s.sampleFilesCompletions
 	}
 
+	kind := protocol.CompletionItemKindFile
 	items := []protocol.CompletionItem{}
-	subdir := "samples"
-	subdirlen := len(subdir) + 1
-	err := fs.WalkDir(static.Files, subdir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
-		kind := protocol.CompletionItemKindFile
-
+	for _, file := range static.ListFiles() {
 		items = append(items, protocol.CompletionItem{
-			Label: path[subdirlen:],
+			Label: file,
 			Kind:  &kind,
 		})
-		slog.Info("Sample", "file", path)
-		return nil
-	})
-	if err != nil {
-		slog.Error("WalkDir failed", "error", err)
-	}
 
+	}
 	s.sampleFilesCompletions = items
 	return items
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	"github.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/static"
 )
 
 func New(opts ...func(*Parser)) *Parser {
@@ -79,7 +80,8 @@ func New(opts ...func(*Parser)) *Parser {
 			Usage: `<Name> "<sample-file>"`,
 			Desc: `Define an instrument using a sample.
 			Waver has a number of builtin percussion samples which can be used.`,
-			Parse: parseSample,
+			Examples: static.ListFiles(),
+			Parse:    parseSample,
 		},
 		"wave": {
 			Usage:    `<Name> "<waveform>"`,

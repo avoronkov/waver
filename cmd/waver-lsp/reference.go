@@ -33,7 +33,14 @@ func (s *Server) pragmasReference(out io.Writer) {
 		if meta.Desc != "" {
 			fmt.Fprintf(out, "\n%v\n", trimLeadingSpaces(meta.Desc))
 		}
-		if len(meta.Examples) > 0 {
+		if len(meta.Examples) > 9 {
+			fmt.Fprintf(out, "\nExamples:\n")
+			for _, ex := range meta.Examples {
+
+				fmt.Fprintf(out, "- `%v`\n", ex)
+			}
+
+		} else if len(meta.Examples) > 0 {
 			fmt.Fprintf(out, "\nExamples: `%v`\n", strings.Join(meta.Examples, "`, `"))
 		}
 		fmt.Fprintln(out)
