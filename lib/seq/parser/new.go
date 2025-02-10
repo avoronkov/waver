@@ -1,6 +1,10 @@
 package parser
 
 import (
+	"maps"
+	"slices"
+
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/lexer"
@@ -78,10 +82,10 @@ func New(opts ...func(*Parser)) *Parser {
 			Parse: parseSample,
 		},
 		"wave": {
-			Usage: `<Name> "<wave-form>"`,
-			Desc: `Define an instrument using basic waveform.
-			Supported waveforms are: sine, triangle, square, saw and semisine.`,
-			Parse: parseWave,
+			Usage:    `<Name> "<waveform>"`,
+			Desc:     `Define an instrument using basic waveform.`,
+			Parse:    parseWave,
+			Examples: slices.Sorted(maps.Keys(waves.Waves)),
 		},
 		"inst": {
 			Parse:      parseWave,

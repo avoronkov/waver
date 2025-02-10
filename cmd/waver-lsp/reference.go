@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 )
 
 func (s *Server) WriteReference(out io.Writer) {
@@ -31,6 +32,9 @@ func (s *Server) pragmasReference(out io.Writer) {
 		}
 		if meta.Desc != "" {
 			fmt.Fprintf(out, "\n%v\n", trimLeadingSpaces(meta.Desc))
+		}
+		if len(meta.Examples) > 0 {
+			fmt.Fprintf(out, "\nExamples: `%v`\n", strings.Join(meta.Examples, "`, `"))
 		}
 		fmt.Fprintln(out)
 	}
