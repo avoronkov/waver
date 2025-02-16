@@ -8,8 +8,8 @@ import (
 
 type SwingExp struct {
 	Carrier   waves.Wave `option:"carrier"`
-	Frequency float64    `option:"freq,frequency"`
-	Amplitude float64    `option:"amp,amplitude"`
+	Frequency float64    `option:"frequency,freq"`
+	Amplitude float64    `option:"amplitude,amp"`
 	Inverse   bool       `option:"inverse"`
 
 	carrierCtx *waves.NoteCtx
@@ -26,6 +26,10 @@ func (SwingExp) New() Filter {
 		Frequency: 0.25,
 		Amplitude: 1.0,
 	}
+}
+
+func (SwingExp) Desc() string {
+	return `Swinging Exponent is an effect of constantly changing exponent effect using periodic function (cosine).`
 }
 
 func (s *SwingExp) Apply(input waves.Wave) waves.Wave {

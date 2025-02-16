@@ -8,8 +8,8 @@ import (
 
 type VibratoFilter struct {
 	Carrier   waves.Wave `option:"carrier"`
-	Frequency float64    `option:"freq,frequency"`
-	Amplitude float64    `option:"amp,amplitude"`
+	Frequency float64    `option:"frequency,freq"`
+	Amplitude float64    `option:"amplitude,amp"`
 }
 
 func (VibratoFilter) New() Filter {
@@ -18,6 +18,10 @@ func (VibratoFilter) New() Filter {
 		Frequency: 1.0,
 		Amplitude: 0.5,
 	}
+}
+
+func (VibratoFilter) Desc() string {
+	return `Vibrato filter.`
 }
 
 func (v *VibratoFilter) Apply(input waves.Wave) waves.Wave {

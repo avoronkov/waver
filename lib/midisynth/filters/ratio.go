@@ -5,13 +5,17 @@ import (
 )
 
 type Ratio struct {
-	Value float64
+	Value float64 `option:"value"`
 }
 
 func (Ratio) New() Filter {
 	return &Ratio{
 		Value: 1.0,
 	}
+}
+
+func (Ratio) Desc() string {
+	return `Effect of increasion / decreasing speed of the input signal.`
 }
 
 func ratioImpl(fx *Ratio, input waves.Wave, t float64, ctx *waves.NoteCtx) float64 {

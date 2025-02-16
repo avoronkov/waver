@@ -19,6 +19,10 @@ func (MovingExponent) New() Filter {
 	}
 }
 
+func (MovingExponent) Desc() string {
+	return `Moving Exponent is a mathematical effect implemented by applying constantly increasing (decreasing) exponent effect.`
+}
+
 func (e *MovingExponent) Apply(input waves.Wave) waves.Wave {
 	return MakeFilterImpl(e, input, movingExpValue)
 }

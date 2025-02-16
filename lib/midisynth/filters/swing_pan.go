@@ -6,8 +6,8 @@ import (
 
 type SwingPan struct {
 	Carrier   waves.Wave `option:"carrier"`
-	Frequency float64    `option:"freq,frequency"`
-	Amplitude float64    `option:"amp,amplitude"`
+	Frequency float64    `option:"frequency,freq"`
+	Amplitude float64    `option:"amplitude,amp"`
 }
 
 func (SwingPan) New() Filter {
@@ -16,6 +16,10 @@ func (SwingPan) New() Filter {
 		Frequency: 0.5,
 		Amplitude: 1.0,
 	}
+}
+
+func (SwingPan) Desc() string {
+	return `Swinging Panning.`
 }
 
 func (p *SwingPan) Apply(input waves.Wave) waves.Wave {

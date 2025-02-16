@@ -8,8 +8,8 @@ import (
 
 type TimeShift struct {
 	Carrier   waves.Wave `option:"carrier"`
-	Frequency float64    `option:"freq,frequency"`
-	Amplitude float64    `option:"amp,amplitude"`
+	Frequency float64    `option:"frequency,freq"`
+	Amplitude float64    `option:"amplitude,amp"`
 }
 
 func (TimeShift) New() Filter {
@@ -18,6 +18,10 @@ func (TimeShift) New() Filter {
 		Frequency: 4.0,
 		Amplitude: 0.05,
 	}
+}
+
+func (TimeShift) Desc() string {
+	return `Experimental time shift effect.`
 }
 
 func (ts *TimeShift) Apply(w waves.Wave) waves.Wave {

@@ -9,7 +9,7 @@ import (
 type Flanger struct {
 	shifter waves.Wave
 
-	Frequency float64 `option:"freq,frequency"`
+	Frequency float64 `option:"frequency,freq"`
 	MaxShift  float64 `option:"maxShift"`
 	AbsTime   bool    `option:"abs"`
 
@@ -26,6 +26,10 @@ func (Flanger) New() Filter {
 		Frequency: 4.0,
 		AbsTime:   false,
 	}
+}
+
+func (Flanger) Desc() string {
+	return `Flanging is an audio effect produced by mixing two identical signals together, one signal delayed by a small and (usually) gradually changing period, usually smaller than 20 milliseconds.`
 }
 
 func (f *Flanger) Apply(wave waves.Wave) waves.Wave {

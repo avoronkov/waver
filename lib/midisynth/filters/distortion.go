@@ -6,13 +6,17 @@ import (
 
 // Amplitude distortion filter
 type Distortion struct {
-	Value float64
+	Value float64 `option:"value"`
 }
 
 func (Distortion) New() Filter {
 	return &Distortion{
 		Value: 1.0,
 	}
+}
+
+func (Distortion) Desc() string {
+	return `Distortion is a form of audio signal processing used to alter the sound of amplified electric musical instruments, usually by increasing their gain, producing a "fuzzy", "growling", or "gritty" tone.`
 }
 
 func (df *Distortion) Apply(w waves.Wave) waves.Wave {

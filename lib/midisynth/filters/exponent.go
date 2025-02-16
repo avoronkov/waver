@@ -7,13 +7,17 @@ import (
 )
 
 type Exponent struct {
-	Value float64
+	Value float64 `option:"value"`
 }
 
 func (Exponent) New() Filter {
 	return &Exponent{
 		Value: 1.0,
 	}
+}
+
+func (Exponent) Desc() string {
+	return `Mathematical effect implemented as exponentiation of input signal into power of "value".`
 }
 
 func (ef *Exponent) Apply(input waves.Wave) waves.Wave {

@@ -5,8 +5,8 @@ import (
 )
 
 type Pan struct {
-	Left  float64 `option:"l,left"`
-	Right float64 `option:"r,right"`
+	Left  float64 `option:"left,l"`
+	Right float64 `option:"right,r"`
 }
 
 func (Pan) New() Filter {
@@ -14,6 +14,10 @@ func (Pan) New() Filter {
 		Left:  1.0,
 		Right: 1.0,
 	}
+}
+
+func (Pan) Desc() string {
+	return `Panning is the distribution of an audio signal into a new stereo or multi-channel sound field determined by a pan control setting.`
 }
 
 func (p *Pan) Apply(w waves.Wave) waves.Wave {
