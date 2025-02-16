@@ -81,7 +81,11 @@ func (s *Server) initHoverInfo() {
 			filterOptions.Add(tags...)
 		}
 		detail := strings.Join(filterOptions.Values(), ", ")
-		info := fmt.Sprintf("[filter] %v: %v", name, detail)
+		desc := ""
+		if d, ok := obj.(descer); ok {
+			desc = "\n" + d.Desc()
+		}
+		info := fmt.Sprintf("[filter] %v: %v%v", name, detail, desc)
 		s.hoverInfo[name] = info
 	}
 }
