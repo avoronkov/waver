@@ -26,6 +26,10 @@ func (AdsrFilter) New() Filter {
 	}
 }
 
+func (AdsrFilter) Desc() string {
+	return `The most common envelope generator controlled with four parameters: attack, decay, sustain and release (ADSR).`
+}
+
 func (af *AdsrFilter) Apply(w waves.Wave) waves.Wave {
 	return &adsrImpl{
 		wave: w,

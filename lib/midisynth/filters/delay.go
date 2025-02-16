@@ -16,7 +16,7 @@ type DelayFilter struct {
 	Times int `option:"times"`
 
 	// [0.0..1.0]
-	FadeOut float64 `option:"fade,feedback"`
+	FadeOut float64 `option:"feedback,fade"`
 }
 
 func (DelayFilter) New() Filter {
@@ -26,6 +26,10 @@ func (DelayFilter) New() Filter {
 		Times:    1,
 		FadeOut:  0.5,
 	}
+}
+
+func (DelayFilter) Desc() string {
+	return `Audio delay is a time-based audio processing effect that captures the original signal and replays it at set intervals, creating echo-like repetitions.`
 }
 
 func (df *DelayFilter) Apply(w waves.Wave) waves.Wave {

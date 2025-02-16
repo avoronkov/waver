@@ -7,8 +7,8 @@ import (
 // Ring (amplitude) modulation.
 type Ring struct {
 	Carrier   waves.Wave `option:"carrier"`
-	Frequency float64    `option:"freq,frequency"`
-	Amplitude float64    `option:"amp,amplitude"`
+	Frequency float64    `option:"frequency,freq"`
+	Amplitude float64    `option:"amplitude,amp"`
 }
 
 func (Ring) New() Filter {
@@ -17,6 +17,10 @@ func (Ring) New() Filter {
 		Frequency: 4.0,
 		Amplitude: 1.0,
 	}
+}
+
+func (Ring) Desc() string {
+	return `Amplitude modulation.`
 }
 
 func (rf *Ring) Apply(input waves.Wave) waves.Wave {
