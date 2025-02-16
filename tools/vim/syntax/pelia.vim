@@ -20,6 +20,7 @@ syn match celOperator '-'
 syn match celOperator ':'
 syn match celOperator '<'
 syn match celOperator '>'
+syn match celOperator '^'
 
 
 syn match celOperator "\<bits\>"
@@ -50,7 +51,7 @@ syn keyword celTodo contained TODO FIXME XXX NOTE
 syn match celComment "#.*$" contains=celTodo
 
 " instruments options
-syn keyword celFilter adsr am delay dist distortion exp flanger movexp pan ratio swingexp swingpan timeshift vibrato
+syn keyword celFilter 8bit adsr am delay dist distortion exp flanger movexp pan ratio swingexp swingpan timeshift vibrato
 
 syn keyword celFilterOption abs
 syn keyword celFilterOption abstime
@@ -60,6 +61,7 @@ syn keyword celFilterOption attackLen
 syn keyword celFilterOption attackLevel
 syn keyword celFilterOption attacklen
 syn keyword celFilterOption attacklevel
+syn keyword celFilterOption bits
 syn keyword celFilterOption carrier
 syn keyword celFilterOption carrierctx
 syn keyword celFilterOption decayLen

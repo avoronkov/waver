@@ -14,6 +14,7 @@ type NewFilter interface {
 }
 
 var Filters = map[string]NewFilter{
+	"8bit":       EightBit{},
 	"adsr":       AdsrFilter{},
 	"am":         Ring{},
 	"delay":      DelayFilter{},
