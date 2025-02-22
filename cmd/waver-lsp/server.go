@@ -131,6 +131,8 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 	if s.isRegularCode(docUri, posLine) {
 		completionItems = append(completionItems, s.completeFunctions()...)
 		completionItems = append(completionItems, s.completeModifiers()...)
+		completionItems = append(completionItems, s.completeSampleFiles()...)
+		completionItems = append(completionItems, s.completeWaveNames()...)
 	}
 
 	return completionItems, nil
