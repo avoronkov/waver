@@ -36,3 +36,8 @@ func (s *Set) AddInstrument(n string, inst *Instrument) {
 	log.Printf("Set: AddInstrument %v", n)
 	s.waved[n] = inst
 }
+
+func (s *Set) HasInstrument(n string) bool {
+	_, ok := s.waved[n]
+	return ok
+}

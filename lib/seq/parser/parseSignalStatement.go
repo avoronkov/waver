@@ -3,6 +3,8 @@ package parser
 import (
 	"fmt"
 
+	"github.com/avoronkov/waver/lib/midisynth/config"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	"github.com/avoronkov/waver/lib/seq/types"
@@ -231,7 +233,40 @@ func (p *Parser) parseSignal(lx *lexer.Lexer) (types.Signaler, error) {
 	return common.Note(p.scale, in, note, common.NoteAmp(amp), common.NoteDur(dur)), nil
 }
 
+func (p *Parser) checkWaveNameUsedAsInstrument(lx *lexer.Lexer) error {
+	// Check if wave name is used as instrument directly, e.g. `:4 sine A4`.
+	tok, err := lx.Top()
+	if err != nil {
+		return err
+	}
+	ident, ok := tok.(lexer.IdentToken)
+	if !ok {
+		return nil
+	}
+	if _, ok := waves.Waves[ident.String()]; !ok {
+		return nil
+	}
+	if p.instSet.HasInstrument(ident.String()) {
+		return nil
+	}
+	in, err := config.ParseInstrument(
+		ident.String(),
+		p.globalFilters,
+		config.Param("tempo", p.tempo),
+	)
+	if err != nil {
+		return err
+	}
+	p.instSet.AddInstrument(ident.String(), in)
+	return nil
+}
+
 func (p *Parser) parsePlainSignal(lx *lexer.Lexer) (types.Signaler, error) {
+	// Check if wave name is used as instrument directly, e.g. `:4 sine A4`.
+	if err := p.checkWaveNameUsedAsInstrument(lx); err != nil {
+		return nil, err
+	}
+
 	// Parse instrument
 	in, err := p.parseAtom(lx)
 	if err != nil {

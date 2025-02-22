@@ -21,6 +21,7 @@ type ScaleSetter func(notes.Scale)
 
 type InstrumentSet interface {
 	AddInstrument(n string, in *instruments.Instrument)
+	HasInstrument(n string) bool
 }
 
 type UserFunction struct {
