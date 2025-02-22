@@ -84,10 +84,12 @@ func (p *Parser) parseElement(lx *lexer.Lexer) (types.ValueFn, error) {
 		return common.Var(sa), nil
 	case lexer.LSquareBracket:
 		return p.parseList(lx)
+	case lexer.StringLiteral:
+		return common.Var(`"` + string(a) + `"`), nil
 	default:
 		if fnp, ok := p.FuncParsers[token]; ok {
 			return fnp.Parse(p, lx, token.String())
 		}
 	}
-	return nil, fmt.Errorf("Unexpected token while parsing atom: %v", token)
+	return nil, fmt.Errorf("Unexpected token while parsing atom: %v (%T)", token, token)
 }

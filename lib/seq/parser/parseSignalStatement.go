@@ -261,9 +261,40 @@ func (p *Parser) checkWaveNameUsedAsInstrument(lx *lexer.Lexer) error {
 	return nil
 }
 
+func (p *Parser) checkSamplePathUsedAsInstrument(lx *lexer.Lexer) error {
+	// Check if sample filename is used as instrument directly, e.g. `:4 "2/kick"`.
+	tok, err := lx.Top()
+	if err != nil {
+		return err
+	}
+	lit, ok := tok.(lexer.StringLiteral)
+	if !ok {
+		return nil
+	}
+	sampleFile := lit.String()
+	sampleName := `"` + sampleFile + `"`
+	if p.instSet.HasInstrument(sampleName) {
+		return nil
+	}
+	in, err := config.ParseSample(
+		sampleFile,
+		p.globalFilters,
+		config.Param("tempo", p.tempo),
+	)
+	if err != nil {
+		return err
+	}
+	p.instSet.AddInstrument(sampleName, in)
+	return nil
+}
+
 func (p *Parser) parsePlainSignal(lx *lexer.Lexer) (types.Signaler, error) {
 	// Check if wave name is used as instrument directly, e.g. `:4 sine A4`.
 	if err := p.checkWaveNameUsedAsInstrument(lx); err != nil {
+		return nil, err
+	}
+
+	if err := p.checkSamplePathUsedAsInstrument(lx); err != nil {
 		return nil, err
 	}
 
