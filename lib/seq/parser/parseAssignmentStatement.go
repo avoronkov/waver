@@ -114,7 +114,7 @@ func token2scalar(t lexer.Token) (any, error) {
 	return nil, fmt.Errorf("Cannot convert token to scalar: %v (%T)", t, t)
 }
 
-// E.g. `àm freq=10.0 int=0.25`, `èxp=2.0`
+// E.g. `am freq=10.0 int=0.25`, `exp=2.0`
 func (p *Parser) parseInstrumentAssignmentOption(lx *lexer.Lexer) (map[string]any, error) {
 	tok, err := lx.Top()
 	if err != nil {
@@ -150,7 +150,32 @@ func (p *Parser) parseInstrumentAssignmentOption(lx *lexer.Lexer) (map[string]an
 
 	opts := map[string]any{}
 	for {
-		break
+		// key = value
+		keyTok, err := lx.Top()
+		if err != nil {
+			return nil, err
+		}
+		keyIdent, ok := keyTok.(lexer.IdentToken)
+		if !ok {
+			break
+		}
+		lx.Drop()
+		assignTok, err := lx.Pop()
+		if err != nil {
+			return nil, err
+		}
+		if _, ok := assignTok.(lexer.AssignToken); !ok {
+			return nil, fmt.Errorf("Unexpected token: %v (%v)", assignTok, assignTok)
+		}
+		valueTok, err := lx.Pop()
+		if err != nil {
+			return nil, err
+		}
+		value, err := token2scalar(valueTok)
+		if err != nil {
+			return nil, err
+		}
+		opts[keyIdent.String()] = value
 	}
 
 	return map[string]any{
