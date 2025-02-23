@@ -110,6 +110,13 @@ func token2scalar(t lexer.Token) (any, error) {
 		return int64(a), nil
 	case lexer.FloatToken:
 		return float64(a), nil
+	case lexer.IdentToken:
+		if a.String() == "true" {
+			return true, nil
+		}
+		if a.String() == "false" {
+			return false, nil
+		}
 	}
 	return nil, fmt.Errorf("Cannot convert token to scalar: %v (%T)", t, t)
 }
