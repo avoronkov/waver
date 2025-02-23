@@ -3,12 +3,15 @@ package syntaxgen
 import (
 	"bufio"
 	"bytes"
+	"maps"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 
 	"github.com/avoronkov/waver/etc/std"
 	"github.com/avoronkov/waver/lib/midisynth/filters"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	"github.com/avoronkov/waver/lib/seq/parser"
 	"github.com/avoronkov/waver/lib/utils"
@@ -17,6 +20,7 @@ import (
 type Params struct {
 	parser            *parser.Parser
 	Pragmas           []string
+	Waves             []string
 	StdFunctions      []string
 	Functions         []string
 	FunctionOperators []string
@@ -32,6 +36,7 @@ func NewParams() *Params {
 		parser: parser.New(),
 	}
 	p.initPragmas()
+	p.initWaves()
 	p.initStdFunctions()
 	p.initFunctions()
 	p.initModifiers()
@@ -41,10 +46,11 @@ func NewParams() *Params {
 }
 
 func (p *Params) initPragmas() {
-	for pragma := range p.parser.PragmaParsers {
-		p.Pragmas = append(p.Pragmas, pragma)
-	}
-	sort.Strings(p.Pragmas)
+	p.Pragmas = slices.Sorted(maps.Keys(p.parser.PragmaParsers))
+}
+
+func (p *Params) initWaves() {
+	p.Waves = slices.Sorted(maps.Keys(waves.Waves))
 }
 
 func (p *Params) initStdFunctions() {

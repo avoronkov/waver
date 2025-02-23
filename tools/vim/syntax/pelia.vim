@@ -6,6 +6,8 @@ if exists('b:current_syntax') | finish|  endif
 " Keywords
 syn keyword celPragmaSt filter form inst lagrange sample scale srand stop tempo wave
 
+syn keyword celWaves noise saw semisine sine square triangle
+
 syn keyword celFunction maj maj7 maj9 min min7 min9
 syn keyword celRepeat concat down loop rand repeat seq up
 
@@ -97,6 +99,7 @@ syn keyword celFilterOption value
 
 " Define highlighting
 hi def link celPragmaSt Conditional
+hi def link celWaves Conditional
 
 hi def link celNumber Number
 hi def link celString String

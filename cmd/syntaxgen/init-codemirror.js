@@ -4,6 +4,7 @@ function initCodeMirror() {
     CodeMirror.defineSimpleMode('waver', {
         start: [
             { regex: /(?:{{ stringsJoin .Pragmas "|" }})\b/, token: 'comment' }, // keyword
+            { regex: /(?:{{ stringsJoin .Waves "|" }})\b/, token: 'comment' }, // keyword
             { regex: /(?:{{ stringsJoin .StdFunctions "|" }})\b/, token: 'variable-2' },
             { regex: /(?:{{ stringsJoin .Functions "|" }})\b/, token: 'variable-2' },
             { regex: /(?:{{ stringsJoin .Modifiers "|" }})\b/, token: 'variable-3' },

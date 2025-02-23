@@ -6,6 +6,8 @@ if exists('b:current_syntax') | finish|  endif
 " Keywords
 syn keyword celPragmaSt{{ range .Pragmas }} {{ . }}{{ end }}
 
+syn keyword celWaves{{ range .Waves }} {{ . }}{{ end }}
+
 syn keyword celFunction{{ range .StdFunctions }} {{ . }}{{ end }}
 syn keyword celRepeat{{ range .Functions }} {{ . }}{{ end }}
 {{ range .FunctionOperators }}
@@ -44,6 +46,7 @@ syn keyword celFilterOption {{.}}{{ end }}
 
 " Define highlighting
 hi def link celPragmaSt Conditional
+hi def link celWaves Conditional
 
 hi def link celNumber Number
 hi def link celString String
