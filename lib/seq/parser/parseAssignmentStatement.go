@@ -3,6 +3,9 @@ package parser
 import (
 	"fmt"
 
+	"github.com/avoronkov/waver/lib/midisynth/config"
+	"github.com/avoronkov/waver/lib/midisynth/instruments"
+	"github.com/avoronkov/waver/lib/midisynth/waves"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 )
 
@@ -45,7 +48,139 @@ func (p *Parser) parseAssignmentStatement(lx *lexer.Lexer) error {
 	return p.parseUdf(lx, string(name), string(param))
 }
 
+func (p *Parser) parseAssignInstrument(lx *lexer.Lexer, name string) error {
+	tok, err := lx.Pop()
+	if err != nil {
+		return err
+	}
+
+	options := []map[string]any{}
+
+L:
+	for {
+		tok, err := lx.Pop()
+		if err != nil {
+			return err
+		}
+		switch tok.(type) {
+		case lexer.EolToken, lexer.EofToken:
+			break L
+		case lexer.VerticalBar:
+			opt, err := p.parseInstrumentAssignmentOption(lx)
+			if err != nil {
+				return err
+			}
+			options = append(options, opt)
+		default:
+			return fmt.Errorf("Unexpected token: %v (%T)", tok, tok)
+		}
+
+	}
+
+	var in *instruments.Instrument
+	switch t := tok.(type) {
+	case lexer.IdentToken:
+		in, err = config.ParseInstrument(
+			t.String(),
+			append(options, p.globalFilters...),
+			config.Param("tempo", p.tempo),
+		)
+	case lexer.StringLiteral:
+		in, err = config.ParseSample(
+			t.String(),
+			append(options, p.globalFilters...),
+			config.Param("tempo", p.tempo),
+		)
+	default:
+		return fmt.Errorf("Unexpected token type: %v (%v)", tok, tok)
+	}
+
+	if err != nil {
+		return err
+	}
+	p.instSet.AddInstrument(name, in)
+
+	p.instrumentVariables.Add(name)
+	return nil
+}
+
+func token2scalar(t lexer.Token) (any, error) {
+	switch a := t.(type) {
+	case lexer.NumberToken:
+		return int64(a), nil
+	case lexer.FloatToken:
+		return float64(a), nil
+	}
+	return nil, fmt.Errorf("Cannot convert token to scalar: %v (%T)", t, t)
+}
+
+// E.g. `àm freq=10.0 int=0.25`, `èxp=2.0`
+func (p *Parser) parseInstrumentAssignmentOption(lx *lexer.Lexer) (map[string]any, error) {
+	tok, err := lx.Top()
+	if err != nil {
+		return nil, err
+	}
+	identName, ok := tok.(lexer.IdentToken)
+	if !ok {
+		return nil, fmt.Errorf("Unexpected token: %v (%T)", tok, tok)
+	}
+	lx.Drop()
+	name := identName.String()
+
+	// Check if it's an assignment
+	tok2, err := lx.Top()
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := tok2.(lexer.AssignToken); ok {
+		lx.Drop()
+		// read next token
+		tok3, err := lx.Pop()
+		if err != nil {
+			return nil, err
+		}
+		value, err := token2scalar(tok3)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{
+			name: value,
+		}, nil
+	}
+
+	opts := map[string]any{}
+	for {
+		break
+	}
+
+	return map[string]any{
+		name: opts,
+	}, nil
+}
+
+func (p *Parser) checkInstrumentAssignment(token lexer.Token) bool {
+	switch t := token.(type) {
+	case lexer.StringLiteral:
+		return true
+	case lexer.IdentToken:
+		if _, ok := waves.Waves[t.String()]; ok {
+			return true
+		}
+		return p.instrumentVariables.Has(t.String())
+	}
+	return false
+}
+
 func (p *Parser) parseAssignVar(lx *lexer.Lexer, name string) error {
+	// Check if it a definition of an instument.
+	tok, err := lx.Top()
+	if err != nil {
+		return err
+	}
+	if p.checkInstrumentAssignment(tok) {
+		return p.parseAssignInstrument(lx, name)
+	}
+
 	// parse atom
 	atom, err := p.parseAtom(lx)
 	if err != nil {

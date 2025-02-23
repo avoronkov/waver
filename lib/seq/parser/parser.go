@@ -10,6 +10,7 @@ import (
 	"github.com/avoronkov/waver/lib/notes"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	"github.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/lib/utils"
 )
 
 type Parser struct {
@@ -26,6 +27,8 @@ type Parser struct {
 
 	userFunctions map[string]UserFunction
 	userSignalers map[string][]types.Signaler
+
+	instrumentVariables *utils.Set[string]
 
 	scale notes.Scale
 

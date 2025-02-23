@@ -9,14 +9,16 @@ import (
 	"github.com/avoronkov/waver/lib/seq/common"
 	"github.com/avoronkov/waver/lib/seq/lexer"
 	"github.com/avoronkov/waver/lib/seq/types"
+	"github.com/avoronkov/waver/lib/utils"
 	"github.com/avoronkov/waver/static"
 )
 
 func New(opts ...func(*Parser)) *Parser {
 	p := &Parser{
-		userFunctions: make(map[string]UserFunction),
-		userSignalers: make(map[string][]types.Signaler),
-		tempo:         120,
+		userFunctions:       make(map[string]UserFunction),
+		userSignalers:       make(map[string][]types.Signaler),
+		instrumentVariables: utils.NewSet[string](),
+		tempo:               120,
 	}
 
 	for _, o := range opts {

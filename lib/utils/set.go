@@ -16,6 +16,10 @@ func (s *Set[T]) Add(values ...T) {
 	}
 }
 
+func (s *Set[T]) Has(value T) bool {
+	return s.values[value]
+}
+
 func (s *Set[T]) Values() []T {
 	values := make([]T, 0, len(s.values))
 	for v := range s.values {
