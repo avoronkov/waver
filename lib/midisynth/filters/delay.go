@@ -61,7 +61,7 @@ func (d *delayImpl) Value(tm float64, ctx *waves.NoteCtx) (res float64) {
 
 	multiplier := 1.0
 	t := tm
-	for i := 1; i <= d.opts.Times; i++ {
+	for range d.opts.Times {
 		t -= interval
 		multiplier *= d.opts.FadeOut
 		if t < 0.0 {

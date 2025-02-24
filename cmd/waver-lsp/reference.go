@@ -41,7 +41,7 @@ func (s *Server) filtersReference(out io.Writer) {
 
 		v := reflect.TypeOf(obj)
 		nField := v.NumField()
-		for i := 0; i < nField; i++ {
+		for i := range nField {
 			fld := v.Field(i)
 			tagsRaw := fld.Tag.Get("option")
 			if tagsRaw == "" {

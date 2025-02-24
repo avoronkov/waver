@@ -14,15 +14,13 @@ func Concat(values types.ValueFn) types.ValueFn {
 			panic(fmt.Errorf("Concat expects list, found: %v", vals))
 		}
 		res := &GreedyEvaluatedList{}
-		l := list.Len()
-		for i := 0; i < l; i++ {
+		for i := range list.Len() {
 			item := list.Get(i)
 			itemList, ok := item.(EvaluatedList)
 			if !ok {
 				panic(fmt.Errorf("Concat: element of list is not a list: %v (%T)", item, item))
 			}
-			ilen := itemList.Len()
-			for j := 0; j < ilen; j++ {
+			for j := range itemList.Len() {
 				x := itemList.Get(j)
 				res.values = append(res.values, x)
 			}

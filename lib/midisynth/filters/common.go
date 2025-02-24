@@ -2,7 +2,7 @@ package filters
 
 import "fmt"
 
-func float64Of(x interface{}) float64 {
+func float64Of(x any) float64 {
 	switch a := x.(type) {
 	case float64:
 		return a

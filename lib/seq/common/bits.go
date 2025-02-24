@@ -18,7 +18,7 @@ func Bits(bits types.ValueFn) types.Modifier {
 			l := bitsList.Len()
 			totalBits := int64(bitsList.Get(l - 1).(Num))
 			currentBit := bit % totalBits
-			for i := 0; i < l-1; i++ {
+			for i := range l - 1 {
 				it := int64(bitsList.Get(i).(Num))
 				if it == currentBit {
 					dur := int64(bitsList.Get(i+1).(Num)) - it

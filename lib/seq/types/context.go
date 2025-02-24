@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"maps"
+)
 
 func NewContext(opts ...func(*contextImpl)) Context {
 	impl := &contextImpl{
@@ -11,7 +14,7 @@ func NewContext(opts ...func(*contextImpl)) Context {
 		opt(impl)
 	}
 	if impl.globalCtx == nil {
-		impl.globalCtx = make(map[string]interface{})
+		impl.globalCtx = make(map[string]any)
 	}
 	return impl
 }
@@ -66,11 +69,7 @@ func (c *contextImpl) Copy() Context {
 		values:    map[string]Value{},
 		globalCtx: c.globalCtx,
 	}
-	for k, v := range c.data {
-		cc.data[k] = v
-	}
-	for k, v := range c.values {
-		cc.values[k] = v
-	}
+	maps.Copy(cc.data, c.data)
+	maps.Copy(cc.values, c.values)
 	return cc
 }

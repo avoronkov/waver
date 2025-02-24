@@ -19,7 +19,7 @@ func Every(n types.ValueFn) types.Modifier {
 			} else if nList, ok := val.(EvaluatedList); ok {
 				var loop int64
 				l := nList.Len()
-				for i := 0; i < l; i++ {
+				for i := range l {
 					item := nList.Get(i)
 					if it, ok := item.(Num); ok {
 						loop += int64(it)
@@ -29,7 +29,7 @@ func Every(n types.ValueFn) types.Modifier {
 				}
 				x := bit % loop
 				var s int64
-				for i := 0; i < l; i++ {
+				for i := range l {
 					item := nList.Get(i)
 					cur := int64(item.(Num))
 					if x == s {

@@ -90,7 +90,7 @@ func (s *Server) TextDocumentDidChange(context *glsp.Context, params *protocol.D
 	return nil
 }
 
-func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (interface{}, error) {
+func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (any, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			slog.Error("Recovered", "error", r)
@@ -290,7 +290,7 @@ func (s *Server) completeFilters() []protocol.CompletionItem {
 		v := reflect.TypeOf(obj)
 		nField := v.NumField()
 		optionItems := []protocol.CompletionItem{}
-		for i := 0; i < nField; i++ {
+		for i := range nField {
 			fld := v.Field(i)
 			tagsRaw := fld.Tag.Get("option")
 			if tagsRaw == "" {

@@ -249,22 +249,10 @@ func handleFilter(f map[string]any, params ...*param) (filters.Filter, error) {
 	panic("unreachable")
 }
 
-func (c *Config) log(inst string, format string, args ...interface{}) {
+func (c *Config) log(inst string, format string, args ...any) {
 	if c.showInst == "" || c.showInst == inst {
 		log.Printf(format, args...)
 	}
-}
-
-func (c *Config) knobValue(inst string, knob int, def float64, delta float64) float64 {
-	ik, ok := c.knobs[inst]
-	if !ok {
-		return def
-	}
-	kv, ok := ik[knob]
-	if !ok {
-		return def
-	}
-	return def + (float64(kv) * delta)
 }
 
 func (c *Config) Up(inst string, knob int) {

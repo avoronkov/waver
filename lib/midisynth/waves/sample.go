@@ -59,8 +59,8 @@ func parseSample(f io.ReadSeeker, size int64) (*Sample, error) {
 	}
 
 	sampleCount := int(reader.GetSampleCount()) / s.channels
-	for i := 0; i < sampleCount; i++ {
-		for ch := 0; ch < s.channels; ch++ {
+	for range sampleCount {
+		for ch := range s.channels {
 			sample, err := reader.ReadRawSample()
 			if err == io.EOF {
 				break

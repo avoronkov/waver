@@ -27,7 +27,7 @@ func Up(shift, value types.ValueFn, invert bool) types.ValueFn {
 				ctx: ctx,
 			}
 			l := v.Len()
-			for i := 0; i < l; i++ {
+			for i := range l {
 				item := v.Get(i).(Num)
 				res.values = append(res.values, Const(int64(item+shInt)))
 			}

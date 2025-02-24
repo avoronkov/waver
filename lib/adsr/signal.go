@@ -28,7 +28,7 @@ func (s *Signal) PutSignal(hz float64, sampler Sampler) {
 	}
 
 	// decay
-	for j := 0; j < int(s.DecayLen); j++ {
+	for j := range s.DecayLen {
 		i++
 		x := 2.0 * math.Pi * float64(i) / waveDuration
 		amp := float64(s.AttackLevel) - float64(s.AttackLevel-s.DecayLevel)*float64(j)/float64(s.DecayLen)
@@ -37,7 +37,7 @@ func (s *Signal) PutSignal(hz float64, sampler Sampler) {
 	}
 
 	// sustain
-	for j := 0; j < int(s.SustainLen); j++ {
+	for range s.SustainLen {
 		i++
 		x := 2.0 * math.Pi * float64(i) / waveDuration
 		l := int16(float64(s.DecayLevel) * math.Sin(x))
@@ -45,7 +45,7 @@ func (s *Signal) PutSignal(hz float64, sampler Sampler) {
 	}
 
 	// release
-	for j := 0; j < int(s.ReleaseLen); j++ {
+	for j := range s.ReleaseLen {
 		i++
 		x := 2.0 * math.Pi * float64(i) / waveDuration
 		amp := float64(s.DecayLevel) - float64(s.DecayLevel)*float64(j)/float64(s.ReleaseLen)
