@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime/debug"
+	"slices"
 	"strings"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
@@ -73,6 +74,15 @@ func assignToField(fld reflect.Value, f any) {
 			fld.SetFloat(float64(x))
 			return
 		}
+	case "int", "int64":
+		switch x := f.(type) {
+		case int:
+			fld.SetInt(int64(x))
+			return
+		case int64:
+			fld.SetInt(x)
+			return
+		}
 	case "waves.Wave":
 		if name, ok := f.(string); ok {
 			if wave, ok := waves.Waves[name]; ok {
@@ -101,14 +111,14 @@ func setOptionByName(obj any, name string, f any) error {
 	typ := reflect.TypeOf(obj).Elem()
 	n := typ.NumField()
 	knownFields := []string{}
-	for i := 0; i < n; i++ {
+	for i := range n {
 		fld := typ.Field(i)
 		tagsRaw := fld.Tag.Get("option")
 		tags := strings.Split(tagsRaw, ",")
 
 		// Check field name
 		// Search by tags
-		if strings.ToLower(fld.Name) == name || contains(name, tags) {
+		if strings.ToLower(fld.Name) == name || slices.Contains(tags, name) {
 			v := reflect.ValueOf(obj).Elem()
 			assignToField(v.Field(i), f)
 			return nil
@@ -122,7 +132,7 @@ func setOptionByName(obj any, name string, f any) error {
 func setParamByTagName(obj any, name string, f any) {
 	typ := reflect.TypeOf(obj).Elem()
 	n := typ.NumField()
-	for i := 0; i < n; i++ {
+	for i := range n {
 		fld := typ.Field(i)
 		tag := fld.Tag.Get("param")
 
@@ -134,13 +144,4 @@ func setParamByTagName(obj any, name string, f any) {
 		}
 	}
 	// Do nothing
-}
-
-func contains[T comparable](item T, list []T) bool {
-	for _, e := range list {
-		if item == e {
-			return true
-		}
-	}
-	return false
 }
