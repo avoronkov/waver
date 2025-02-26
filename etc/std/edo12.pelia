@@ -5,3 +5,7 @@ maj9 maj9_argument = maj9_argument,+4,+7,+11,+14
 min min_argument = min_argument,+3,+7
 min7 min7_argument = min7_argument,+3,+7,+10
 min9 min9_argument = min9_argument,+3,+7,+10,+14
+
+chromatic chromatic_argument = chromatic_argument,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11
+major major_argument = major_argument,+2,+4,+5,+7,+9,+11
+minor minor_argument = minor_argument,+2,+3,+5,+7,+8,+10

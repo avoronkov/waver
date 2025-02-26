@@ -1,0 +1,2 @@
+% scale edo19
+:2 sine @concat [ major C3 minor A2 ]

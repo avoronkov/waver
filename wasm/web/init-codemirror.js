@@ -5,7 +5,7 @@ function initCodeMirror() {
         start: [
             { regex: /(?:filter|form|inst|lagrange|sample|scale|srand|stop|tempo|wave)\b/, token: 'comment' }, // keyword
             { regex: /(?:noise|saw|semisine|sine|square|triangle)\b/, token: 'comment' }, // keyword
-            { regex: /(?:maj|maj7|maj9|min|min7|min9)\b/, token: 'variable-2' },
+            { regex: /(?:chromatic|maj|maj7|maj9|major|min|min7|min9|minor)\b/, token: 'variable-2' },
             { regex: /(?:concat|down|loop|rand|repeat|seq|up)\b/, token: 'variable-2' },
             { regex: /(?:bits|eucl|eucl')\b/, token: 'variable-3' },
             { regex: /(?:_|_dur|true|false)\b/, token: 'variable-3' },
@@ -20,8 +20,8 @@ function initCodeMirror() {
             // notes
             { regex: /\b[ABCDEFG][sb]?\d\b/, token: 'keyword' },
             // filters tokens (variable-3)
-            { regex: /(?:8bit|adsr|am|delay|dist|distortion|exp|flanger|movexp|pan|ratio|swingexp|swingpan|timeshift|vibrato)\b/, token: 'variable-3' },
-            { regex: /(?:abs|abstime|amp|amplitude|attackLen|attackLevel|attacklen|attacklevel|bits|carrier|carrierctx|decayLen|decayLevel|decaylen|decaylevel|fade|fadeout|feedback|freq|frequency|initialValue|initialvalue|int|interval|inverse|l|left|maxShift|maxshift|r|releaseLen|releaselen|right|shifter|shifterctx|speed|sustainLen|sustainlen|tempo|times|value)\b/, token: 'variable-3' },
+            { regex: /(?:8bit|adsr|am|code|delay|dist|distortion|exp|flanger|movexp|pan|ratio|swingexp|swingpan|timeshift|vibrato)\b/, token: 'variable-3' },
+            { regex: /(?:abs|abstime|amp|amplitude|attackLen|attackLevel|attacklen|attacklevel|bits|carrier|carrierctx|code|decayLen|decayLevel|decaylen|decaylevel|fade|fadeout|feedback|freq|frequency|initialValue|initialvalue|int|interval|inverse|l|left|maxShift|maxshift|r|releaseLen|releaselen|right|shifter|shifterctx|speed|sustainLen|sustainlen|tempo|times|value)\b/, token: 'variable-3' },
         ],
     });
 

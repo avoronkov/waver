@@ -8,7 +8,7 @@ syn keyword celPragmaSt filter form inst lagrange sample scale srand stop tempo 
 
 syn keyword celWaves noise saw semisine sine square triangle
 
-syn keyword celFunction maj maj7 maj9 min min7 min9
+syn keyword celFunction chromatic maj maj7 maj9 major min min7 min9 minor
 syn keyword celRepeat concat down loop rand repeat seq up
 
 syn match celRepeat "&"
@@ -53,7 +53,7 @@ syn keyword celTodo contained TODO FIXME XXX NOTE
 syn match celComment "#.*$" contains=celTodo
 
 " instruments options
-syn keyword celFilter 8bit adsr am delay dist distortion exp flanger movexp pan ratio swingexp swingpan timeshift vibrato
+syn keyword celFilter 8bit adsr am code delay dist distortion exp flanger movexp pan ratio swingexp swingpan timeshift vibrato
 
 syn keyword celFilterOption abs
 syn keyword celFilterOption abstime
@@ -66,6 +66,7 @@ syn keyword celFilterOption attacklevel
 syn keyword celFilterOption bits
 syn keyword celFilterOption carrier
 syn keyword celFilterOption carrierctx
+syn keyword celFilterOption code
 syn keyword celFilterOption decayLen
 syn keyword celFilterOption decayLevel
 syn keyword celFilterOption decaylen
