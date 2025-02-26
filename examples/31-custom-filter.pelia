@@ -1,0 +1,4 @@
+I = sine | code="let e = 0.5; v >= 0 ? v ** e : -((-v) ** e)"
+I2 = sine | exp=0.5
+
+:4 @I,I2 A3

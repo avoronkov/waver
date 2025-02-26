@@ -30,7 +30,7 @@ func (p *Parser) parseAtom(lx *lexer.Lexer) (types.ValueFn, error) {
 				if ok {
 					elem = common.Up(common.Const(int64(numShift)), prev, tok == lexer.MinusToken{})
 				} else {
-					return nil, fmt.Errorf("Unexpected token: %v (%T)", shift, shift)
+					return nil, fmt.Errorf("Unexpected token while parsing plus-minus expression, expected number, got: %v (%T)", shift, shift)
 				}
 			}
 		}

@@ -33,10 +33,7 @@ type distortionImpl struct {
 
 func (i *distortionImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
 	val := i.wave.Value(t, ctx) * i.opts.Value
-	if val > 1.0 {
-		val = 1.0
-	} else if val < -1.0 {
-		val = -1.0
-	}
+	val = min(val, 1.0)
+	val = max(val, -1.0)
 	return val
 }

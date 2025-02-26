@@ -6,6 +6,7 @@ toolchain go1.23.4
 
 require (
 	github.com/cryptix/wav v0.0.0-20180415113528-8bdace674401
+	github.com/expr-lang/expr v1.16.9
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-errors/errors v1.5.1
 	github.com/hajimehoshi/oto/v2 v2.4.2

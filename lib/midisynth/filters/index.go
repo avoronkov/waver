@@ -29,4 +29,5 @@ var Filters = map[string]NewFilter{
 	"swingpan":   SwingPan{},
 	"timeshift":  TimeShift{},
 	"vibrato":    VibratoFilter{},
+	"code":       Custom{},
 }

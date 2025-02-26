@@ -117,6 +117,8 @@ func token2scalar(t lexer.Token) (any, error) {
 		if a.String() == "false" {
 			return false, nil
 		}
+	case lexer.StringLiteral:
+		return a.String(), nil
 	}
 	return nil, fmt.Errorf("Cannot convert token to scalar: %v (%T)", t, t)
 }

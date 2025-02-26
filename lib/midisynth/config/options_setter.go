@@ -31,7 +31,7 @@ func SetOptions(obj, options any, params ...*param) (err error) {
 
 	// Set filter options
 	switch opts := options.(type) {
-	case float64, int:
+	case float64, int, string:
 		if err := setSingleOption(obj, opts); err != nil {
 			return err
 		}
