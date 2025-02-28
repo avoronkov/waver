@@ -194,6 +194,13 @@ func (p *Parser) parseInstrumentAssignmentOption(lx *lexer.Lexer) (map[string]an
 		opts[keyIdent.String()] = value
 	}
 
+	if uf, ok := p.userFilters[name]; ok {
+		opts["code"] = uf
+		return map[string]any{
+			"code": opts,
+		}, nil
+	}
+
 	return map[string]any{
 		name: opts,
 	}, nil
@@ -222,6 +229,12 @@ func (p *Parser) parseAssignVar(lx *lexer.Lexer, name string) error {
 		return p.parseAssignInstrument(lx, name)
 	}
 
+	// Check if it is a definition of a filter
+	if code, ok := tok.(lexer.CodeLiteral); ok {
+		lx.Drop()
+		return p.parseUserFilter(lx, name, code)
+	}
+
 	// parse atom
 	atom, err := p.parseAtom(lx)
 	if err != nil {
@@ -237,6 +250,20 @@ func (p *Parser) parseAssignVar(lx *lexer.Lexer, name string) error {
 		return fmt.Errorf("Expected EOL at the end of assign statement, found: %v (%T)", endl, endl)
 	}
 	p.seq.Assign(name, atom)
+	return nil
+}
+
+func (p *Parser) parseUserFilter(lx *lexer.Lexer, name string, code lexer.CodeLiteral) error {
+	endl, err := lx.Pop()
+	if err != nil {
+		return err
+	}
+	switch endl.(type) {
+	case lexer.EolToken, lexer.EofToken:
+	default:
+		return fmt.Errorf("Expected EOL at the end of assign statement, found: %v (%T)", endl, endl)
+	}
+	p.userFilters[name] = code.String()
 	return nil
 }
 

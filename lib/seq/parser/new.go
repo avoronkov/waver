@@ -17,6 +17,7 @@ func New(opts ...func(*Parser)) *Parser {
 	p := &Parser{
 		userFunctions:       make(map[string]UserFunction),
 		userSignalers:       make(map[string][]types.Signaler),
+		userFilters:         make(map[string]string),
 		instrumentVariables: utils.NewSet[string](),
 		tempo:               120,
 	}

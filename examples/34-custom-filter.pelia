@@ -1,0 +1,6 @@
+exponent = `let e = 2.0;
+v > 0 ? v ** e : -((-v) ** e)`
+
+I = sine | exponent
+
+:4 I C3

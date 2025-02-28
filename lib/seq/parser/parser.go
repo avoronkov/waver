@@ -27,6 +27,7 @@ type Parser struct {
 
 	userFunctions map[string]UserFunction
 	userSignalers map[string][]types.Signaler
+	userFilters   map[string]string
 
 	instrumentVariables *utils.Set[string]
 
