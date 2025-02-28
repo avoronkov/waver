@@ -72,7 +72,7 @@ L:
 			}
 			options = append(options, opt)
 		default:
-			return fmt.Errorf("Unexpected token: %v (%T)", tok, tok)
+			return fmt.Errorf("Unexpected token while parsing instrument filters: %v (%T)", tok, tok)
 		}
 
 	}
@@ -128,6 +128,13 @@ func (p *Parser) parseInstrumentAssignmentOption(lx *lexer.Lexer) (map[string]an
 	tok, err := lx.Top()
 	if err != nil {
 		return nil, err
+	}
+	code, ok := tok.(lexer.CodeLiteral)
+	if ok {
+		lx.Drop()
+		return map[string]any{
+			"code": code.String(),
+		}, nil
 	}
 	identName, ok := tok.(lexer.IdentToken)
 	if !ok {
