@@ -16,6 +16,7 @@ var (
 	identRe       = regexp.MustCompile(`^[_a-zA-Z][_a-zA-Z0-9']*`)
 	stringRe      = regexp.MustCompile(`^".*"`)
 	singleQuoteRe = regexp.MustCompile(`^'.*'`)
+	codeRe        = regexp.MustCompile("^`.*`")
 )
 
 type Lexer struct {
@@ -170,6 +171,15 @@ func (l *Lexer) nextToken() (token Token, err error) {
 		return StringLiteral(strings.Trim(str, `'`)), nil
 	}
 
+	if str := codeRe.FindString(line); str != "" {
+		l.index += len(str)
+		return CodeLiteral(strings.Trim(str, "`")), nil
+	}
+
+	if strings.HasPrefix(line, "`") {
+		return l.scanMultilineCode()
+	}
+
 	return nil, fmt.Errorf("Unexpected token near: '%v'", line)
 }
 
@@ -209,6 +219,26 @@ func (l *Lexer) scanBody() (Token, error) {
 		return nil, err
 	}
 	return BodyToken(strings.Join(lines, "\n") + "\n"), nil
+}
+
+func (l *Lexer) scanMultilineCode() (Token, error) {
+	line := l.line[l.index+1:]
+	lines := []string{line}
+	for l.in.Scan() {
+		l.lineNum++
+		line := l.in.Text()
+		if idx := strings.Index(line, "`"); idx >= 0 {
+			lines = append(lines, line[:idx])
+			l.line = line
+			l.index = idx + 1
+			break
+		}
+		lines = append(lines, line)
+	}
+	if err := l.in.Err(); err != nil {
+		return nil, err
+	}
+	return CodeLiteral(strings.Join(lines, "\n")), nil
 }
 
 func (l *Lexer) AllTokens() (tokens []Token, err error) {

@@ -164,6 +164,28 @@ x = 11`,
 				NumberToken(31),
 			},
 		},
+		{
+			"Single line code",
+			"sine | `v * t` |",
+			[]Token{
+				IdentToken("sine"),
+				VerticalBar{},
+				CodeLiteral("v * t"),
+				VerticalBar{},
+			},
+		},
+		{
+			"Multiline code",
+			"foo = `let x=0;\nx * v` baz\nbar",
+			[]Token{
+				IdentToken("foo"),
+				AssignToken{},
+				CodeLiteral("let x=0;\nx * v"),
+				IdentToken("baz"),
+				EolToken{},
+				IdentToken("bar"),
+			},
+		},
 	}
 
 	for _, test := range tests {

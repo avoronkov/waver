@@ -161,6 +161,10 @@ type StringLiteral string
 
 func (t StringLiteral) String() string { return string(t) }
 
+type CodeLiteral string
+
+func (t CodeLiteral) String() string { return string(t) }
+
 // Comment
 type CommentToken string
 
