@@ -104,13 +104,24 @@ L:
 	return nil
 }
 
-func token2scalar(t lexer.Token) (any, error) {
+func token2scalar(t lexer.Token, negate bool) (any, error) {
 	switch a := t.(type) {
 	case lexer.NumberToken:
-		return int64(a), nil
+		val := int64(a)
+		if negate {
+			val = -val
+		}
+		return val, nil
 	case lexer.FloatToken:
-		return float64(a), nil
+		val := float64(a)
+		if negate {
+			val = -val
+		}
+		return val, nil
 	case lexer.IdentToken:
+		if negate {
+			return nil, fmt.Errorf("Unexpected MinusToken before identifier: %v", a)
+		}
 		if a.String() == "true" {
 			return true, nil
 		}
@@ -118,6 +129,9 @@ func token2scalar(t lexer.Token) (any, error) {
 			return false, nil
 		}
 	case lexer.StringLiteral:
+		if negate {
+			return nil, fmt.Errorf("Unexpected MinusToken before string literal: %v", a)
+		}
 		return a.String(), nil
 	}
 	return nil, fmt.Errorf("Cannot convert token to scalar: %v (%T)", t, t)
@@ -155,7 +169,15 @@ func (p *Parser) parseInstrumentAssignmentOption(lx *lexer.Lexer) (map[string]an
 		if err != nil {
 			return nil, err
 		}
-		value, err := token2scalar(tok3)
+		negate := false
+		if _, ok := tok3.(lexer.MinusToken); ok {
+			negate = true
+			tok3, err = lx.Pop()
+			if err != nil {
+				return nil, err
+			}
+		}
+		value, err := token2scalar(tok3, negate)
 		if err != nil {
 			return nil, err
 		}
@@ -187,7 +209,15 @@ func (p *Parser) parseInstrumentAssignmentOption(lx *lexer.Lexer) (map[string]an
 		if err != nil {
 			return nil, err
 		}
-		value, err := token2scalar(valueTok)
+		negate := false
+		if _, ok := valueTok.(lexer.MinusToken); ok {
+			negate = true
+			valueTok, err = lx.Pop()
+			if err != nil {
+				return nil, err
+			}
+		}
+		value, err := token2scalar(valueTok, negate)
 		if err != nil {
 			return nil, err
 		}
