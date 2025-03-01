@@ -20,8 +20,8 @@ function initCodeMirror() {
             // notes
             { regex: /\b[ABCDEFG][sb]?\d\b/, token: 'keyword' },
             // filters tokens (variable-3)
-            { regex: /(?:8bit|adsr|am|code|delay|dist|distortion|exp|flanger|movexp|pan|ratio|swingexp|swingpan|timeshift|vibrato)\b/, token: 'variable-3' },
-            { regex: /(?:abs|abstime|amp|amplitude|attackLen|attackLevel|attacklen|attacklevel|bits|carrier|carrierctx|code|decayLen|decayLevel|decaylen|decaylevel|fade|fadeout|feedback|freq|frequency|initialValue|initialvalue|int|interval|inverse|l|left|maxShift|maxshift|r|releaseLen|releaselen|right|shifter|shifterctx|speed|sustainLen|sustainlen|tempo|times|value)\b/, token: 'variable-3' },
+            { regex: /(?:8bit|adsr|am|code|delay|dist|distortion|exp|flanger|harm|harmonizer|movexp|pan|ratio|swingexp|swingpan|timeshift|vibrato)\b/, token: 'variable-3' },
+            { regex: /(?:abs|abstime|amp|amplitude|attackLen|attackLevel|attacklen|attacklevel|bits|carrier|carrierctx|code|decayLen|decayLevel|decaylen|decaylevel|fade|fadeout|feedback|freq|frequency|harmonics|initialValue|initialvalue|int|interval|inverse|l|left|maxShift|maxshift|r|releaseLen|releaselen|right|shifter|shifterctx|speed|sustainLen|sustainlen|tempo|times|value)\b/, token: 'variable-3' },
         ],
     });
 

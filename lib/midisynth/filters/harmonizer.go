@@ -2,14 +2,22 @@ package filters
 
 import (
 	"fmt"
-	"sort"
+	"maps"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/avoronkov/waver/lib/midisynth/waves"
 )
 
 type Harmonizer struct {
 	harmonics []float64
+}
+
+var _ FilterCreator = Harmonizer{}
+
+func (Harmonizer) New() Filter {
+	return NewHarmonizer()
 }
 
 func NewHarmonizer(opts ...func(*Harmonizer)) Filter {
@@ -39,13 +47,24 @@ func (Harmonizer) Create(options any) (fx Filter, err error) {
 	var o []func(*Harmonizer)
 	if options != nil {
 		opts := options.(map[string]any)
-		keys := make([]string, 0, len(opts))
-		for param := range opts {
-			keys = append(keys, param)
+		if _, ok := opts["clean"]; ok {
+			o = append(o, ClearHarmonizer())
 		}
-		sort.Strings(keys)
+		// keys := make([]string, 0, len(opts))
+		// for param := range opts {
+		// 	keys = append(keys, param)
+		// }
+		// sort.Strings(keys)
+		keys := slices.Sorted(maps.Keys(opts))
 		for _, param := range keys {
-			n, err := strconv.Atoi(param)
+			if param == "clean" {
+				continue
+			}
+			p := param
+			if strings.HasPrefix(p, "h") {
+				p = p[1:]
+			}
+			n, err := strconv.Atoi(p)
 			if err != nil {
 				return nil, fmt.Errorf("Incorrect Harmonizer param: %v", param)
 			}
@@ -80,6 +99,19 @@ func (i *harmonizerImpl) Value(t float64, ctx *waves.NoteCtx) float64 {
 }
 
 // Options
+func ClearHarmonizer() func(*Harmonizer) {
+	return func(h *Harmonizer) {
+		h.harmonics = []float64{
+			0: 0.0,
+			1: 1.0,
+			2: 0.0,
+			3: 0.0,
+			4: 0.0,
+			5: 0.0,
+		}
+	}
+}
+
 func Harmonic(n int, strength float64) func(*Harmonizer) {
 	return func(h *Harmonizer) {
 		h.harmonics[n] = strength

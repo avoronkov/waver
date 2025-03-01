@@ -4,11 +4,6 @@ type FilterCreator interface {
 	Create(options any) (Filter, error)
 }
 
-var FilterCreators = map[string]FilterCreator{
-	"harmonizer": Harmonizer{},
-	"harm":       Harmonizer{},
-}
-
 type NewFilter interface {
 	New() Filter
 }
@@ -22,6 +17,8 @@ var Filters = map[string]NewFilter{
 	"distortion": Distortion{},
 	"exp":        Exponent{},
 	"flanger":    Flanger{},
+	"harmonizer": Harmonizer{},
+	"harm":       Harmonizer{},
 	"movexp":     MovingExponent{},
 	"pan":        Pan{},
 	"ratio":      Ratio{},

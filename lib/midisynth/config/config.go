@@ -232,19 +232,26 @@ func handleFilter(f map[string]any, params ...*param) (filters.Filter, error) {
 		return nil, fmt.Errorf("Filter description should contain exactly 1 element: %+v", f)
 	}
 	for name, opts := range f {
-		if fn, ok := filters.Filters[name]; ok {
-			filt := fn.New()
-			if err := SetOptions(filt, opts, params...); err != nil {
+		fn, ok := filters.Filters[name]
+		if !ok {
+			return nil, fmt.Errorf("Unknown filter: %v", name)
+		}
+
+		if fc, ok := fn.(filters.FilterCreator); ok {
+			filt, err := fc.Create(opts)
+			if err != nil {
 				return nil, err
 			}
 			log.Printf("DEBUG created filter: %#v", filt)
 			return filt, nil
 		}
 
-		if fc, ok := filters.FilterCreators[name]; ok {
-			return fc.Create(opts)
+		filt := fn.New()
+		if err := SetOptions(filt, opts, params...); err != nil {
+			return nil, err
 		}
-		return nil, fmt.Errorf("Unknown filter: %v", name)
+		log.Printf("DEBUG created filter: %#v", filt)
+		return filt, nil
 	}
 	panic("unreachable")
 }

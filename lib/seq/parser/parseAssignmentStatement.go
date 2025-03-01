@@ -63,7 +63,7 @@ L:
 			return err
 		}
 		switch tok.(type) {
-		case lexer.EolToken, lexer.EofToken:
+		case lexer.EolToken, lexer.EofToken, lexer.CommentToken:
 			break L
 		case lexer.VerticalBar:
 			opt, err := p.parseInstrumentAssignmentOption(lx)

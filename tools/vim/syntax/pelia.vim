@@ -53,7 +53,7 @@ syn keyword celTodo contained TODO FIXME XXX NOTE
 syn match celComment "#.*$" contains=celTodo
 
 " instruments options
-syn keyword celFilter 8bit adsr am code delay dist distortion exp flanger movexp pan ratio swingexp swingpan timeshift vibrato
+syn keyword celFilter 8bit adsr am code delay dist distortion exp flanger harm harmonizer movexp pan ratio swingexp swingpan timeshift vibrato
 
 syn keyword celFilterOption abs
 syn keyword celFilterOption abstime
@@ -76,6 +76,7 @@ syn keyword celFilterOption fadeout
 syn keyword celFilterOption feedback
 syn keyword celFilterOption freq
 syn keyword celFilterOption frequency
+syn keyword celFilterOption harmonics
 syn keyword celFilterOption initialValue
 syn keyword celFilterOption initialvalue
 syn keyword celFilterOption int
