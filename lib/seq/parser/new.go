@@ -83,7 +83,7 @@ func New(opts ...func(*Parser)) *Parser {
 			Usage: `<Name> "<sample-file>"`,
 			Desc: `Define an instrument using a sample.
 			Waver has a number of builtin percussion samples which can be used.`,
-			Examples: static.ListFiles(),
+			Examples: static.ListFiles(""),
 			Parse:    parseSample,
 		},
 		"wave": {

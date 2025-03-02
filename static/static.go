@@ -4,14 +4,18 @@ import (
 	"embed"
 	"io/fs"
 	"log/slog"
+	"path/filepath"
 	"sort"
 )
 
 //go:embed samples
 var Files embed.FS
 
-func ListFiles() (files []string) {
+func ListFiles(dir string) (files []string) {
 	subdir := "samples"
+	if dir != "" {
+		subdir = filepath.Join(subdir, dir)
+	}
 	subdirlen := len(subdir) + 1
 	err := fs.WalkDir(Files, subdir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
