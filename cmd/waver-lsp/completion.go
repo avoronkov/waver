@@ -59,10 +59,13 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 			completionItems = append(completionItems, s.completeFilters()...)
 		} else if matches := s.lineFindRe(docUri, posLine, posChar, pipeFilterOptionRe); len(matches) >= 2 {
 			completionItems = append(completionItems, s.completeFilterOptions(matches[1])...)
+		} else if matches := s.lineFindRe(docUri, posLine, posChar, fileSubdirRe); len(matches) >= 2 {
+			completionItems = append(completionItems, s.completeSampleFiles(matches[1])...)
+		} else if s.lineMatchRe(docUri, posLine, posChar, fileRe) {
+			completionItems = append(completionItems, s.completeSampleFiles("")...)
 		} else {
 			completionItems = append(completionItems, s.completeFunctions()...)
 			completionItems = append(completionItems, s.completeModifiers()...)
-			completionItems = append(completionItems, s.completeSampleFiles("")...)
 			completionItems = append(completionItems, s.completeWaveNames()...)
 		}
 	}
@@ -78,6 +81,8 @@ var filterRe = regexp.MustCompile(`^-\s*\S*$`)
 var filterOptionRe = regexp.MustCompile(`^\s+\S*$`)
 var pipeFilterRe = regexp.MustCompile(`\|\s*\S*$`)
 var pipeFilterOptionRe = regexp.MustCompile(`\|\s*(\S+)\s+[^\|]*$`)
+var fileRe = regexp.MustCompile(`"[^"/]*$`)
+var fileSubdirRe = regexp.MustCompile(`"([^"/]+)/[^"]*$`)
 
 func (s *Server) lineFindRe(doc string, line, pos int, re *regexp.Regexp) []string {
 	lines, ok := s.docs[doc]
