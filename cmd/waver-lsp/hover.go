@@ -118,6 +118,32 @@ func (s *Server) findSymbolUnderCursor(doc string, line, pos int) *protocol.Mark
 			Value: meta,
 		}
 	}
+
+	userDef := func() *protocol.MarkupContent {
+		docDefs, ok := s.definitionsInfo[doc]
+		if !ok {
+			return nil
+		}
+		def, ok := docDefs[word]
+		if !ok {
+			return nil
+		}
+		line := def.Range.Start.Line
+		docLines, ok := s.docs[doc]
+		if !ok {
+			return nil
+		}
+
+		meta := docLines[line]
+		return &protocol.MarkupContent{
+			Kind:  protocol.MarkupKindPlainText,
+			Value: meta,
+		}
+	}()
+	if userDef != nil {
+		return userDef
+	}
+
 	return nil
 }
 
