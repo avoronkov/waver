@@ -55,10 +55,16 @@ func (s *Server) TextDocumentCompletion(context *glsp.Context, params *protocol.
 	}
 
 	if s.isRegularCode(docUri, posLine) {
-		completionItems = append(completionItems, s.completeFunctions()...)
-		completionItems = append(completionItems, s.completeModifiers()...)
-		completionItems = append(completionItems, s.completeSampleFiles("")...)
-		completionItems = append(completionItems, s.completeWaveNames()...)
+		if s.lineMatchRe(docUri, posLine, posChar, pipeFilterRe) {
+			completionItems = append(completionItems, s.completeFilters()...)
+		} else if matches := s.lineFindRe(docUri, posLine, posChar, pipeFilterOptionRe); len(matches) >= 2 {
+			completionItems = append(completionItems, s.completeFilterOptions(matches[1])...)
+		} else {
+			completionItems = append(completionItems, s.completeFunctions()...)
+			completionItems = append(completionItems, s.completeModifiers()...)
+			completionItems = append(completionItems, s.completeSampleFiles("")...)
+			completionItems = append(completionItems, s.completeWaveNames()...)
+		}
 	}
 
 	return completionItems, nil
@@ -70,6 +76,8 @@ var sampleFileSubdirRe = regexp.MustCompile(`^%%?\s*sample\s+\w+\s+"([^"]+)/[^"]
 var waveNameRe = regexp.MustCompile(`^%%?\s*(wave|inst)\s+\w+\s+"[^"]*$`)
 var filterRe = regexp.MustCompile(`^-\s*\S*$`)
 var filterOptionRe = regexp.MustCompile(`^\s+\S*$`)
+var pipeFilterRe = regexp.MustCompile(`\|\s*\S*$`)
+var pipeFilterOptionRe = regexp.MustCompile(`\|\s*(\S+)\s+[^\|]*$`)
 
 func (s *Server) lineFindRe(doc string, line, pos int, re *regexp.Regexp) []string {
 	lines, ok := s.docs[doc]
