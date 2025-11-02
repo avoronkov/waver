@@ -8,7 +8,7 @@ pkgs.buildGoModule rec {
 
 	src = ./.;
 
-	vendorHash = "sha256-Qz/rOIbpKoDglVYlZl9tcR1hnE18QIfgywgxhAJitSk=";
+	vendorHash = "sha256-ZQiye9a7pa8rOhqO/kVHkdOoYZwtiV15Yp2jo/P4hBk=";
 
 	subPackages = [ "cmd/waver" ];
 
